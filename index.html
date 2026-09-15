@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malevin — Canvas & Vector PDF Deck Studio</title>
-    <!-- pdfMake library for pure native vector PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    
+    <!-- Mengganti pdfMake dengan html2canvas & jsPDF untuk hasil 100% sama dengan Preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         :root {
             --bg-obsidian: #0A0B0A;
@@ -218,10 +220,10 @@
             max-width: 850px;
         }
 
-        /* SLIDE KINI BISA MELEBAR DINAMIS (AUTO HEIGHT) */
+        /* SLIDE AUTO HEIGHT */
         .slide {
             width: 850px;
-            min-height: 478.125px; /* Minimal tinggi standar 16:9, bisa bertambah jika isi melebar */
+            min-height: 478.125px; /* Minimal tinggi standar 16:9, otomatis melar ke bawah */
             height: auto;
             background-color: var(--bg-obsidian);
             border: 1px solid var(--border-obsidian);
@@ -234,6 +236,7 @@
             box-sizing: border-box;
             gap: 20px;
             flex-shrink: 0;
+            overflow: hidden; /* Mencegah konten luber saat export */
         }
 
         .slide::before {
@@ -386,14 +389,15 @@
     <!-- TOP CONTROL BAR -->
     <div class="topbar">
         <div class="brand-title">
-            <span>MALEVIN</span> <span class="brand-badge">VECTOR DECK STUDIO</span>
+            <span>MALEVIN</span> <span class="brand-badge">DECK STUDIO</span>
         </div>
         <div class="mode-tabs">
             <button class="mode-tab-btn" id="tabEditBtn" onclick="setMode('edit')">Form Editor</button>
             <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Canvas Preview</button>
         </div>
         <div class="topbar-actions">
-            <button class="btn btn-gold" id="downloadBtn" onclick="downloadVectorPDF()">Download Vector PDF</button>
+            <!-- Tombol Export Kini Lebih Keren -->
+            <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Download Deck (PDF)</button>
         </div>
     </div>
 
@@ -421,6 +425,7 @@
             wawasan: 'WAWASAN', image: 'GAMBAR'
         };
 
+        // Data awal dari desain Malevin Campaign Deck[span_0](start_span)[span_0](end_span)
         let slidesData = [
             {
                 id: 1,
@@ -438,9 +443,9 @@
             },
             {
                 id: 2,
-                footerLeft: 'SECTION 01 — EXECUTION STRATEGY',
+                footerLeft: 'SECTION 01 - PERFORMANCE & DELIVERABLES',
                 elements: [
-                    { type: 'header', brand: 'MALEVIN ID', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
+                    { type: 'header', brand: 'MALEVIN IO', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
                     {
                         type: 'kpi',
                         brand: 'METRICS',
@@ -453,7 +458,7 @@
                     },
                     {
                         type: 'table',
-                        brand: 'CLIENT ID: #0921',
+                        brand: 'CLIENT ID: 40921',
                         shapeStyle: 'sharp',
                         headers: ['Platform', 'Format', 'Target Output'],
                         rows: [
@@ -849,89 +854,20 @@
         }
 
         /* FORM HELPER FUNCTIONS */
-        function updateElem(sIdx, eIdx, key, value) {
-            slidesData[sIdx].elements[eIdx][key] = value;
-            renderPreview();
-        }
-
-        function updateSlideFooter(sIdx, value) {
-            slidesData[sIdx].footerLeft = value;
-            renderPreview();
-        }
-
-        function addTableColumn(sIdx, eIdx) {
-            const elem = slidesData[sIdx].elements[eIdx];
-            if (!elem.headers) elem.headers = [];
-            elem.headers.push(`Kolom ${elem.headers.length + 1}`);
-            renderForms();
-        }
-
-        function deleteTableColumn(sIdx, eIdx, colIdx) {
-            const elem = slidesData[sIdx].elements[eIdx];
-            elem.headers.splice(colIdx, 1);
-            if (elem.rows) elem.rows.forEach(r => r.splice(colIdx, 1));
-            renderForms();
-        }
-
-        function updateTableHeader(sIdx, eIdx, colIdx, val) {
-            slidesData[sIdx].elements[eIdx].headers[colIdx] = val;
-            renderPreview();
-        }
-
-        function addTableRow(sIdx, eIdx) {
-            const elem = slidesData[sIdx].elements[eIdx];
-            if (!elem.rows) elem.rows = [];
-            elem.rows.push(new Array(elem.headers ? elem.headers.length : 1).fill(''));
-            renderForms();
-        }
-
-        function deleteTableRow(sIdx, eIdx, rowIdx) {
-            slidesData[sIdx].elements[eIdx].rows.splice(rowIdx, 1);
-            renderForms();
-        }
-
-        function updateTableCell(sIdx, eIdx, rowIdx, colIdx, val) {
-            if (!slidesData[sIdx].elements[eIdx].rows[rowIdx]) {
-                slidesData[sIdx].elements[eIdx].rows[rowIdx] = [];
-            }
-            slidesData[sIdx].elements[eIdx].rows[rowIdx][colIdx] = val;
-            renderPreview();
-        }
-
-        function addListItem(sIdx, eIdx) {
-            const elem = slidesData[sIdx].elements[eIdx];
-            if (!elem.items) elem.items = [];
-            elem.items.push('Poin baru...');
-            renderForms();
-        }
-
-        function deleteListItem(sIdx, eIdx, lIdx) {
-            slidesData[sIdx].elements[eIdx].items.splice(lIdx, 1);
-            renderForms();
-        }
-
-        function updateListItem(sIdx, eIdx, lIdx, val) {
-            slidesData[sIdx].elements[eIdx].items[lIdx] = val;
-            renderPreview();
-        }
-
-        function addKpiItem(sIdx, eIdx) {
-            const elem = slidesData[sIdx].elements[eIdx];
-            if (!elem.items) elem.items = [];
-            elem.items.push({ val: '0', lbl: 'Metrik Baru' });
-            renderForms();
-        }
-
-        function deleteKpiItem(sIdx, eIdx, kIdx) {
-            slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1);
-            renderForms();
-        }
-
-        function updateKpiItem(sIdx, eIdx, kIdx, key, val) {
-            slidesData[sIdx].elements[eIdx].items[kIdx][key] = val;
-            renderPreview();
-        }
-
+        function updateElem(sIdx, eIdx, key, value) { slidesData[sIdx].elements[eIdx][key] = value; renderPreview(); }
+        function updateSlideFooter(sIdx, value) { slidesData[sIdx].footerLeft = value; renderPreview(); }
+        function addTableColumn(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.headers) elem.headers = []; elem.headers.push(`Kolom ${elem.headers.length + 1}`); renderForms(); }
+        function deleteTableColumn(sIdx, eIdx, colIdx) { const elem = slidesData[sIdx].elements[eIdx]; elem.headers.splice(colIdx, 1); if (elem.rows) elem.rows.forEach(r => r.splice(colIdx, 1)); renderForms(); }
+        function updateTableHeader(sIdx, eIdx, colIdx, val) { slidesData[sIdx].elements[eIdx].headers[colIdx] = val; renderPreview(); }
+        function addTableRow(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.rows) elem.rows = []; elem.rows.push(new Array(elem.headers ? elem.headers.length : 1).fill('')); renderForms(); }
+        function deleteTableRow(sIdx, eIdx, rowIdx) { slidesData[sIdx].elements[eIdx].rows.splice(rowIdx, 1); renderForms(); }
+        function updateTableCell(sIdx, eIdx, rowIdx, colIdx, val) { if (!slidesData[sIdx].elements[eIdx].rows[rowIdx]) { slidesData[sIdx].elements[eIdx].rows[rowIdx] = []; } slidesData[sIdx].elements[eIdx].rows[rowIdx][colIdx] = val; renderPreview(); }
+        function addListItem(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.items) elem.items = []; elem.items.push('Poin baru...'); renderForms(); }
+        function deleteListItem(sIdx, eIdx, lIdx) { slidesData[sIdx].elements[eIdx].items.splice(lIdx, 1); renderForms(); }
+        function updateListItem(sIdx, eIdx, lIdx, val) { slidesData[sIdx].elements[eIdx].items[lIdx] = val; renderPreview(); }
+        function addKpiItem(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.items) elem.items = []; elem.items.push({ val: '0', lbl: 'Metrik Baru' }); renderForms(); }
+        function deleteKpiItem(sIdx, eIdx, kIdx) { slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1); renderForms(); }
+        function updateKpiItem(sIdx, eIdx, kIdx, key, val) { slidesData[sIdx].elements[eIdx].items[kIdx][key] = val; renderPreview(); }
         function addElementToSlide(sIdx, type) {
             const newElem = { type: type, brand: '', shapeStyle: 'sharp' };
             if (type === 'cover') { newElem.tag = 'Proposal'; newElem.title = 'COVER TITLE'; newElem.subtitle = 'Subtitle'; }
@@ -942,181 +878,92 @@
             else if (type === 'kpi') { newElem.items = [{ val: '100K', lbl: 'Metric 1' }, { val: '5.0%', lbl: 'Metric 2' }]; }
             else if (type === 'table') { newElem.headers = ['Kolom 1', 'Kolom 2']; newElem.rows = [['Data A', 'Data B']]; }
             else if (type === 'wawasan') { newElem.content = 'Catatan ringkasan wawasan performa campaign...'; }
-
-            slidesData[sIdx].elements.push(newElem);
-            renderForms();
+            slidesData[sIdx].elements.push(newElem); renderForms();
         }
-
-        function deleteElem(sIdx, eIdx) {
-            slidesData[sIdx].elements.splice(eIdx, 1);
-            renderForms();
-        }
-
-        function addSlide() {
-            slidesData.push({
-                id: Date.now(),
-                footerLeft: 'PREPARED BY MALEVIN TEAM',
-                elements: [
-                    { type: 'header', brand: '', tag: 'Section Tag', title: 'JUDUL SLIDE BARU', shapeStyle: 'sharp' }
-                ]
-            });
-            renderForms();
-        }
-
-        function deleteSlide(sIdx) {
-            if (slidesData.length > 1) {
-                slidesData.splice(sIdx, 1);
-                renderForms();
-            }
-        }
+        function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); renderForms(); }
+        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'PREPARED BY MALEVIN TEAM', elements: [{ type: 'header', brand: '', tag: 'Section Tag', title: 'JUDUL SLIDE BARU', shapeStyle: 'sharp' }] }); renderForms(); }
+        function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
         /* =========================================================
-           CANVA-STYLE DYNAMIC VECTOR PDF ENGINE (AUTO-HEIGHT SLIDES)
+           FUNGSI EXPORT PDF BARU (100% SAMA PERSIS DENGAN PREVIEW)
+           MENGGUNAKAN HTML2CANVAS & JSPDF
            ========================================================= */
-        function downloadVectorPDF() {
+        async function downloadPDF() {
             const btn = document.getElementById('downloadBtn');
-            btn.innerText = 'Membuat Vector PDF...';
+            const originalText = btn.innerText;
+            btn.innerText = 'Memproses PDF (Harap Tunggu)...';
             btn.disabled = true;
 
-            setTimeout(() => {
-                const docContent = [];
+            // 1. Pindah otomatis ke Mode Preview agar DOM dirender sempurna
+            setMode('preview');
 
-                slidesData.forEach((slide, sIdx) => {
-                    const slideBodyContent = [];
-                    const isCoverSlide = slide.elements.some(e => e.type === 'cover');
+            // 2. Beri jeda waktu sebentar agar browser selesai menggambar CSS & layout
+            await new Promise(r => setTimeout(r, 600));
 
-                    // 1. Garis Aksen Emas di Atas (Menggunakan koordinat minus agar mentok ke atas/pinggir margin)
-                    docContent.push({
-                        canvas: [
-                            { type: 'rect', x: -36, y: -28, w: 841.89, h: 3, color: '#C49A57' }
-                        ]
-                    });
-
-                    // 2. Render Elemen Konten
-                    slide.elements.forEach((elem) => {
-                        const elemBlock = [];
-
-                        if (elem.type === 'cover') {
-                            if (elem.brand) {
-                                elemBlock.push({
-                                    text: elem.brand, fontSize: 8, bold: true, color: '#0A0B0A',
-                                    background: '#C49A57', alignment: 'left', margin: [0, 0, 0, 6]
-                                });
-                            }
-                            if (elem.tag) {
-                                elemBlock.push({ text: elem.tag.toUpperCase(), fontSize: 10, color: '#C49A57', bold: true, alignment: 'left', margin: [0, 2, 0, 4] });
-                            }
-                            elemBlock.push({ text: (elem.title || '').toUpperCase(), fontSize: 28, bold: true, color: '#FEFEFE', alignment: 'left', margin: [0, 6, 0, 6] });
-                            elemBlock.push({ text: elem.subtitle || '', fontSize: 13, color: '#C49A57', alignment: 'left', margin: [0, 0, 0, 0] });
-                        } else {
-                            if (elem.brand) {
-                                elemBlock.push({
-                                    text: elem.brand, fontSize: 8, bold: true, color: '#0A0B0A',
-                                    background: '#C49A57', margin: [0, 0, 0, 4]
-                                });
-                            }
-
-                            if (elem.type === 'header') {
-                                if (elem.tag) {
-                                    elemBlock.push({ text: elem.tag.toUpperCase(), fontSize: 9, color: '#C49A57', bold: true, margin: [0, 2, 0, 2] });
-                                }
-                                elemBlock.push({ text: (elem.title || '').toUpperCase(), fontSize: 18, bold: true, color: '#FEFEFE', margin: [0, 2, 0, 4] });
-                            } else if (elem.type === 'text') {
-                                elemBlock.push({ text: elem.content || '', fontSize: 10, color: '#C0C2C0', margin: [0, 2, 0, 6] });
-                            } else if (elem.type === 'image') {
-                                if (elem.imgData) {
-                                    elemBlock.push({ image: elem.imgData, width: 220, margin: [0, 4, 0, 6] });
-                                }
-                            } else if (elem.type === 'list') {
-                                const listItems = (elem.items || []).map(item => ({ text: item, fontSize: 10, color: '#C0C2C0', margin: [0, 1, 0, 1] }));
-                                elemBlock.push({ ul: listItems, margin: [0, 4, 0, 6] });
-                            } else if (elem.type === 'kpi') {
-                                const kpiColumns = (elem.items || []).map(k => ({
-                                    stack: [
-                                        { text: k.val || '0', fontSize: 18, bold: true, color: '#C49A57', alignment: 'center' },
-                                        { text: (k.lbl || '').toUpperCase(), fontSize: 7, color: '#808280', alignment: 'center', margin: [0, 2, 0, 0] }
-                                    ],
-                                    fillColor: '#161816',
-                                    margin: [2, 2, 2, 2]
-                                }));
-                                elemBlock.push({ columns: kpiColumns, margin: [0, 4, 0, 6] });
-                            } else if (elem.type === 'table') {
-                                const tableHeaders = (elem.headers || []).map(h => ({ text: h.toUpperCase(), fontSize: 8, bold: true, color: '#C49A57', fillColor: '#1A1C1A' }));
-                                const tableRows = (elem.rows || []).map(r => (elem.headers || []).map((_, cIdx) => ({ text: r[cIdx] || '', fontSize: 9, color: '#D1D1D1' })));
-
-                                elemBlock.push({
-                                    table: {
-                                        headerRows: 1,
-                                        widths: new Array((elem.headers || []).length).fill('*'),
-                                        body: [tableHeaders, ...tableRows]
-                                    },
-                                    // Custom Layout Tabel agar garis terlihat tegas di background gelap
-                                    layout: {
-                                        hLineWidth: function (i, node) { return 1; },
-                                        vLineWidth: function (i, node) { return 0; }, // Tanpa garis vertikal
-                                        hLineColor: function (i, node) { return (i === 1) ? '#C49A57' : '#242624'; }, // Garis bawah header warna emas
-                                        paddingTop: function(i, node) { return 6; },
-                                        paddingBottom: function(i, node) { return 6; }
-                                    },
-                                    margin: [0, 4, 0, 6]
-                                });
-                            } else if (elem.type === 'wawasan') {
-                                elemBlock.push({
-                                    stack: [
-                                        { text: '💡 ANALISIS & WAWASAN:', fontSize: 9, bold: true, color: '#C49A57', margin: [0, 0, 0, 4] },
-                                        { text: elem.content || '', fontSize: 10, color: '#E0E0E0' }
-                                    ],
-                                    fillColor: '#121412',
-                                    margin: [0, 4, 0, 6]
-                                });
-                            }
-                        }
-
-                        slideBodyContent.push({
-                            stack: elemBlock,
-                            margin: [0, 0, 0, 15]
-                        });
-                    });
-
-                    // 3. Gabungkan Konten Utama (Berikan jarak ke bawah)
-                    docContent.push({
-                        stack: slideBodyContent,
-                        margin: isCoverSlide ? [0, 60, 0, 40] : [0, 20, 0, 40]
-                    });
-
-                    // 4. Footer Slide
-                    const slideNum = sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1;
-                    docContent.push({
-                        columns: [
-                            { text: (slide.footerLeft || '').toUpperCase(), fontSize: 8, color: '#808280', alignment: 'left' },
-                            { text: slideNum, fontSize: 10, bold: true, color: '#C49A57', alignment: 'right' }
-                        ],
-                        margin: [0, 10, 0, 0],
-                        pageBreak: sIdx < slidesData.length - 1 ? 'after' : undefined
-                    });
+            try {
+                const { jsPDF } = window.jspdf;
+                // Siapkan dokumen PDF kosong
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: 'a4' // Format awal, nanti ditimpa per slide
                 });
 
-                // Set Definition
-                const docDefinition = {
-                    pageSize: { width: 841.89, height: 'auto' }, // Tinggi Fleksibel Dinamis
-                    pageMargins: [36, 28, 36, 20],
-                    background: function(currentPage, pageSize) {
-                        return {
-                            canvas: [
-                                // Background otomatis memanjang sejauh isi konten 
-                                { type: 'rect', x: 0, y: 0, w: pageSize.width, h: Math.max(pageSize.height, 3000), color: '#0A0B0A' }
-                            ]
-                        };
-                    },
-                    content: docContent,
-                    defaultStyle: { font: 'Roboto' }
-                };
+                const slides = document.querySelectorAll('.slide');
 
-                pdfMake.createPdf(docDefinition).download('Malevin_Vector_Deck.pdf');
+                for (let i = 0; i < slides.length; i++) {
+                    const slide = slides[i];
 
-                btn.innerText = 'Download Vector PDF';
+                    // Simpan style asli box-shadow dan border (agar di PDF tidak ada bayangan tumpang tindih)
+                    const originalBoxShadow = slide.style.boxShadow;
+                    const originalBorder = slide.style.border;
+                    
+                    slide.style.boxShadow = 'none';
+                    slide.style.border = 'none';
+                    
+                    // Supaya tombol delete silang tidak ikut terfoto (meski draggable-element hovernya nyala)
+                    const draggables = slide.querySelectorAll('.draggable-element');
+                    draggables.forEach(d => { d.style.border = 'none'; });
+
+                    // Merender HTML jadi Gambar Resolusi Tinggi (Scale 3x)
+                    const canvas = await html2canvas(slide, {
+                        scale: 3, 
+                        useCORS: true,
+                        backgroundColor: '#0A0B0A',
+                        logging: false
+                    });
+
+                    // Kembalikan style CSS setelah di-foto
+                    slide.style.boxShadow = originalBoxShadow;
+                    slide.style.border = originalBorder;
+                    draggables.forEach(d => { d.style.border = ''; });
+
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const slideWidth = slide.offsetWidth;
+                    const slideHeight = slide.offsetHeight;
+
+                    // Tambahkan ke PDF sesuai ukuran dinamis masing-masing slide (Auto Height)
+                    if (i === 0) {
+                        pdf.setPage(1);
+                        pdf.internal.pageSize.setWidth(slideWidth);
+                        pdf.internal.pageSize.setHeight(slideHeight);
+                    } else {
+                        pdf.addPage([slideWidth, slideHeight], 'portrait');
+                    }
+
+                    pdf.addImage(imgData, 'JPEG', 0, 0, slideWidth, slideHeight);
+                }
+
+                // Selesai & Download
+                pdf.save('Malevin_Deck_Official.pdf');
+            } catch (error) {
+                console.error("Gagal export PDF:", error);
+                alert("Terjadi kesalahan saat memproses PDF.");
+            } finally {
+                // Kembalikan tombol seperti semula
+                btn.innerText = originalText;
                 btn.disabled = false;
-            }, 300);
+            }
         }
 
         function setMode(mode) {
