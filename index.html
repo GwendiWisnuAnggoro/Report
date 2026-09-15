@@ -426,6 +426,56 @@
         ];
 
         let chartInstances = [];
+
+        /* PLUGIN CUSTOM: MENAMPILKAN VALUE/PERSENTASE DI TENGAH GRAFIK (BAR/LINE/PIE/DOUGHNUT)
+           Aktif per-grafik lewat toggle "Tampilkan Value" di editor, ambil data langsung dari
+           angka yang sudah diinput di grafik jadi tidak perlu ketik ulang manual. */
+        const valueLabelPlugin = {
+            id: 'valueLabelPlugin',
+            afterDatasetsDraw(chart) {
+                const opts = chart.options.plugins && chart.options.plugins.valueLabelPlugin;
+                if (!opts || !opts.enabled) return;
+                const { ctx } = chart;
+                const suffix = opts.suffix || '';
+
+                chart.data.datasets.forEach((dataset, dsIndex) => {
+                    const meta = chart.getDatasetMeta(dsIndex);
+                    if (meta.hidden) return;
+
+                    meta.data.forEach((element, index) => {
+                        const rawValue = dataset.data[index];
+                        if (rawValue === null || rawValue === undefined) return;
+                        const label = `${rawValue}${suffix}`;
+
+                        ctx.save();
+                        ctx.font = '700 11px Helvetica Neue, Arial, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        let x, y;
+                        if (chart.config.type === 'pie' || chart.config.type === 'doughnut') {
+                            const midAngle = (element.startAngle + element.endAngle) / 2;
+                            const midRadius = (element.innerRadius + element.outerRadius) / 2;
+                            x = element.x + Math.cos(midAngle) * midRadius;
+                            y = element.y + Math.sin(midAngle) * midRadius;
+                            ctx.fillStyle = '#FEFEFE';
+                        } else if (chart.config.type === 'line') {
+                            x = element.x;
+                            y = element.y - 12;
+                            ctx.fillStyle = '#FEFEFE';
+                        } else {
+                            /* bar: taruh di tengah-tengah tinggi bar biar gampang kebaca */
+                            x = element.x;
+                            y = (element.y + element.base) / 2;
+                            ctx.fillStyle = '#0A0B0A';
+                        }
+                        ctx.fillText(label, x, y);
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+        Chart.register(valueLabelPlugin);
         let draggedElemInfo = null;
         let dragHoverInfo = null;
         let draggedSlideInfo = null;
@@ -1160,7 +1210,7 @@
             else if (type === 'social') { newElem.socialLinks = [{ platform: 'Instagram', handle: '@malevin', stat: '10K' }]; }
             else if (type === 'breakdown') { newElem.title = 'WAWASAN AUDIENS'; newElem.rowsData = 'Kategori A, 60%\nKategori B, 40%'; }
             else if (type === 'wawasan') { newElem.title = 'CATATAN ANALISIS'; newElem.content = 'Poin ringkasan analisis...'; }
-            else if (type === 'chart') { newElem.title = 'Grafik Analisis'; newElem.subtitle = 'Data Penjualan'; newElem.chartType = 'bar'; newElem.labels = 'Jan, Feb, Mar'; newElem.data = '10, 20, 30'; newElem.badgeType = 'trend'; }
+            else if (type === 'chart') { newElem.title = 'Grafik Analisis'; newElem.subtitle = 'Data Penjualan'; newElem.chartType = 'bar'; newElem.labels = 'Jan, Feb, Mar'; newElem.data = '10, 20, 30'; newElem.badgeType = 'trend'; newElem.showValues = false; newElem.valueSuffix = ''; }
             else if (type === 'comparison') { newElem.label = 'PERBANDINGAN'; newElem.compareMode = 'trend'; newElem.prevVal = '100'; newElem.currVal = '150'; }
 
             slidesData[sIdx].elements.push(newElem);
@@ -1381,7 +1431,18 @@
                                 </div>
                             </div>
                             <div class="form-group"><label>Label X (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'labels', elem.labels, 'Jan, Feb, Mar', false)}</div>
-                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>`; 
+                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>
+                            <div class="two-col-form">
+                                <div class="form-group">
+                                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                        <input type="checkbox" ${elem.showValues ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'showValues', this.checked)">
+                                        Tampilkan Value di Tengah Grafik
+                                    </label>
+                                </div>
+                                <div class="form-group"><label>Sufiks Value (Opsional, cth: %)</label>
+                                    <input type="text" class="form-control" placeholder="%" value="${elem.valueSuffix || ''}" onchange="updateElem(${sIdx}, ${eIdx}, 'valueSuffix', this.value)">
+                                </div>
+                            </div>`; 
                     }
 
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
@@ -1700,354 +1761,4 @@
                     elemWrapper.dataset.elemIndex = eIdx;
                     elemWrapper.setAttribute('draggable', 'true');
                     elemWrapper.setAttribute('ondragstart', `onElemDragStart(event, ${sIdx}, ${eIdx})`);
-                    elemWrapper.setAttribute('ondragend', `onElemDragEnd(event)`);
-                    elemWrapper.setAttribute('ondragover', `onElemDragOver(event)`);
-                    elemWrapper.setAttribute('ondragleave', `onElemDragLeave(event)`);
-                    elemWrapper.setAttribute('ondrop', `onElemDrop(event, ${sIdx}, ${eIdx})`);
-
-                    const dragBar = `<div class="elem-drag-bar">
-                        <span>⋮⋮ DRAG</span>
-                        <span style="color:var(--text-muted)">|</span>
-                        <span class="grid-opt-btn" onclick="quickSetWidth(${sIdx}, ${eIdx}, 'full')">100%</span>
-                        <span class="grid-opt-btn" onclick="quickSetWidth(${sIdx}, ${eIdx}, 'half')">50%</span>
-                        <span class="grid-opt-btn" onclick="quickSetWidth(${sIdx}, ${eIdx}, 'third')">33%</span>
-                    </div>`;
-
-                    const br = getRadiusCss(elem.shapeStyle);
-                    const parsedBrand = renderVarsInText(elem.brand || '', globalVars, sIdx, eIdx, 'brand');
-                    const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${parsedBrand}</span>` : '';
-                    let p = '';
-
-                    /* IMPLEMENTASI COVER DENGAN ALIGNMENT & SCALING KUSTOM */
-                    if (elem.type === 'cover') {
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
-                        const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
-                        const parsedSub = renderVarsInText(elem.subtitle || '', globalVars, sIdx, eIdx, 'subtitle');
-                        
-                        const alignVal = elem.align || 'left';
-                        const scaleVal = elem.scale || 1;
-                        let flexAlign = 'flex-start';
-                        if (alignVal === 'center') flexAlign = 'center';
-                        else if (alignVal === 'right') flexAlign = 'flex-end';
-
-                        p = `<div class="cover-container" style="text-align: ${alignVal}; align-items: ${flexAlign}; transform: scale(${scaleVal}); transform-origin: center ${alignVal};">
-                                ${(pill || elem.tag) ? `<div style="display:flex; justify-content:${flexAlign}; gap:6px; margin-bottom:12px; width:100%;">
-                                    ${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}
-                                </div>` : ''}
-                                <div class="elem-title" style="font-size:38px; margin: 10px 0;">${parsedTitle}</div>
-                                <div style="font-size:14px; color:var(--accent-gold); font-weight:700;">${parsedSub}</div>
-                            </div>`;
-                    }
-                    else if (elem.type === 'header') {
-                        const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
-                        p = `${(pill || elem.tag) ? `<div style="display:flex; gap:6px; align-items:center; margin-bottom:4px;">${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}</div>` : ''}
-                             <div class="elem-title">${parsedTitle}</div>`;
-                    }
-                    else if (elem.type === 'text') {
-                        const styleCls = elem.style === 'hero' ? 't-hero' : (elem.style === 'judul' ? 't-judul' : (elem.style === 'subjudul' ? 't-subjudul' : 't-paragraf'));
-                        const parsedContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
-                        const textHtml = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="${styleCls}">${parsedContent}</div>`;
-                        p = elem.card ? `<div class="text-card-wrap" style="border-radius:0 ${br} ${br} 0;">${textHtml}</div>` : textHtml;
-                    }
-                    else if (elem.type === 'columns') {
-                        const cols = elem.cols || [];
-                        const colStyle = elem.colStyle || 'accent';
-                        let colsHTML = cols.map((c, cIdx) => {
-                            const parsedTitle = renderVarsInText(c.title || '', globalVars, sIdx, eIdx, 'title', 'col', cIdx);
-                            const parsedContent = renderVarsInText(c.content || '', globalVars, sIdx, eIdx, 'content', 'col', cIdx);
-
-                            if (colStyle === 'numbered') {
-                                return `<div class="col-item col-card--numbered" style="border-radius:${br};">
-                                    <div class="col-num-badge">${cIdx + 1}</div>
-                                    <div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
-                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
-                                </div>`;
-                            } else if (colStyle === 'minimal') {
-                                return `<div class="col-item col-card--minimal">
-                                    <div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
-                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
-                                </div>`;
-                            } else if (colStyle === 'plain') {
-                                return `<div class="col-item col-card--plain" style="border-radius:${br};">
-                                    <div style="font-size:11px; font-weight:800; color:var(--text-white); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
-                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
-                                </div>`;
-                            } else {
-                                return `<div class="col-item col-card--accent" style="border-radius:0 ${br} ${br} 0;">
-                                    <div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
-                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
-                                </div>`;
-                            }
-                        }).join('');
-
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="col-wrap">${colsHTML}</div>`;
-                    }
-                    else if (elem.type === 'kpi') {
-                        const metrics = elem.metrics || [];
-                        let cardsHTML = metrics.map((m, mIdx) => {
-                            const parsedLabel = renderVarsInText(m.label || '', globalVars, sIdx, eIdx, 'label', 'metric', mIdx);
-                            const parsedVal = renderVarsInText(m.value || '', globalVars, sIdx, eIdx, 'value', 'metric', mIdx);
-                            return `<div class="kpi-card" style="border-radius:${br};">
-                                <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-weight:800;">${parsedLabel}</div>
-                                <div class="kpi-value">${parsedVal}</div>
-                            </div>`;
-                        }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${cardsHTML}</div>`;
-                    }
-                    else if (elem.type === 'table') {
-                        const parsedHeadersStr = resolveVarPlain(elem.headers || '', globalVars);
-                        const parsedRowsStr = resolveVarPlain(elem.rowsData || '', globalVars);
-
-                        const headers = parsedHeadersStr.split(',').map(h => h.trim());
-                        const rows = parsedRowsStr.split('\n').filter(r => r.trim()).map(r => r.split(',').map(c => c.trim()));
-
-                        let thHTML = headers.map(h => `<th style="border-bottom: 2px solid var(--accent-gold); padding: 8px 10px; text-align: left; font-size: 10px; color: var(--accent-gold); text-transform: uppercase;">${escapeHtml(h)}</th>`).join('');
-                        let trHTML = rows.map(r => `<tr>${r.map(c => `<td style="border-bottom: 1px solid var(--border-obsidian); padding: 8px 10px; font-size: 10px; color: var(--text-white);">${escapeHtml(c)}</td>`).join('')}</tr>`).join('');
-
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
-                        <div style="overflow-x: auto; width: 100%; border: 1px solid var(--border-obsidian); border-radius: ${br}; background: rgba(22, 24, 22, 0.6);">
-                            <table style="width: 100%; border-collapse: collapse; font-family: inherit;">
-                                <thead><tr>${thHTML}</tr></thead>
-                                <tbody>${trHTML}</tbody>
-                            </table>
-                        </div>`;
-                    }
-                    else if (elem.type === 'social') {
-                        const links = elem.socialLinks || [];
-                        let cardsHTML = links.map((l, lIdx) => {
-                            const parsedPlat = renderVarsInText(l.platform || '', globalVars, sIdx, eIdx, 'platform', 'social', lIdx);
-                            const parsedHandle = renderVarsInText(l.handle || '', globalVars, sIdx, eIdx, 'handle', 'social', lIdx);
-                            const parsedStat = renderVarsInText(l.stat || '', globalVars, sIdx, eIdx, 'stat', 'social', lIdx);
-                            return `<div class="social-card" style="border-radius:${br};">
-                                <div style="font-size:9px; color:var(--accent-gold); text-transform:uppercase; font-weight:800;">${parsedPlat}</div>
-                                <div class="social-card-val">${parsedStat}</div>
-                                <div style="font-size:8px; color:var(--text-muted); font-weight:700;">${parsedHandle}</div>
-                            </div>`;
-                        }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${cardsHTML}</div>`;
-                    }
-                    else if (elem.type === 'breakdown') {
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
-                        const parsedRowsStr = resolveVarPlain(elem.rowsData || '', globalVars);
-                        const rows = parsedRowsStr.split('\n').filter(r => r.trim()).map(r => r.split(',').map(c => c.trim()));
-
-                        let rowsHTML = rows.map(r => `
-                            <div class="breakdown-row">
-                                <span>${escapeHtml(r[0] || '')}</span>
-                                <span style="font-weight:800; color:var(--text-white);">${escapeHtml(r[1] || '')}</span>
-                            </div>
-                        `).join('');
-
-                        p = `<div style="background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 12px; border-radius: ${br}; width: 100%;">
-                            <div style="font-size: 10px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px; text-transform: uppercase;">${parsedTitle}</div>
-                            ${rowsHTML}
-                        </div>`;
-                    }
-                    else if (elem.type === 'wawasan') {
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
-                        const parsedContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
-                        p = `<div class="wawasan-box" style="border-radius: ${br};">
-                            <div style="font-size: 10px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase;">💡 ${parsedTitle}</div>
-                            <div style="line-height: 1.5; white-space: pre-line;">${parsedContent}</div>
-                        </div>`;
-                    }
-                    else if (elem.type === 'image') {
-                        p = elem.imgData ? `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<img src="${elem.imgData}" class="img-preview-box" style="border-radius:${br};">` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px;">[Belum Ada Gambar Ditambahkan]</div>`;
-                    }
-                    else if (elem.type === 'comparison') {
-                        const parsedLabel = renderVarsInText(elem.label || '', globalVars, sIdx, eIdx, 'label');
-                        if (elem.compareMode === 'boolean') {
-                            const isTrue = elem.boolVal === 'true';
-                            const parsedBoolText = renderVarsInText(elem.boolText || 'Status', globalVars, sIdx, eIdx, 'boolText');
-                            p = `<div class="compare-box" style="border-radius:${br};">
-                                <div>
-                                    <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:800;">${parsedLabel}</div>
-                                    <div class="compare-num">${parsedBoolText}</div>
-                                </div>
-                                <span class="var-badge ${isTrue ? 'var-up' : 'var-down'}" style="font-size:12px; padding:4px 10px;">${isTrue ? '✓ AKTIF / YA' : '✕ NONAKTIF / TIDAK'}</span>
-                            </div>`;
-                        } else {
-                            const prev = parseFloat(resolveVarPlain(elem.prevVal, globalVars)) || 0;
-                            const curr = parseFloat(resolveVarPlain(elem.currVal, globalVars)) || 0;
-                            const diff = curr - prev;
-                            const pct = prev !== 0 ? Math.abs((diff / prev) * 100).toFixed(1) : '0';
-                            const isUp = diff >= 0;
-
-                            p = `<div class="compare-box" style="border-radius:${br};">
-                                <div>
-                                    <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:800;">${parsedLabel}</div>
-                                    <div class="compare-num">${curr}</div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <span class="var-badge ${isUp ? 'var-up' : 'var-down'}" style="font-size:11px;">${isUp ? '▲' : '▼'} ${pct}%</span>
-                                    <div style="font-size:8px; color:var(--text-muted); margin-top:2px;">Sebelumnya: ${prev}</div>
-                                </div>
-                            </div>`;
-                        }
-                    }
-                    else if (elem.type === 'chart') {
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
-                        const parsedSub = renderVarsInText(elem.subtitle || '', globalVars, sIdx, eIdx, 'subtitle');
-                        const canvasId = `chart_${sIdx}_${eIdx}`;
-
-                        const dataArr = resolveVarPlain(elem.data || '', globalVars).split(',').map(n => parseFloat(n.trim()) || 0);
-                        const badgeInfo = computeChartBadge(elem.badgeType || 'trend', dataArr);
-
-                        p = `<div style="background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-radius: ${br}; padding: 12px; width: 100%;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                                <div>
-                                    <div style="font-size: 11px; font-weight: 800; color: var(--text-white); text-transform: uppercase;">${parsedTitle}</div>
-                                    <div style="font-size: 9px; color: var(--text-muted);">${parsedSub}</div>
-                                </div>
-                                <span class="var-badge ${badgeInfo.badgeClass}">${badgeInfo.badgeIcon} ${badgeInfo.badgeText}</span>
-                            </div>
-                            <div style="height: 160px; position: relative; width: 100%;">
-                                <canvas id="${canvasId}"></canvas>
-                            </div>
-                        </div>`;
-
-                        chartsToRender.push({
-                            canvasId,
-                            chartType: elem.chartType || 'bar',
-                            labels: resolveVarPlain(elem.labels || '', globalVars).split(',').map(l => l.trim()),
-                            data: dataArr
-                        });
-                    }
-
-                    elemWrapper.innerHTML = dragBar + p;
-                    slideBody.appendChild(elemWrapper);
-                });
-
-                const parsedFooter = renderVarsInText(slide.footerLeft || 'MALEVIN', globalVars, sIdx, null, 'footerLeft');
-                const footerHTML = `<div class="slide-footer">
-                    <span>${parsedFooter}</span>
-                    <span class="slide-num">${sIdx + 1}</span>
-                </div>`;
-
-                slideEl.appendChild(slideBody);
-                slideEl.appendChild(document.createRange().createContextualFragment(footerHTML));
-                container.appendChild(slideEl);
-            });
-
-            // INSTANSIASI CANVASES HARUS DILAKUKAN SETELAH ELEMENT DIBUAT DI DOM
-            setTimeout(() => {
-                chartsToRender.forEach(c => {
-                    const canvas = document.getElementById(c.canvasId);
-                    if (!canvas) return;
-                    const ctx = canvas.getContext('2d');
-                    
-                    const newChart = new Chart(ctx, {
-                        type: c.chartType,
-                        data: {
-                            labels: c.labels,
-                            datasets: [{
-                                label: 'Data',
-                                data: c.data,
-                                backgroundColor: c.chartType === 'pie' || c.chartType === 'doughnut' 
-                                    ? ['#C49A57', '#A37E43', '#8A6831', '#4CAF7A', '#E55353'] 
-                                    : 'rgba(196, 154, 87, 0.4)',
-                                borderColor: '#C49A57',
-                                borderWidth: 1,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: c.chartType === 'pie' || c.chartType === 'doughnut' } },
-                            scales: (c.chartType === 'pie' || c.chartType === 'doughnut') ? {} : {
-                                x: { ticks: { color: '#808280', font: { size: 8 } }, grid: { color: '#242624' } },
-                                y: { ticks: { color: '#808280', font: { size: 8 } }, grid: { color: '#242624' } }
-                            }
-                        }
-                    });
-                    chartInstances.push(newChart);
-                });
-            }, 50);
-        }
-
-        /* PERBAIKAN FUNGSI PDF DENGAN SCALE ADJUSTMENT SAMA DENGAN DISPLAY */
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            document.body.classList.add('exporting-pdf');
-
-            const container = document.getElementById('deck-container');
-            const originalTransform = container.style.transform;
-            const originalMarginBottom = container.style.marginBottom;
-            container.style.transform = 'none';
-            container.style.marginBottom = '0px';
-
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'pt',
-                format: [850, 478]
-            });
-
-            const slideElements = document.querySelectorAll('.slide');
-
-            for (let i = 0; i < slideElements.length; i++) {
-                const slide = slideElements[i];
-                
-                const canvas = await html2canvas(slide, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: '#0A0B0A',
-                    logging: false
-                });
-
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-                if (i > 0) pdf.addPage([850, 478], 'landscape');
-                pdf.addImage(imgData, 'JPEG', 0, 0, 850, 478);
-            }
-
-            container.style.transform = originalTransform;
-            container.style.marginBottom = originalMarginBottom;
-            document.body.classList.remove('exporting-pdf');
-
-            pdf.save('Malevin-Presentation.pdf');
-        }
-
-        /* IMPORT PDF KE DALAM SLIDES DECK */
-        async function handlePDFImport(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const fileReader = new FileReader();
-            fileReader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-
-                slidesData = []; // RESET SLIDES UNTUK IMPORT
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                    const imgData = canvas.toDataURL('image/png');
-
-                    slidesData.push({
-                        id: i,
-                        footerLeft: 'PDF IMPORT',
-                        elements: [
-                            { type: 'image', width: 'full', imgData: imgData, shapeStyle: 'sharp' }
-                        ]
-                    });
-                }
-
-                saveToLocalStorage();
-                renderForms();
-            };
-            fileReader.readAsArrayBuffer(file);
-            e.target.value = '';
-        }
-    </script>
-</body>
-</html>
+               
