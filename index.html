@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malevin — Modular Deck Studio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
         /* =========================================================
            1. MALEVIN DESIGN SYSTEM & CORE VARIABLES
@@ -41,6 +39,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* TOP CONTROL BAR */
         .topbar {
             background-color: var(--surface-dark);
             border-bottom: 1px solid var(--border-obsidian);
@@ -82,7 +81,6 @@
         }
         .mode-tab-btn.active { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; }
         .mode-tab-btn:not(.active):hover { color: var(--accent-gold); }
-        .mode-tab-btn, .btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
 
         .app-container {
             display: flex;
@@ -92,11 +90,11 @@
         }
 
         /* =========================================================
-           2. EDITOR PANEL
+           2. EDITOR PANEL (CONTROL UI)
            ========================================================= */
         .editor-panel {
             width: 100%;
-            max-width: 720px;
+            max-width: 680px;
             margin: 0 auto;
             background-color: var(--surface-dark);
             display: flex;
@@ -113,7 +111,7 @@
             padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .slide-accordion-header {
@@ -122,9 +120,37 @@
             align-items: center;
             border-bottom: 1px solid var(--border-obsidian);
             padding-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 8px;
         }
+
+        .section-label-btn {
+            font-size: 9px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .add-elem-btn {
+            background-color: var(--surface-dark);
+            color: var(--text-white);
+            border: 1px solid var(--border-obsidian);
+            font-size: 9px;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        .add-elem-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
 
         .element-box {
             background-color: var(--bg-obsidian);
@@ -132,10 +158,9 @@
             border-left: 3px solid var(--accent-gold);
             border-radius: 4px;
             padding: 12px;
-            margin-top: 8px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .element-header {
@@ -149,41 +174,20 @@
             letter-spacing: 1px;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .form-group label {
-            font-size: 9px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
         .form-control {
             background-color: var(--surface-dark);
             border: 1px solid var(--border-obsidian);
             color: var(--text-white);
-            padding: 8px 10px;
+            padding: 7px 9px;
             border-radius: 4px;
             font-size: 11px;
             font-family: inherit;
             width: 100%;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 55px;
-            line-height: 1.4;
-        }
+        .form-control:focus { outline: none; border-color: var(--accent-gold); }
+        textarea.form-control { resize: vertical; min-height: 50px; line-height: 1.4; }
 
         .btn {
             background-color: var(--card-obsidian);
@@ -194,36 +198,21 @@
             font-size: 10px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
         .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
-
-        .btn-gold {
-            background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%);
-            color: #0A0B0A;
-            border: none;
-            font-weight: 800;
-        }
-
-        .btn-danger {
-            background-color: transparent;
-            color: #E55353;
-            border: 1px solid rgba(229, 83, 83, 0.3);
-            padding: 3px 8px;
-            font-size: 9px;
-        }
+        .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; border: none; font-weight: 800; }
+        .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
         /* =========================================================
-           3. LIVE PREVIEW CANVAS & BRAND BADGES
+           3. LIVE PREVIEW CANVAS
            ========================================================= */
         .preview-panel {
             flex: 1;
             background-color: #050505;
             overflow-y: auto;
-            padding: 35px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -232,11 +221,12 @@
         #deck-container {
             display: flex;
             flex-direction: column;
-            gap: 35px;
+            gap: 30px;
             width: 100%;
             max-width: 850px;
         }
 
+        /* SLIDE CONTAINER (16:9 LANDSCAPE ASPECT RATIO) */
         .slide {
             width: 850px;
             height: 478.125px;
@@ -271,95 +261,45 @@
         .corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
         .corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
 
-        .content-tag-badge {
-            position: absolute;
-            top: 14px;
-            right: 18px;
-            background: rgba(196, 154, 87, 0.12);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            font-size: 8px;
-            padding: 3px 9px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 800;
-            z-index: 10;
-        }
-
         .slide-body {
             flex: 1;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 14px;
-            align-content: center;
-            align-items: start;
-            margin: 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: center;
+            margin: 10px 0;
             overflow: hidden;
         }
 
-        .grid-item {
-            grid-column: span var(--span, 6);
-            position: relative;
-            border-radius: 4px;
-        }
-
-        /* BRAND BADGE STYLE IN COVER/ELEMENTS */
-        .cover-brand-pill {
+        /* DYNAMIC BRAND BADGE ON ELEMENTS */
+        .elem-brand-pill {
             background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%);
             color: #0A0B0A;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 800;
-            padding: 3px 8px;
+            padding: 2px 7px;
             border-radius: 3px;
             letter-spacing: 1px;
             text-transform: uppercase;
             display: inline-block;
+            margin-right: 6px;
         }
 
-        .elem-tag {
-            font-size: 9px;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            display: inline-block;
-        }
-
-        .elem-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--text-white);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.2;
-        }
+        .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
+        .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
 
         p, li { color: #C0C2C0; font-size: 11px; line-height: 1.5; white-space: pre-line; }
 
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
-        .malevin-table th {
-            background-color: rgba(196, 154, 87, 0.12);
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--accent-gold);
-            text-align: left;
-            font-weight: 700;
-        }
-        .malevin-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; }
+        .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; }
+        .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; }
 
         .kpi-grid { display: flex; gap: 10px; width: 100%; }
-        .kpi-card { flex: 1; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 12px; text-align: center; border-radius: 4px; }
-        .kpi-value { font-size: 24px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
+        .kpi-card { flex: 1; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; border-radius: 4px; }
+        .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
         .kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
-        .compare-box { display: flex; gap: 14px; align-items: center; width: 100%; }
-        .compare-stat { flex: 1; }
-        .compare-num { font-size: 20px; font-weight: 800; margin: 2px 0; }
-        .progress-track { width: 100%; height: 8px; background: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 20px; overflow: hidden; margin-top: 4px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #8A6831, #C49A57); }
+        .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 10px; border-radius: 4px; font-size: 11px; color: #E0E0E0; }
 
         .slide-footer {
             display: flex;
@@ -375,6 +315,53 @@
         }
 
         .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
+
+        /* =========================================================
+           4. EXACT VECTOR PRINT & PDF ENGINE (@media print)
+           ========================================================= */
+        @media print {
+            @page {
+                size: 297mm 167.0625mm; /* Standard 16:9 Landscape */
+                margin: 0;
+            }
+
+            body {
+                background-color: #0A0B0A !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .topbar, .editor-panel {
+                display: none !important;
+            }
+
+            .app-container, .preview-panel {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: transparent !important;
+                overflow: visible !important;
+                display: block !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+
+            #deck-container {
+                width: 100% !important;
+                gap: 0 !important;
+            }
+
+            .slide {
+                width: 297mm !important;
+                height: 167.0625mm !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                box-shadow: none !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 30px 40px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -382,14 +369,14 @@
     <!-- TOP CONTROL BAR -->
     <div class="topbar">
         <div class="brand-title">
-            <span id="brandNameLabel">MALEVIN</span> <span class="brand-badge">MODULAR STUDIO</span>
+            <span>MALEVIN</span> <span class="brand-badge">MODULAR STUDIO</span>
         </div>
         <div class="mode-tabs">
             <button class="mode-tab-btn" id="tabEditBtn" onclick="setMode('edit')">Edit</button>
             <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Preview</button>
         </div>
         <div class="topbar-actions">
-            <button class="btn btn-gold" onclick="exportPDF()">Export PDF</button>
+            <button class="btn btn-gold" onclick="exportPDFVector()">Simpan / Export PDF</button>
         </div>
     </div>
 
@@ -399,7 +386,7 @@
         <div class="editor-panel" id="editorPanel">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
-                <button class="btn btn-gold" onclick="addSlide()">+ Halaman Baru</button>
+                <button class="btn btn-gold" onclick="addSlide()">+ Slide Baru</button>
             </div>
             <div id="forms-wrapper"></div>
         </div>
@@ -411,34 +398,31 @@
     </div>
 
     <script>
-        let BRAND_NAME = 'Malevin';
-
         const ELEM_LABELS = {
             cover: 'COVER', header: 'HEADER', text: 'TEKS',
-            table: 'TABEL', kpi: 'KPI', comparison: 'PERBANDINGAN'
+            kolom: 'KOLOM', table: 'TABEL', kpi: 'KPI',
+            grafik: 'GRAFIK', compare: 'PERBANDINGAN', stat: 'STATISTIK', wawasan: 'WAWASAN'
         };
 
         let slidesData = [
             {
                 id: 1,
-                footerLeft: `PREPARED BY ${BRAND_NAME.toUpperCase()} CREATIVE & PRODUCTION TEAM`,
-                contentTag: 'Creative Deck',
+                footerLeft: 'PREPARED BY MALEVIN CREATIVE & PRODUCTION TEAM',
                 elements: [
-                    { type: 'cover', brand: 'MALEVIN', tag: 'Creative Proposal', title: 'CAMPAIGN DECK 2026', subtitle: 'Dynamic Brand Strategy & Visual Direction', w: 6 }
+                    { type: 'cover', brand: 'MALEVIN OFFICIAL', tag: 'Creative Proposal', title: 'CAMPAIGN DECK 2026', subtitle: 'Dynamic Brand Strategy & Visual Direction' }
                 ]
             },
             {
                 id: 2,
-                footerLeft: 'SECTION 01 EXECUTION STRATEGY',
-                contentTag: 'Creative Deck',
+                footerLeft: 'SECTION 01 — EXECUTION STRATEGY',
                 elements: [
-                    { type: 'header', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', w: 6 },
-                    { type: 'kpi', k1Val: '1.2M+', k1Lbl: 'Monthly Reach', k2Val: '4.8%', k2Lbl: 'Eng. Rate', k3Val: '120+', k3Lbl: 'Video Assets', w: 6 },
+                    { type: 'header', brand: 'MALEVIN ID', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES' },
+                    { type: 'kpi', brand: '', k1Val: '1.2M+', k1Lbl: 'Monthly Reach', k2Val: '4.8%', k2Lbl: 'Eng. Rate', k3Val: '120+', k3Lbl: 'Video Assets' },
                     {
                         type: 'table',
+                        brand: 'CLIENT ID: #0921',
                         headers: 'Platform, Format, Target Output',
-                        rows: 'TikTok, Short Video, 40 Clips / Mo\nInstagram, Reels & Grid, 20 Posts / Mo\nYouTube, Shorts, 15 Clips / Mo',
-                        w: 6
+                        rows: 'TikTok, Short Video, 40 Clips / Mo\nInstagram, Reels & Grid, 20 Posts / Mo\nYouTube, Shorts, 15 Clips / Mo'
                     }
                 ]
             }
@@ -455,23 +439,44 @@
                 let elementsHTML = '';
 
                 slide.elements.forEach((elem, eIdx) => {
-                    let fields = '';
+                    let fields = `
+                        <div class="form-group">
+                            <label>Brand / ID / Label Elemen (Opsional)</label>
+                            <input type="text" class="form-control" value="${elem.brand || ''}" placeholder="contoh: MALEVIN OFFICIAL / MALEVIN ID" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)">
+                        </div>
+                    `;
 
                     if (elem.type === 'cover') {
-                        fields = `
-                            <div class="form-group"><label>Nama Brand (Opsional)</label><input type="text" class="form-control" value="${elem.brand || ''}" placeholder="contoh: MALEVIN" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>
+                        fields += `
                             <div class="form-group"><label>Tag / Sub-Label</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div>
                             <div class="form-group"><label>Judul Utama</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
                             <div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>
                         `;
                     } else if (elem.type === 'header') {
-                        fields = `
+                        fields += `
                             <div class="form-group"><label>Tag Section</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div>
                             <div class="form-group"><label>Judul Section</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
                         `;
                     } else if (elem.type === 'text') {
-                        fields = `
+                        fields += `
                             <div class="form-group"><label>Isi Teks</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
+                        `;
+                    } else if (elem.type === 'kpi') {
+                        fields += `
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+                                <div class="form-group"><label>Val 1</label><input type="text" class="form-control" value="${elem.k1Val || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'k1Val', this.value)"></div>
+                                <div class="form-group"><label>Val 2</label><input type="text" class="form-control" value="${elem.k2Val || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'k2Val', this.value)"></div>
+                                <div class="form-group"><label>Val 3</label><input type="text" class="form-control" value="${elem.k3Val || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'k3Val', this.value)"></div>
+                            </div>
+                        `;
+                    } else if (elem.type === 'table') {
+                        fields += `
+                            <div class="form-group"><label>Header (pisah koma)</label><input type="text" class="form-control" value="${elem.headers || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'headers', this.value)"></div>
+                            <div class="form-group"><label>Baris Data (1 baris = 1 row)</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'rows', this.value)">${elem.rows || ''}</textarea></div>
+                        `;
+                    } else if (elem.type === 'wawasan') {
+                        fields += `
+                            <div class="form-group"><label>Catatan Wawasan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
                         `;
                     }
 
@@ -495,7 +500,26 @@
                         <label>Teks Footer Kiri</label>
                         <input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)">
                     </div>
+
                     ${elementsHTML}
+
+                    <div class="section-label-btn">+ TAMBAH ELEMEN KONTEN:</div>
+                    <div class="btn-grid">
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kolom')">+ KOLOM</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'grafik')">+ GRAFIK</button>
+                    </div>
+
+                    <div class="section-label-btn">+ TAMBAH ELEMEN ANALISIS:</div>
+                    <div class="btn-grid">
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'compare')">+ PERBANDINGAN</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'stat')">+ STATISTIK</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')">+ WAWASAN</button>
+                    </div>
                 `;
 
                 wrapper.appendChild(card);
@@ -518,40 +542,89 @@
                 slide.elements.forEach((elem) => {
                     let piece = '';
 
-                    if (elem.type === 'cover') {
-                        const brandPill = elem.brand ? `<span class="cover-brand-pill">${elem.brand}</span>` : '';
-                        const tagText = elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : '';
+                    const brandPill = elem.brand ? `<span class="elem-brand-pill">${elem.brand}</span>` : '';
 
+                    if (elem.type === 'cover') {
+                        const tagText = elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : '';
                         piece = `
                             <div style="margin: auto 0;">
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                                <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
                                     ${brandPill}
                                     ${tagText}
                                 </div>
-                                <div class="elem-title" style="font-size:32px; margin: 10px 0;">${elem.title || ''}</div>
+                                <div class="elem-title" style="font-size:32px; margin: 8px 0;">${elem.title || ''}</div>
                                 <p style="font-size:13px; color:var(--accent-gold);">${elem.subtitle || ''}</p>
                             </div>
                         `;
                     } else if (elem.type === 'header') {
                         piece = `
                             <div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;">
-                                <div class="elem-tag">${elem.tag || ''}</div>
-                                <div class="elem-title">${elem.title || ''}</div>
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                    ${brandPill}
+                                    <span class="elem-tag">${elem.tag || ''}</span>
+                                </div>
+                                <div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div>
+                            </div>
+                        `;
+                    } else if (elem.type === 'text') {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <p>${elem.content || ''}</p>
+                            </div>
+                        `;
+                    } else if (elem.type === 'kpi') {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:6px;">${brandPill}</div>` : ''}
+                                <div class="kpi-grid">
+                                    <div class="kpi-card"><div class="kpi-value">${elem.k1Val || '0'}</div><div class="kpi-label">Metric 1</div></div>
+                                    <div class="kpi-card"><div class="kpi-value">${elem.k2Val || '0'}</div><div class="kpi-label">Metric 2</div></div>
+                                    <div class="kpi-card"><div class="kpi-value">${elem.k3Val || '0'}</div><div class="kpi-label">Metric 3</div></div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (elem.type === 'table') {
+                        const headersArr = (elem.headers || '').split(',').map(h => `<th>${h.trim()}</th>`).join('');
+                        const rowsArr = (elem.rows || '').split('\n').map(r => {
+                            const cols = r.split(',').map(c => `<td>${c.trim()}</td>`).join('');
+                            return `<tr>${cols}</tr>`;
+                        }).join('');
+
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <table class="malevin-table">
+                                    <thead><tr>${headersArr}</tr></thead>
+                                    <tbody>${rowsArr}</tbody>
+                                </table>
+                            </div>
+                        `;
+                    } else if (elem.type === 'wawasan') {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <div class="wawasan-box">
+                                    <strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">💡 ANALISIS & WAWASAN:</strong>
+                                    ${elem.content || ''}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <p style="font-style:italic; color:var(--text-muted);">${ELEM_LABELS[elem.type]} Content Placeholder</p>
                             </div>
                         `;
                     }
 
-                    bodyHTML += `
-                        <div class="grid-item" style="--span:${elem.w || 6}; grid-column: span ${elem.w || 6};">
-                            ${piece}
-                        </div>
-                    `;
+                    bodyHTML += `<div style="width:100%;">${piece}</div>`;
                 });
 
                 slideEl.innerHTML = `
                     <div class="corner-accent corner-tl"></div>
                     <div class="corner-accent corner-br"></div>
-                    ${slide.contentTag ? `<div class="content-tag-badge">${slide.contentTag}</div>` : ''}
                     <div class="slide-body">${bodyHTML}</div>
                     <div class="slide-footer">
                         <span>${slide.footerLeft || ''}</span>
@@ -573,6 +646,19 @@
             renderPreview();
         }
 
+        function addElementToSlide(sIdx, type) {
+            const newElem = { type: type, brand: '' };
+            if (type === 'cover') { newElem.tag = 'Proposal'; newElem.title = 'COVER TITLE'; newElem.subtitle = 'Subtitle'; }
+            else if (type === 'header') { newElem.tag = 'Section'; newElem.title = 'SECTION TITLE'; }
+            else if (type === 'text') { newElem.content = 'Tulis deskripsi penjelasan di sini...'; }
+            else if (type === 'kpi') { newElem.k1Val = '100K'; newElem.k2Val = '5.0%'; newElem.k3Val = '50+'; }
+            else if (type === 'table') { newElem.headers = 'Col 1, Col 2, Col 3'; newElem.rows = 'Data A, Data B, Data C'; }
+            else if (type === 'wawasan') { newElem.content = 'Catatan ringkasan wawasan performa campaign...'; }
+
+            slidesData[sIdx].elements.push(newElem);
+            renderForms();
+        }
+
         function deleteElem(sIdx, eIdx) {
             slidesData[sIdx].elements.splice(eIdx, 1);
             renderForms();
@@ -581,10 +667,9 @@
         function addSlide() {
             slidesData.push({
                 id: Date.now(),
-                footerLeft: `PREPARED BY ${BRAND_NAME.toUpperCase()} TEAM`,
-                contentTag: '',
+                footerLeft: 'PREPARED BY MALEVIN TEAM',
                 elements: [
-                    { type: 'header', tag: 'Section Tag', title: 'JUDUL SLIDE BARU', w: 6 }
+                    { type: 'header', brand: '', tag: 'Section Tag', title: 'JUDUL SLIDE BARU' }
                 ]
             });
             renderForms();
@@ -597,27 +682,30 @@
             }
         }
 
-        async function exportPDF() {
-            const container = document.getElementById('deck-container');
-            const opt = {
-                margin: 0,
-                filename: `${BRAND_NAME}_Deck.pdf`,
-                image: { type: 'jpeg', quality: 1.0 },
-                html2canvas: { scale: 3, useCORS: true, backgroundColor: '#0A0B0A' },
-                jsPDF: { unit: 'px', format: [850, 478.125], orientation: 'landscape' }
-            };
-            await html2pdf().set(opt).from(container).save();
+        /* NATIVE VECTOR PRINT & EXPORT PDF ENGINE */
+        function exportPDFVector() {
+            setMode('preview');
+            setTimeout(() => {
+                window.print();
+            }, 200);
         }
 
         function setMode(mode) {
             const editorPanel = document.getElementById('editorPanel');
             const previewPanel = document.getElementById('previewPanel');
+            const tabEdit = document.getElementById('tabEditBtn');
+            const tabPreview = document.getElementById('tabPreviewBtn');
+
             if (mode === 'preview') {
                 editorPanel.style.display = 'none';
                 previewPanel.style.display = 'flex';
+                tabEdit.classList.remove('active');
+                tabPreview.classList.add('active');
             } else {
                 editorPanel.style.display = 'flex';
                 previewPanel.style.display = 'none';
+                tabPreview.classList.remove('active');
+                tabEdit.classList.add('active');
             }
         }
 
