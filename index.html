@@ -1909,7 +1909,7 @@
                         const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
                         const parsedContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
                         p = `<div class="wawasan-box" style="border-radius: ${br};">
-                            <div style="font-size: 10px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase;">💡 ${parsedTitle}</div>
+                            <div style="font-size: 10px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase;"> ${parsedTitle}</div>
                             <div style="line-height: 1.5; white-space: pre-line;">${parsedContent}</div>
                         </div>`;
                     }
