@@ -3,329 +3,1154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malevin — Canva-Style Vector Engine</title>
-    <!-- jsPDF untuk render Vector PDF murni -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>Malevin — Canvas & Vector PDF Deck Studio</title>
+    <!-- pdfMake library for pure native vector PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <style>
         :root {
             --bg-obsidian: #0A0B0A;
             --surface-dark: #121312;
-            --card-obsidian: #1A1C1A;
-            --border-obsidian: #2A2C2A;
+            --card-obsidian: #161816;
+            --border-obsidian: #242624;
             --accent-gold: #C49A57;
             --text-white: #FEFEFE;
             --text-muted: #808280;
-            --canvas-bg: #050505;
+            --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        body { background-color: var(--bg-obsidian); color: var(--text-white); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body {
+            background-color: var(--bg-obsidian);
+            color: var(--text-white);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        /* TOPBAR */
-        .topbar { background-color: var(--surface-dark); border-bottom: 1px solid var(--border-obsidian); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .brand { font-size: 14px; font-weight: 800; letter-spacing: 2px; color: var(--accent-gold); display: flex; align-items: center; gap: 10px; }
-        .badge { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 9px; padding: 2px 6px; border-radius: 4px; }
-        
-        .btn { background-color: var(--card-obsidian); color: var(--text-white); border: 1px solid var(--border-obsidian); padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
+        .topbar {
+            background-color: var(--surface-dark);
+            border-bottom: 1px solid var(--border-obsidian);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .brand-title {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%);
+            color: #0A0B0A;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+        .mode-tabs { display: flex; gap: 4px; background: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 3px; }
+        .mode-tab-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 6px 14px; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; border-radius: 4px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .mode-tab-btn.active { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; }
+        .mode-tab-btn:not(.active):hover { color: var(--accent-gold); }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 53px);
+            overflow: hidden;
+        }
+
+        /* EDITOR PANEL */
+        .editor-panel {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: var(--surface-dark);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+            gap: 16px;
+        }
+
+        .slide-accordion {
+            background-color: var(--card-obsidian);
+            border: 1px solid var(--border-obsidian);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .slide-accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-obsidian);
+            padding-bottom: 8px;
+        }
+
+        .section-label-btn {
+            font-size: 9px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+            margin-bottom: 4px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .add-elem-btn {
+            background-color: var(--surface-dark);
+            color: var(--text-white);
+            border: 1px solid var(--border-obsidian);
+            font-size: 9px;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        .add-elem-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+
+        .element-box {
+            background-color: var(--bg-obsidian);
+            border: 1px solid var(--border-obsidian);
+            border-left: 3px solid var(--accent-gold);
+            border-radius: 4px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .element-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .form-control {
+            background-color: var(--surface-dark);
+            border: 1px solid var(--border-obsidian);
+            color: var(--text-white);
+            padding: 7px 9px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: inherit;
+            width: 100%;
+        }
+        .form-control:focus { outline: none; border-color: var(--accent-gold); }
+        textarea.form-control { resize: vertical; min-height: 50px; line-height: 1.4; }
+
+        .btn {
+            background-color: var(--card-obsidian);
+            color: var(--text-white);
+            border: 1px solid var(--border-obsidian);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
         .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
         .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; border: none; font-weight: 800; }
-        .btn-gold:hover { transform: translateY(-1px); color: #000; }
+        .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
-        /* WORKSPACE */
-        .workspace { display: flex; flex: 1; height: calc(100vh - 55px); }
+        /* LIVE PREVIEW CANVAS */
+        .preview-panel {
+            flex: 1;
+            background-color: #050505;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        /* PROPERTIES SIDEBAR */
-        .sidebar { width: 300px; background-color: var(--surface-dark); border-right: 1px solid var(--border-obsidian); display: flex; flex-direction: column; padding: 20px; gap: 20px; overflow-y: auto; }
-        .sidebar-title { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 10px; }
-        
-        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-        .form-group label { font-size: 10px; color: #A0A0A0; }
-        .form-control { background: var(--bg-obsidian); border: 1px solid var(--border-obsidian); color: white; padding: 8px 10px; border-radius: 4px; font-size: 12px; width: 100%; outline: none; }
-        .form-control:focus { border-color: var(--accent-gold); }
-        input[type="color"] { padding: 0; height: 32px; cursor: pointer; }
-        input[type="range"] { accent-color: var(--accent-gold); }
+        #deck-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 850px;
+        }
 
-        /* CANVAS AREA */
-        .canvas-container { flex: 1; background-color: var(--canvas-bg); display: flex; justify-content: center; align-items: center; overflow: auto; position: relative; }
-        
-        /* THE SLIDE (960x540 = 16:9) */
-        #slide { width: 960px; height: 540px; background-color: #121312; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid #222; }
-        
-        .canvas-element { position: absolute; cursor: grab; user-select: none; line-height: 1.2; box-sizing: border-box; }
-        .canvas-element:active { cursor: grabbing; }
-        .canvas-element.selected { outline: 2px dashed var(--accent-gold); outline-offset: 2px; z-index: 100; }
-        
-        .no-selection-msg { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 40px; font-style: italic; }
+        /* SLIDE KINI BISA MELEBAR DINAMIS (AUTO HEIGHT) */
+        .slide {
+            width: 850px;
+            min-height: 478.125px; /* Minimal tinggi standar 16:9, bisa bertambah jika isi melebar */
+            height: auto;
+            background-color: var(--bg-obsidian);
+            border: 1px solid var(--border-obsidian);
+            padding: 28px 36px 20px 36px;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            gap: 20px;
+            flex-shrink: 0;
+        }
 
-        /* TOOLS ROW */
-        .tools-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%);
+        }
+
+        .corner-accent {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-color: var(--accent-gold);
+            border-style: solid;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+        .corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+
+        .slide-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: flex-start;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .slide-body.has-cover {
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* DRAGGABLE STYLING */
+        .draggable-element {
+            position: relative;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            border: 1px dashed transparent;
+            padding: 4px;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .draggable-element:hover {
+            border-color: rgba(196, 154, 87, 0.5);
+            background: rgba(196, 154, 87, 0.02);
+        }
+        .draggable-element.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+            border-color: var(--accent-gold);
+        }
+
+        .snap-guide-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 1px;
+            background-color: var(--accent-gold);
+            box-shadow: 0 0 8px var(--accent-gold);
+            z-index: 10;
+            pointer-events: none;
+            display: none;
+        }
+
+        .drag-drop-target {
+            border-top: 2px solid var(--accent-gold) !important;
+            box-shadow: 0 -4px 10px rgba(196, 154, 87, 0.3);
+        }
+
+        /* ELEMENT STYLING */
+        .elem-brand-pill {
+            background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%);
+            color: #0A0B0A;
+            font-size: 8px;
+            font-weight: 800;
+            padding: 3px 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
+        .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
+
+        p.slide-text { color: #C0C2C0; font-size: 11px; line-height: 1.5; white-space: pre-line; }
+
+        .malevin-list {
+            list-style: none;
+            padding-left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .malevin-list li {
+            position: relative;
+            padding-left: 16px;
+            font-size: 11px;
+            color: #C0C2C0;
+        }
+        .malevin-list li::before {
+            content: '■';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--accent-gold);
+            font-size: 8px;
+        }
+
+        .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
+        .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; }
+        .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; }
+
+        .kpi-grid { display: flex; gap: 10px; width: 100%; }
+        .kpi-card { flex: 1; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
+        .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
+        .kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+        .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 10px; font-size: 11px; color: #E0E0E0; }
+
+        .img-preview-box {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-obsidian);
+            padding-top: 8px;
+            font-size: 8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: auto;
+        }
+
+        .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
     </style>
 </head>
 <body>
 
+    <!-- TOP CONTROL BAR -->
     <div class="topbar">
-        <div class="brand">MALEVIN <span class="badge">VECTOR ENGINE</span></div>
-        <div>
-            <button class="btn btn-gold" onclick="exportToVectorPDF()">📥 Download Vector PDF</button>
+        <div class="brand-title">
+            <span>MALEVIN</span> <span class="brand-badge">VECTOR DECK STUDIO</span>
+        </div>
+        <div class="mode-tabs">
+            <button class="mode-tab-btn" id="tabEditBtn" onclick="setMode('edit')">Form Editor</button>
+            <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Canvas Preview</button>
+        </div>
+        <div class="topbar-actions">
+            <button class="btn btn-gold" id="downloadBtn" onclick="downloadVectorPDF()">Download Vector PDF</button>
         </div>
     </div>
 
-    <div class="workspace">
-        <div class="sidebar">
-            <div class="sidebar-title">TAMBAH ELEMEN</div>
-            <div class="tools-row">
-                <button class="btn" onclick="addText()">+ Teks Baru</button>
-                <button class="btn" onclick="document.getElementById('imgInput').click()">+ Gambar</button>
-                <input type="file" id="imgInput" style="display: none;" accept="image/*" onchange="handleImageUpload(event)">
+    <!-- MAIN APP WRAPPER -->
+    <div class="app-container">
+        <!-- LEFT: MODULAR EDITOR PANEL -->
+        <div class="editor-panel" id="editorPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
+                <button class="btn btn-gold" onclick="addSlide()">+ Slide Baru</button>
             </div>
-
-            <div class="sidebar-title">PENGATURAN ELEMEN</div>
-            <div id="propertiesPanel">
-                <div class="no-selection-msg">Klik elemen pada kanvas untuk mengeditnya.</div>
-            </div>
+            <div id="forms-wrapper"></div>
         </div>
 
-        <div class="canvas-container" id="canvasContainer">
-            <div id="slide" onmousedown="onSlideClick(event)">
-                <!-- Elements rendered here by JS -->
-            </div>
+        <!-- RIGHT: LIVE PREVIEW & DRAG CANVAS -->
+        <div class="preview-panel" id="previewPanel">
+            <div id="deck-container"></div>
         </div>
     </div>
 
     <script>
-        // State Management
-        let elements = [
-            { id: '1', type: 'text', text: 'CAMPAIGN DECK 2026', x: 60, y: 80, fontSize: 36, color: '#C49A57', bold: true },
-            { id: '2', type: 'text', text: 'Tarik aku kemana saja!\nKlik aku untuk mengedit teks atau warna di panel kiri.', x: 60, y: 140, fontSize: 16, color: '#FFFFFF', bold: false }
+        const ELEM_LABELS = {
+            cover: 'COVER', header: 'HEADER', text: 'TEKS',
+            list: 'POIN LIST', table: 'TABEL', kpi: 'KPI METRIK',
+            wawasan: 'WAWASAN', image: 'GAMBAR'
+        };
+
+        let slidesData = [
+            {
+                id: 1,
+                footerLeft: 'PREPARED BY MALEVIN CREATIVE & PRODUCTION TEAM',
+                elements: [
+                    { 
+                        type: 'cover', 
+                        brand: 'MALEVIN OFFICIAL', 
+                        tag: 'Creative Proposal', 
+                        title: 'CAMPAIGN DECK 2026', 
+                        subtitle: 'Dynamic Brand Strategy & Visual Direction',
+                        shapeStyle: 'sharp'
+                    }
+                ]
+            },
+            {
+                id: 2,
+                footerLeft: 'SECTION 01 — EXECUTION STRATEGY',
+                elements: [
+                    { type: 'header', brand: 'MALEVIN ID', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
+                    {
+                        type: 'kpi',
+                        brand: 'METRICS',
+                        shapeStyle: 'rounded',
+                        items: [
+                            { val: '1.2M+', lbl: 'Monthly Reach' },
+                            { val: '4.8%', lbl: 'Eng. Rate' },
+                            { val: '120+', lbl: 'Video Assets' }
+                        ]
+                    },
+                    {
+                        type: 'table',
+                        brand: 'CLIENT ID: #0921',
+                        shapeStyle: 'sharp',
+                        headers: ['Platform', 'Format', 'Target Output'],
+                        rows: [
+                            ['TikTok', 'Short Video', '40 Clips / Mo'],
+                            ['Instagram', 'Reels & Grid', '20 Posts / Mo'],
+                            ['YouTube', 'Shorts', '15 Clips / Mo']
+                        ]
+                    },
+                    {
+                        type: 'list',
+                        brand: 'DELIVERABLES',
+                        shapeStyle: 'pill',
+                        items: [
+                            'High Quality 4K Video Render & Raw Files',
+                            'Custom Sound Design & Color Grading',
+                            'Full Commercial Rights License'
+                        ]
+                    }
+                ]
+            }
         ];
-        let selectedId = null;
 
-        // Drag Variables
-        let isDragging = false;
-        let startMouseX = 0, startMouseY = 0;
-        let startElX = 0, startElY = 0;
+        let draggedItem = null;
 
-        const slideDOM = document.getElementById('slide');
-        const propsPanel = document.getElementById('propertiesPanel');
+        function renderForms() {
+            const wrapper = document.getElementById('forms-wrapper');
+            wrapper.innerHTML = '';
 
-        // Initial Render
-        renderCanvas();
+            slidesData.forEach((slide, sIdx) => {
+                const card = document.createElement('div');
+                card.className = 'slide-accordion';
 
-        function renderCanvas() {
-            slideDOM.innerHTML = ''; // Bersihkan kanvas
-            
-            elements.forEach(el => {
-                const node = document.createElement(el.type === 'image' ? 'img' : 'div');
-                node.className = `canvas-element ${el.id === selectedId ? 'selected' : ''}`;
-                node.style.left = `${el.x}px`;
-                node.style.top = `${el.y}px`;
-                node.id = `el-${el.id}`;
+                let elementsHTML = '';
 
-                if (el.type === 'text') {
-                    node.innerText = el.text;
-                    node.style.fontSize = `${el.fontSize}px`;
-                    node.style.color = el.color;
-                    node.style.fontWeight = el.bold ? 'bold' : 'normal';
-                    node.style.whiteSpace = 'pre-wrap';
-                } else if (el.type === 'image') {
-                    node.src = el.src;
-                    node.style.width = `${el.w}px`;
-                    node.style.height = `${el.h}px`;
-                    node.style.objectFit = 'cover';
-                    node.style.borderRadius = `${el.borderRadius}px`; // Pill, Rounded, or Circle
-                }
+                slide.elements.forEach((elem, eIdx) => {
+                    const styleShape = elem.shapeStyle || 'sharp';
 
-                // Attach drag events
-                node.addEventListener('mousedown', (e) => startDrag(e, el));
-                slideDOM.appendChild(node);
-            });
+                    let shapeSelector = `
+                        <div class="form-group">
+                            <label>Bentuk / Style Ujung (Corner Style)</label>
+                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)">
+                                <option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak Presisi (Sharp / 0px)</option>
+                                <option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Sudut Melengkung (Rounded / 6px)</option>
+                                <option value="pill" ${styleShape === 'pill' ? 'selected' : ''}>Bentuk Kapsul (Pill / 20px)</option>
+                            </select>
+                        </div>
+                    `;
 
-            renderProperties();
-        }
+                    let fields = `
+                        <div class="form-group">
+                            <label>Brand / ID / Label Elemen (Opsional)</label>
+                            <input type="text" class="form-control" value="${elem.brand || ''}" placeholder="contoh: MALEVIN OFFICIAL" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)">
+                        </div>
+                        ${shapeSelector}
+                    `;
 
-        // --- INTERAKSI DRAG & DROP ---
-        function startDrag(e, el) {
-            e.stopPropagation(); // Cegah event klik slide
-            selectedId = el.id;
-            isDragging = true;
-            
-            // Dapatkan skala zoom layar jika ada
-            const rect = slideDOM.getBoundingClientRect();
-            const scaleX = 960 / rect.width;
-            const scaleY = 540 / rect.height;
+                    if (elem.type === 'cover') {
+                        fields += `
+                            <div class="form-group"><label>Tag / Sub-Label</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div>
+                            <div class="form-group"><label>Judul Utama</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
+                            <div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>
+                        `;
+                    } else if (elem.type === 'header') {
+                        fields += `
+                            <div class="form-group"><label>Tag Section</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div>
+                            <div class="form-group"><label>Judul Section</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
+                        `;
+                    } else if (elem.type === 'text') {
+                        fields += `
+                            <div class="form-group"><label>Isi Teks Penjelasan</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
+                        `;
+                    } else if (elem.type === 'image') {
+                        fields += `
+                            <div class="form-group">
+                                <label>Unggah Gambar (Input Asset)</label>
+                                <input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)">
+                            </div>
+                        `;
+                    } else if (elem.type === 'list') {
+                        let listInputs = (elem.items || []).map((item, lIdx) => `
+                            <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
+                                <input type="text" class="form-control" value="${item}" placeholder="Poin list ${lIdx+1}" oninput="updateListItem(${sIdx}, ${eIdx}, ${lIdx}, this.value)">
+                                <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteListItem(${sIdx}, ${eIdx}, ${lIdx})">✕</button>
+                            </div>
+                        `).join('');
 
-            startMouseX = e.clientX * scaleX;
-            startMouseY = e.clientY * scaleY;
-            startElX = el.x;
-            startElY = el.y;
+                        fields += `
+                            <div class="form-group">
+                                <label>Poin-Poin List</label>
+                                <div>${listInputs}</div>
+                                <button class="btn" style="font-size:8px; padding:4px 8px; margin-top:4px;" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin List</button>
+                            </div>
+                        `;
+                    } else if (elem.type === 'kpi') {
+                        let kpiInputs = (elem.items || []).map((k, kIdx) => `
+                            <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
+                                <input type="text" class="form-control" value="${k.val || ''}" placeholder="Nilai (cth: 100K)" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)">
+                                <input type="text" class="form-control" value="${k.lbl || ''}" placeholder="Label Metrik" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)">
+                                <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button>
+                            </div>
+                        `).join('');
 
-            renderCanvas();
-        }
+                        fields += `
+                            <div class="form-group">
+                                <label>Daftar Metrik KPI</label>
+                                <div>${kpiInputs}</div>
+                                <button class="btn" style="font-size:8px; padding:4px 8px; margin-top:4px;" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah KPI Metrik</button>
+                            </div>
+                        `;
+                    } else if (elem.type === 'table') {
+                        let headersInputs = (elem.headers || []).map((h, cIdx) => `
+                            <div style="display:flex; gap:4px; align-items:center;">
+                                <input type="text" class="form-control" value="${h}" placeholder="Nama Kolom ${cIdx+1}" oninput="updateTableHeader(${sIdx}, ${eIdx}, ${cIdx}, this.value)">
+                                <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteTableColumn(${sIdx}, ${eIdx}, ${cIdx})">✕</button>
+                            </div>
+                        `).join('');
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const rect = slideDOM.getBoundingClientRect();
-            const scaleX = 960 / rect.width;
-            const scaleY = 540 / rect.height;
+                        let rowsInputs = (elem.rows || []).map((row, rIdx) => {
+                            let cells = (elem.headers || []).map((_, cIdx) => `
+                                <input type="text" class="form-control" value="${row[cIdx] || ''}" placeholder="Sel ${cIdx+1}" oninput="updateTableCell(${sIdx}, ${eIdx}, ${rIdx}, ${cIdx}, this.value)">
+                            `).join('');
 
-            const currentMouseX = e.clientX * scaleX;
-            const currentMouseY = e.clientY * scaleY;
-            
-            const dx = currentMouseX - startMouseX;
-            const dy = currentMouseY - startMouseY;
+                            return `
+                                <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
+                                    <span style="font-size:9px; color:var(--text-muted); font-weight:bold; min-width:18px;">B${rIdx+1}</span>
+                                    <div style="display:grid; grid-template-columns: repeat(${(elem.headers || []).length || 1}, 1fr); gap:4px; flex:1;">
+                                        ${cells}
+                                    </div>
+                                    <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteTableRow(${sIdx}, ${eIdx}, ${rIdx})">✕</button>
+                                </div>
+                            `;
+                        }).join('');
 
-            const el = elements.find(e => e.id === selectedId);
-            if (el) {
-                el.x = startElX + dx;
-                el.y = startElY + dy;
-                // Update DOM langsung biar smooth tanpa re-render seluruh array
-                const node = document.getElementById(`el-${el.id}`);
-                node.style.left = `${el.x}px`;
-                node.style.top = `${el.y}px`;
-            }
-        });
+                        fields += `
+                            <div class="form-group">
+                                <label>Header Kolom Tabel</label>
+                                <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:6px;">${headersInputs}</div>
+                                <button class="btn" style="font-size:8px; padding:4px 8px;" onclick="addTableColumn(${sIdx}, ${eIdx})">+ Tambah Kolom Header</button>
+                            </div>
+                            <div class="form-group" style="margin-top:8px;">
+                                <label>Baris Data Tabel</label>
+                                <div>${rowsInputs}</div>
+                                <button class="btn" style="font-size:8px; padding:4px 8px; margin-top:4px;" onclick="addTableRow(${sIdx}, ${eIdx})">+ Tambah Baris Data</button>
+                            </div>
+                        `;
+                    } else if (elem.type === 'wawasan') {
+                        fields += `
+                            <div class="form-group"><label>Catatan Wawasan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
+                        `;
+                    }
 
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                renderProperties(); // Update posisi X & Y di form properties jika ada
-            }
-        });
+                    elementsHTML += `
+                        <div class="element-box">
+                            <div class="element-header">
+                                <span>ELEMEN ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type.toUpperCase()}</span>
+                                <button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus Elemen</button>
+                            </div>
+                            ${fields}
+                        </div>
+                    `;
+                });
 
-        function onSlideClick(e) {
-            // Deselect jika mengklik area kosong slide
-            selectedId = null;
-            renderCanvas();
-        }
+                card.innerHTML = `
+                    <div class="slide-accordion-header">
+                        <strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong>
+                        <button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Teks Footer Kiri</label>
+                        <input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)">
+                    </div>
 
-        // --- PROPERTY EDITOR ---
-        function renderProperties() {
-            const el = elements.find(e => e.id === selectedId);
-            if (!el) {
-                propsPanel.innerHTML = '<div class="no-selection-msg">Klik elemen pada kanvas untuk mengeditnya.</div>';
-                return;
-            }
+                    ${elementsHTML}
 
-            let html = '';
-            if (el.type === 'text') {
-                html += `
-                    <div class="form-group"><label>Isi Teks</label><textarea class="form-control" rows="3" oninput="updateEl('text', this.value)">${el.text}</textarea></div>
-                    <div class="form-group"><label>Ukuran Font (px)</label><input type="range" min="10" max="120" value="${el.fontSize}" oninput="updateEl('fontSize', parseInt(this.value)); document.getElementById('fs-val').innerText=this.value;"> <span id="fs-val" style="font-size:10px">${el.fontSize}</span></div>
-                    <div class="form-group"><label>Warna Teks</label><input type="color" class="form-control" value="${el.color}" oninput="updateEl('color', this.value)"></div>
-                    <div class="form-group"><label>Format</label>
-                        <button class="btn" style="width:100%; border-color: ${el.bold ? 'var(--accent-gold)' : ''}" onclick="updateEl('bold', !${el.bold})">Teks Tebal (Bold)</button>
+                    <div class="section-label-btn">+ TAMBAH ELEMEN DECK:</div>
+                    <div class="btn-grid">
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ POIN LIST</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI METRIK</button>
+                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')">+ WAWASAN</button>
                     </div>
                 `;
-            } else if (el.type === 'image') {
-                html += `
-                    <div class="form-group"><label>Lebar (W)</label><input type="range" min="50" max="800" value="${el.w}" oninput="updateEl('w', parseInt(this.value))"></div>
-                    <div class="form-group"><label>Tinggi (H)</label><input type="range" min="50" max="800" value="${el.h}" oninput="updateEl('h', parseInt(this.value))"></div>
-                    <div class="form-group"><label>Lengkungan Sudut / Pill / Circle</label><input type="range" min="0" max="300" value="${el.borderRadius}" oninput="updateEl('borderRadius', parseInt(this.value))"></div>
-                `;
+
+                wrapper.appendChild(card);
+            });
+
+            renderPreview();
+        }
+
+        function getRadiusCss(style) {
+            if (style === 'rounded') return '6px';
+            if (style === 'pill') return '20px';
+            return '0px';
+        }
+
+        function handleImageUpload(sIdx, eIdx, input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    slidesData[sIdx].elements[eIdx].imgData = e.target.result;
+                    renderPreview();
+                };
+                reader.readAsDataURL(input.files[0]);
             }
-            
-            html += `<button class="btn" style="color: #FF5555; border-color: #552222; margin-top: 15px; width: 100%" onclick="deleteElement('${el.id}')">HAPUS ELEMEN</button>`;
-            propsPanel.innerHTML = html;
         }
 
-        function updateEl(key, value) {
-            const el = elements.find(e => e.id === selectedId);
-            if (el) { el[key] = value; renderCanvas(); }
-        }
+        function renderPreview() {
+            const container = document.getElementById('deck-container');
+            container.innerHTML = '';
 
-        // --- ADD & DELETE ACTIONS ---
-        function addText() {
-            const newEl = { id: Date.now().toString(), type: 'text', text: 'Teks Baru', x: 400, y: 250, fontSize: 24, color: '#FFFFFF', bold: false };
-            elements.push(newEl);
-            selectedId = newEl.id;
-            renderCanvas();
-        }
+            slidesData.forEach((slide, sIdx) => {
+                const slideEl = document.createElement('div');
+                slideEl.className = 'slide';
 
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    // Kalkulasi ukuran agar pas di layar (max 300px)
-                    let w = img.width; let h = img.height;
-                    if (w > 300) { h = h * (300/w); w = 300; }
-                    const newEl = { id: Date.now().toString(), type: 'image', src: event.target.result, x: 330, y: 150, w: w, h: h, borderRadius: 0 };
-                    elements.push(newEl);
-                    selectedId = newEl.id;
-                    renderCanvas();
-                }
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-            e.target.value = ''; // reset
-        }
+                const slideNum = sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1;
+                const slideBody = document.createElement('div');
+                
+                const isCoverSlide = slide.elements.some(e => e.type === 'cover');
+                slideBody.className = `slide-body ${isCoverSlide ? 'has-cover' : ''}`;
 
-        function deleteElement(id) {
-            elements = elements.filter(e => e.id !== id);
-            selectedId = null;
-            renderCanvas();
-        }
+                const snapLine = document.createElement('div');
+                snapLine.className = 'snap-guide-line';
+                slideBody.appendChild(snapLine);
 
-        // --- ALGORITMA EKSPOR VEKTOR ASLI (THE MAGIC) ---
-        async function exportToVectorPDF() {
-            // Deselect agar garis seleksi tidak ikut ke-render secara visual
-            selectedId = null; 
-            renderCanvas();
+                slide.elements.forEach((elem, eIdx) => {
+                    const elemWrapper = document.createElement('div');
+                    elemWrapper.className = 'draggable-element';
+                    elemWrapper.draggable = true;
+                    elemWrapper.dataset.sIdx = sIdx;
+                    elemWrapper.dataset.eIdx = eIdx;
 
-            const { jsPDF } = window.jspdf;
-            // Orientasi Landscape, satuan Pixel (pt), Resolusi Canvas kita 960x540
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'px', format: [960, 540] });
+                    elemWrapper.addEventListener('dragstart', (e) => {
+                        draggedItem = { sIdx, eIdx };
+                        elemWrapper.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
 
-            // 1. Gambar Background Slide
-            doc.setFillColor(18, 19, 18); // warna #121312
-            doc.rect(0, 0, 960, 540, 'F');
+                    elemWrapper.addEventListener('dragend', () => {
+                        elemWrapper.classList.remove('dragging');
+                        snapLine.style.display = 'none';
+                        document.querySelectorAll('.draggable-element').forEach(el => el.classList.remove('drag-drop-target'));
+                        draggedItem = null;
+                    });
 
-            // 2. Loop Semua Elemen dari Data Model (Bukan dari HTML!)
-            for (let el of elements) {
-                if (el.type === 'text') {
-                    // Pengaturan Vektor Teks Asli
-                    doc.setFont("helvetica", el.bold ? "bold" : "normal");
-                    doc.setFontSize(el.fontSize);
-                    doc.setTextColor(el.color);
-                    
-                    // jsPDF tidak mendukung multi-line secara otomatis dari \n dengan baseline 'top' sempurna
-                    // Kita pisah \n jadi array agar tercetak turun ke bawah
-                    const textLines = el.text.split('\n');
-                    doc.text(textLines, el.x, el.y, { baseline: 'top' });
-                } 
-                else if (el.type === 'image') {
-                    // Jika gambar butuh melengkung (rounded/pill), jsPDF asli tidak bisa kliping gambar sembarangan.
-                    // Solusi: Kita gambar ke kanvas virtual sementar yang di kliping, ambil base64-nya, tempel ke PDF!
-                    if (el.borderRadius > 0) {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = el.w; canvas.height = el.h;
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Buat path melengkung
-                        ctx.beginPath();
-                        ctx.roundRect(0, 0, el.w, el.h, el.borderRadius);
-                        ctx.clip(); // Potong
-                        
-                        // Gambar image ke dalam path melengkung
-                        const imgNode = document.getElementById(`el-${el.id}`);
-                        ctx.drawImage(imgNode, 0, 0, el.w, el.h);
-                        
-                        // Masukkan gambar terpotong ke PDF
-                        const clippedImg = canvas.toDataURL('image/png');
-                        doc.addImage(clippedImg, 'PNG', el.x, el.y, el.w, el.h);
-                    } else {
-                        // Jika kotak biasa, tempel langsung (kualitas maksimal)
-                        doc.addImage(el.src, 'JPEG', el.x, el.y, el.w, el.h);
+                    elemWrapper.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+
+                        if (!draggedItem || draggedItem.sIdx !== sIdx) return;
+
+                        snapLine.style.display = 'block';
+                        snapLine.style.top = `${elemWrapper.offsetTop}px`;
+
+                        elemWrapper.classList.add('drag-drop-target');
+                    });
+
+                    elemWrapper.addEventListener('dragleave', () => {
+                        elemWrapper.classList.remove('drag-drop-target');
+                    });
+
+                    elemWrapper.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        snapLine.style.display = 'none';
+                        elemWrapper.classList.remove('drag-drop-target');
+
+                        if (draggedItem && (draggedItem.sIdx === sIdx)) {
+                            const fromIdx = draggedItem.eIdx;
+                            const toIdx = eIdx;
+                            if (fromIdx !== toIdx) {
+                                const movedItem = slidesData[sIdx].elements.splice(fromIdx, 1)[0];
+                                slidesData[sIdx].elements.splice(toIdx, 0, movedItem);
+                                renderForms();
+                            }
+                        }
+                    });
+
+                    const borderRadius = getRadiusCss(elem.shapeStyle);
+                    const brandPill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${borderRadius};">${elem.brand}</span>` : '';
+
+                    let piece = '';
+
+                    if (elem.type === 'cover') {
+                        const tagText = elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : '';
+                        piece = `
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; width: 100%; padding: 20px 0;">
+                                <div style="display:flex; align-items:center; justify-content: flex-start; gap:6px; margin-bottom:12px; flex-wrap:wrap;">
+                                    ${brandPill}
+                                    ${tagText}
+                                </div>
+                                <div class="elem-title" style="font-size:36px; margin: 10px 0; text-align: left;">${elem.title || ''}</div>
+                                <p style="font-size:14px; color:var(--accent-gold); text-align: left;">${elem.subtitle || ''}</p>
+                            </div>
+                        `;
+                    } else if (elem.type === 'header') {
+                        piece = `
+                            <div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;">
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                    ${brandPill}
+                                    <span class="elem-tag">${elem.tag || ''}</span>
+                                </div>
+                                <div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div>
+                            </div>
+                        `;
+                    } else if (elem.type === 'text') {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <p class="slide-text">${elem.content || ''}</p>
+                            </div>
+                        `;
+                    } else if (elem.type === 'image') {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                ${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${borderRadius};">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center; color: var(--text-muted); font-size: 10px;">[ Upload Gambar di Form Editor ]</div>'}
+                            </div>
+                        `;
+                    } else if (elem.type === 'list') {
+                        const itemsHTML = (elem.items || []).map(item => `<li>${item}</li>`).join('');
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:6px;">${brandPill}</div>` : ''}
+                                <ul class="malevin-list">${itemsHTML}</ul>
+                            </div>
+                        `;
+                    } else if (elem.type === 'kpi') {
+                        const cardsHTML = (elem.items || []).map(k => `
+                            <div class="kpi-card" style="border-radius: ${borderRadius};">
+                                <div class="kpi-value">${k.val || '0'}</div>
+                                <div class="kpi-label">${k.lbl || ''}</div>
+                            </div>
+                        `).join('');
+
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:6px;">${brandPill}</div>` : ''}
+                                <div class="kpi-grid">${cardsHTML}</div>
+                            </div>
+                        `;
+                    } else if (elem.type === 'table') {
+                        const headersArr = (elem.headers || []).map(h => `<th>${h}</th>`).join('');
+                        const rowsArr = (elem.rows || []).map(r => {
+                            const cols = (elem.headers || []).map((_, cIdx) => `<td>${r[cIdx] || ''}</td>`).join('');
+                            return `<tr>${cols}</tr>`;
+                        }).join('');
+
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <table class="malevin-table">
+                                    <thead><tr>${headersArr}</tr></thead>
+                                    <tbody>${rowsArr}</tbody>
+                                </table>
+                            </div>
+                        `;
+                    } else if (elem.type === 'wawasan') {
+                        piece = `
+                            <div>
+                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
+                                <div class="wawasan-box" style="border-radius: ${borderRadius};">
+                                    <strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">💡 ANALISIS & WAWASAN:</strong>
+                                    ${elem.content || ''}
+                                </div>
+                            </div>
+                        `;
                     }
-                }
-            }
 
-            // 3. Unduh secara paksa (Langsung masuk file explorer tanpa dialog print)
-            doc.save('Malevin_Vector_Slide.pdf');
+                    elemWrapper.innerHTML = piece;
+                    slideBody.appendChild(elemWrapper);
+                });
+
+                slideEl.innerHTML = `
+                    <div class="corner-accent corner-tl"></div>
+                    <div class="corner-accent corner-br"></div>
+                `;
+
+                slideEl.appendChild(slideBody);
+
+                const footer = document.createElement('div');
+                footer.className = 'slide-footer';
+                footer.innerHTML = `
+                    <span>${slide.footerLeft || ''}</span>
+                    <span class="slide-num">${slideNum}</span>
+                `;
+                slideEl.appendChild(footer);
+
+                container.appendChild(slideEl);
+            });
         }
+
+        /* FORM HELPER FUNCTIONS */
+        function updateElem(sIdx, eIdx, key, value) {
+            slidesData[sIdx].elements[eIdx][key] = value;
+            renderPreview();
+        }
+
+        function updateSlideFooter(sIdx, value) {
+            slidesData[sIdx].footerLeft = value;
+            renderPreview();
+        }
+
+        function addTableColumn(sIdx, eIdx) {
+            const elem = slidesData[sIdx].elements[eIdx];
+            if (!elem.headers) elem.headers = [];
+            elem.headers.push(`Kolom ${elem.headers.length + 1}`);
+            renderForms();
+        }
+
+        function deleteTableColumn(sIdx, eIdx, colIdx) {
+            const elem = slidesData[sIdx].elements[eIdx];
+            elem.headers.splice(colIdx, 1);
+            if (elem.rows) elem.rows.forEach(r => r.splice(colIdx, 1));
+            renderForms();
+        }
+
+        function updateTableHeader(sIdx, eIdx, colIdx, val) {
+            slidesData[sIdx].elements[eIdx].headers[colIdx] = val;
+            renderPreview();
+        }
+
+        function addTableRow(sIdx, eIdx) {
+            const elem = slidesData[sIdx].elements[eIdx];
+            if (!elem.rows) elem.rows = [];
+            elem.rows.push(new Array(elem.headers ? elem.headers.length : 1).fill(''));
+            renderForms();
+        }
+
+        function deleteTableRow(sIdx, eIdx, rowIdx) {
+            slidesData[sIdx].elements[eIdx].rows.splice(rowIdx, 1);
+            renderForms();
+        }
+
+        function updateTableCell(sIdx, eIdx, rowIdx, colIdx, val) {
+            if (!slidesData[sIdx].elements[eIdx].rows[rowIdx]) {
+                slidesData[sIdx].elements[eIdx].rows[rowIdx] = [];
+            }
+            slidesData[sIdx].elements[eIdx].rows[rowIdx][colIdx] = val;
+            renderPreview();
+        }
+
+        function addListItem(sIdx, eIdx) {
+            const elem = slidesData[sIdx].elements[eIdx];
+            if (!elem.items) elem.items = [];
+            elem.items.push('Poin baru...');
+            renderForms();
+        }
+
+        function deleteListItem(sIdx, eIdx, lIdx) {
+            slidesData[sIdx].elements[eIdx].items.splice(lIdx, 1);
+            renderForms();
+        }
+
+        function updateListItem(sIdx, eIdx, lIdx, val) {
+            slidesData[sIdx].elements[eIdx].items[lIdx] = val;
+            renderPreview();
+        }
+
+        function addKpiItem(sIdx, eIdx) {
+            const elem = slidesData[sIdx].elements[eIdx];
+            if (!elem.items) elem.items = [];
+            elem.items.push({ val: '0', lbl: 'Metrik Baru' });
+            renderForms();
+        }
+
+        function deleteKpiItem(sIdx, eIdx, kIdx) {
+            slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1);
+            renderForms();
+        }
+
+        function updateKpiItem(sIdx, eIdx, kIdx, key, val) {
+            slidesData[sIdx].elements[eIdx].items[kIdx][key] = val;
+            renderPreview();
+        }
+
+        function addElementToSlide(sIdx, type) {
+            const newElem = { type: type, brand: '', shapeStyle: 'sharp' };
+            if (type === 'cover') { newElem.tag = 'Proposal'; newElem.title = 'COVER TITLE'; newElem.subtitle = 'Subtitle'; }
+            else if (type === 'header') { newElem.tag = 'Section'; newElem.title = 'SECTION TITLE'; }
+            else if (type === 'text') { newElem.content = 'Tulis deskripsi penjelasan di sini...'; }
+            else if (type === 'image') { newElem.imgData = ''; }
+            else if (type === 'list') { newElem.items = ['Item poin 1', 'Item poin 2']; }
+            else if (type === 'kpi') { newElem.items = [{ val: '100K', lbl: 'Metric 1' }, { val: '5.0%', lbl: 'Metric 2' }]; }
+            else if (type === 'table') { newElem.headers = ['Kolom 1', 'Kolom 2']; newElem.rows = [['Data A', 'Data B']]; }
+            else if (type === 'wawasan') { newElem.content = 'Catatan ringkasan wawasan performa campaign...'; }
+
+            slidesData[sIdx].elements.push(newElem);
+            renderForms();
+        }
+
+        function deleteElem(sIdx, eIdx) {
+            slidesData[sIdx].elements.splice(eIdx, 1);
+            renderForms();
+        }
+
+        function addSlide() {
+            slidesData.push({
+                id: Date.now(),
+                footerLeft: 'PREPARED BY MALEVIN TEAM',
+                elements: [
+                    { type: 'header', brand: '', tag: 'Section Tag', title: 'JUDUL SLIDE BARU', shapeStyle: 'sharp' }
+                ]
+            });
+            renderForms();
+        }
+
+        function deleteSlide(sIdx) {
+            if (slidesData.length > 1) {
+                slidesData.splice(sIdx, 1);
+                renderForms();
+            }
+        }
+
+        /* =========================================================
+           CANVA-STYLE DYNAMIC VECTOR PDF ENGINE (AUTO-HEIGHT SLIDES)
+           ========================================================= */
+        function downloadVectorPDF() {
+            const btn = document.getElementById('downloadBtn');
+            btn.innerText = 'Membuat Vector PDF...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const docContent = [];
+
+                slidesData.forEach((slide, sIdx) => {
+                    const slideBodyContent = [];
+                    const isCoverSlide = slide.elements.some(e => e.type === 'cover');
+
+                    // Top Accent Line
+                    slideBodyContent.push({
+                        canvas: [
+                            { type: 'rect', x: 0, y: 0, w: 841.89, h: 3, color: '#C49A57' }
+                        ],
+                        absolutePosition: { x: 0, y: 0 }
+                    });
+
+                    // Element Rendering
+                    slide.elements.forEach((elem) => {
+                        const elemBlock = [];
+
+                        if (elem.type === 'cover') {
+                            if (elem.brand) {
+                                elemBlock.push({
+                                    text: elem.brand,
+                                    fontSize: 8,
+                                    bold: true,
+                                    color: '#0A0B0A',
+                                    background: '#C49A57',
+                                    alignment: 'left',
+                                    margin: [0, 0, 0, 6]
+                                });
+                            }
+                            if (elem.tag) {
+                                elemBlock.push({ text: elem.tag.toUpperCase(), fontSize: 10, color: '#C49A57', bold: true, alignment: 'left', margin: [0, 2, 0, 4] });
+                            }
+                            elemBlock.push({ text: (elem.title || '').toUpperCase(), fontSize: 28, bold: true, color: '#FEFEFE', alignment: 'left', margin: [0, 6, 0, 6] });
+                            elemBlock.push({ text: elem.subtitle || '', fontSize: 13, color: '#C49A57', alignment: 'left', margin: [0, 0, 0, 0] });
+                        } else {
+                            if (elem.brand) {
+                                elemBlock.push({
+                                    text: elem.brand,
+                                    fontSize: 8,
+                                    bold: true,
+                                    color: '#0A0B0A',
+                                    background: '#C49A57',
+                                    margin: [0, 0, 0, 4]
+                                });
+                            }
+
+                            if (elem.type === 'header') {
+                                if (elem.tag) {
+                                    elemBlock.push({ text: elem.tag.toUpperCase(), fontSize: 9, color: '#C49A57', bold: true, margin: [0, 2, 0, 2] });
+                                }
+                                elemBlock.push({ text: (elem.title || '').toUpperCase(), fontSize: 18, bold: true, color: '#FEFEFE', margin: [0, 2, 0, 4] });
+                            } else if (elem.type === 'text') {
+                                elemBlock.push({ text: elem.content || '', fontSize: 10, color: '#C0C2C0', margin: [0, 2, 0, 6] });
+                            } else if (elem.type === 'image') {
+                                if (elem.imgData) {
+                                    elemBlock.push({ image: elem.imgData, width: 220, margin: [0, 4, 0, 6] });
+                                }
+                            } else if (elem.type === 'list') {
+                                const listItems = (elem.items || []).map(item => ({ text: item, fontSize: 10, color: '#C0C2C0', margin: [0, 1, 0, 1] }));
+                                elemBlock.push({ ul: listItems, margin: [0, 4, 0, 6] });
+                            } else if (elem.type === 'kpi') {
+                                const kpiColumns = (elem.items || []).map(k => ({
+                                    stack: [
+                                        { text: k.val || '0', fontSize: 18, bold: true, color: '#C49A57', alignment: 'center' },
+                                        { text: (k.lbl || '').toUpperCase(), fontSize: 7, color: '#808280', alignment: 'center', margin: [0, 2, 0, 0] }
+                                    ],
+                                    fillColor: '#161816',
+                                    margin: [2, 2, 2, 2]
+                                }));
+                                elemBlock.push({ columns: kpiColumns, margin: [0, 4, 0, 6] });
+                            } else if (elem.type === 'table') {
+                                const tableHeaders = (elem.headers || []).map(h => ({ text: h.toUpperCase(), fontSize: 8, bold: true, color: '#C49A57', fillColor: '#1A1C1A' }));
+                                const tableRows = (elem.rows || []).map(r => (elem.headers || []).map((_, cIdx) => ({ text: r[cIdx] || '', fontSize: 9, color: '#D1D1D1' })));
+
+                                elemBlock.push({
+                                    table: {
+                                        headerRows: 1,
+                                        widths: new Array((elem.headers || []).length).fill('*'),
+                                        body: [tableHeaders, ...tableRows]
+                                    },
+                                    layout: 'lightHorizontalLines',
+                                    margin: [0, 4, 0, 6]
+                                });
+                            } else if (elem.type === 'wawasan') {
+                                elemBlock.push({
+                                    stack: [
+                                        { text: '💡 ANALISIS & WAWASAN:', fontSize: 9, bold: true, color: '#C49A57', margin: [0, 0, 0, 4] },
+                                        { text: elem.content || '', fontSize: 10, color: '#E0E0E0' }
+                                    ],
+                                    fillColor: '#121412',
+                                    margin: [0, 4, 0, 6]
+                                });
+                            }
+                        }
+
+                        slideBodyContent.push({
+                            stack: elemBlock,
+                            margin: [0, 0, 0, 10]
+                        });
+                    });
+
+                    // Footer Text & Page Number
+                    const slideNum = sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1;
+                    const footerBlock = {
+                        columns: [
+                            { text: (slide.footerLeft || '').toUpperCase(), fontSize: 8, color: '#808280', alignment: 'left' },
+                            { text: slideNum, fontSize: 10, bold: true, color: '#C49A57', alignment: 'right' }
+                        ],
+                        margin: [0, 15, 0, 0]
+                    };
+
+                    // Dynamic Slide Wrapper (Auto-Expanding)
+                    docContent.push({
+                        table: {
+                            widths: ['*'],
+                            heights: ['*', 'auto'],
+                            body: [
+                                [{ stack: slideBodyContent, verticalAlign: isCoverSlide ? 'middle' : 'top' }],
+                                [{ stack: [footerBlock], verticalAlign: 'bottom' }]
+                            ]
+                        },
+                        layout: 'noBorders',
+                        pageBreak: sIdx < slidesData.length - 1 ? 'after' : undefined
+                    });
+                });
+
+                // PDF Definition dengan Ketinggian Otomatis (Dynamic Auto Height Page Size)
+                const docDefinition = {
+                    pageSize: { width: 841.89, height: 'auto' },
+                    pageMargins: [36, 28, 36, 20],
+                    background: function() {
+                        return {
+                            canvas: [
+                                { type: 'rect', x: 0, y: 0, w: 841.89, h: 2000, color: '#0A0B0A' }
+                            ]
+                        };
+                    },
+                    content: docContent,
+                    defaultStyle: {
+                        font: 'Roboto'
+                    }
+                };
+
+                pdfMake.createPdf(docDefinition).download('Malevin_Vector_Deck.pdf');
+
+                btn.innerText = 'Download Vector PDF';
+                btn.disabled = false;
+            }, 300);
+        }
+
+        function setMode(mode) {
+            const editorPanel = document.getElementById('editorPanel');
+            const previewPanel = document.getElementById('previewPanel');
+            const tabEdit = document.getElementById('tabEditBtn');
+            const tabPreview = document.getElementById('tabPreviewBtn');
+
+            if (mode === 'preview') {
+                editorPanel.style.display = 'none';
+                previewPanel.style.display = 'flex';
+                tabEdit.classList.remove('active');
+                tabPreview.classList.add('active');
+            } else {
+                editorPanel.style.display = 'flex';
+                previewPanel.style.display = 'none';
+                tabPreview.classList.remove('active');
+                tabEdit.classList.add('active');
+            }
+        }
+
+        renderForms();
+        setMode('edit');
     </script>
 </body>
 </html>
