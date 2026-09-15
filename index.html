@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malevin — Modular Deck Studio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
         /* =========================================================
@@ -107,8 +106,6 @@
             padding: 20px;
             gap: 20px;
         }
-
-
 
         .slide-accordion {
             background-color: var(--card-obsidian);
@@ -227,6 +224,23 @@
             margin-top: 8px;
         }
 
+        .micro-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .col-wrap { display: flex; gap: 12px; width: 100%; flex-wrap: wrap; }
+        .col-item { flex: 1 1 0; min-width: 120px; }
+        .col-title { color: var(--accent-gold); font-size: 11px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .col-card--accent { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 15px; border-radius: 0 4px 4px 0; }
+        .col-card--plain { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 12px 15px; border-radius: 4px; }
+        .col-card--minimal { border-bottom: 1px solid var(--border-obsidian); padding-bottom: 10px; }
+        .col-card--numbered { position: relative; background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 12px 15px 12px 40px; border-radius: 4px; }
+        .col-num-badge { position: absolute; left: 10px; top: 12px; width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #8A6831); color: #0A0B0A; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
         .tag-select {
             background-color: var(--surface-dark);
             border: 1px solid var(--border-obsidian);
@@ -250,6 +264,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
 
         #deck-container {
@@ -273,6 +288,9 @@
             justify-content: space-between;
             box-sizing: border-box;
             page-break-after: always;
+            break-after: page;
+            page-break-inside: avoid;
+            break-inside: avoid;
             overflow: hidden;
         }
 
@@ -310,7 +328,6 @@
             font-weight: 800;
         }
 
-        /* Dynamic Grid Layout for slide contents */
         .slide-body {
             flex: 1;
             display: grid;
@@ -342,7 +359,6 @@
         }
         .grid-item:hover .drag-handle { opacity: 0.6; }
 
-        /* Modular Element Render Components */
         .elem-header-title {
             border-bottom: 1px solid var(--border-obsidian);
             padding-bottom: 8px;
@@ -389,7 +405,6 @@
         p, li { color: #C0C2C0; font-size: 11px; line-height: 1.5; white-space: pre-line; }
         ul { padding-left: 15px; }
 
-        /* Golden-ratio type scale: 11 -> 18 -> 29 -> 47 (x1.618) */
         .t-paragraf { font-size: 11px; color: #C0C2C0; line-height: 1.6; white-space: pre-line; }
         .t-subjudul { font-size: 18px; color: var(--accent-gold); font-weight: 700; line-height: 1.35; white-space: pre-line; }
         .t-judul { font-size: 29px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; white-space: pre-line; }
@@ -405,7 +420,6 @@
         .var-up { color: var(--positive); font-weight: 700; white-space: nowrap; }
         .var-down { color: var(--negative); font-weight: 700; white-space: nowrap; }
 
-        /* Dynamic Table Style */
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
         .malevin-table th {
             background-color: rgba(196, 154, 87, 0.12);
@@ -419,13 +433,11 @@
         }
         .malevin-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; }
 
-        /* KPI Stat Box Style */
         .kpi-grid { display: flex; gap: 10px; width: 100%; }
         .kpi-card { flex: 1; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 12px; text-align: center; border-radius: 4px; }
         .kpi-value { font-size: 24px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
         .kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
-        /* Chart Components */
         .chart-wrap { width: 100%; }
         .chart-bar-row { display: flex; align-items: flex-end; gap: 8px; height: 110px; width: 100%; }
         .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
@@ -448,7 +460,6 @@
         .progress-track { width: 100%; height: 10px; background: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 20px; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #8A6831, #C49A57); }
 
-        /* Comparison Component */
         .compare-box { display: flex; gap: 14px; align-items: center; width: 100%; }
         .compare-stat { flex: 1; }
         .compare-num { font-size: 20px; font-weight: 800; margin: 2px 0; }
@@ -458,7 +469,6 @@
         .delta-flat { color: var(--text-muted); background: rgba(128,130,128,0.12); }
         .var-tag { font-size: 7px; color: var(--text-muted); margin-top: 6px; letter-spacing: 0.5px; }
 
-        /* Social Stats Component (Ikhtisar / Pengikut / Penonton) */
         .social-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
         .social-period { font-size: 9px; color: var(--accent-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
         .social-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
@@ -467,7 +477,6 @@
         .social-card-value { font-size: 17px; font-weight: 800; color: var(--text-white); margin: 3px 0 4px; }
         .social-card-delta { font-size: 9px; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 20px; }
 
-        /* Breakdown / Wawasan Component (Gender, Usia, Lokasi) */
         .breakdown-bar { display: flex; width: 100%; height: 10px; border-radius: 20px; overflow: hidden; background: var(--card-obsidian); margin-bottom: 10px; }
         .breakdown-list { display: flex; flex-direction: column; gap: 6px; }
         .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; }
@@ -488,19 +497,81 @@
         .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
 
         /* =========================================================
-           4. RESPONSIVE — HP & PC
+           4. RESPONSIVE MEDIA QUERIES
            ========================================================= */
         @media (max-width: 900px) {
             body { height: auto; overflow: auto; }
             .app-container { flex-direction: column; height: auto; overflow: visible; }
-            .preview-panel { padding: 16px; }
-            .slide { padding: 22px 18px; aspect-ratio: auto; min-height: 380px; }
-            .grid-item { grid-column: span 6 !important; }
-            .t-hero { font-size: 30px; }
-            .t-judul { font-size: 21px; }
-            .t-subjudul { font-size: 15px; }
-            .kpi-grid, .elem-grid, .compare-box { flex-direction: column; }
-            .donut-wrap { flex-direction: column; align-items: flex-start; }
+            .preview-panel { padding: 16px; overflow-x: auto; width: 100%; }
+            #deck-container { min-width: 650px; }
+        }
+
+        /* =========================================================
+           5. NATIVE VECTOR PRINT ENGINE (EXPORT PDF VEKTOR ASLI)
+           ========================================================= */
+        @media print {
+            @page {
+                size: 16in 9in;
+                margin: 0;
+            }
+
+            html, body {
+                background-color: #0A0B0A !important;
+                color: #FEFEFE !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .topbar, .editor-panel, .drag-handle, .var-tag, button, select, input {
+                display: none !important;
+            }
+
+            .app-container {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .preview-panel {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background-color: #0A0B0A !important;
+                width: 100% !important;
+                overflow: visible !important;
+            }
+
+            #deck-container {
+                width: 100% !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                gap: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .slide {
+                width: 100vw !important;
+                height: 56.25vw !important;
+                max-height: 100vh !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 35px 40px !important;
+                box-sizing: border-box !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #0A0B0A !important;
+            }
         }
     </style>
 </head>
@@ -523,14 +594,18 @@
             </button>
         </div>
         <div class="topbar-actions">
-            <input type="file" id="importPdfInput" accept="application/pdf" style="display:none" onchange="handleImportPDF(event)">
+            <input type="file" id="importPdfInput" accept="application/pdf,.json" style="display:none" onchange="handleImportPDF(event)">
             <button class="btn" onclick="document.getElementById('importPdfInput').click()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Import PDF Malevin
+                Import Project / PDF
+            </button>
+            <button class="btn" onclick="exportJSON()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Simpan Project (.json)
             </button>
             <button class="btn btn-gold" onclick="exportPDF()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export PDF Document
+                Export PDF Vector
             </button>
         </div>
     </div>
@@ -544,7 +619,7 @@
                 <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
                 <button class="btn btn-gold" onclick="addSlide()">+ Halaman Baru</button>
             </div>
-            <p style="font-size:9px; color:var(--text-muted); line-height:1.5;">Drag ikon ⠿ di tab Preview untuk mengatur ulang posisi elemen. Atur "Lebar Elemen" di tiap kartu untuk membentuk grid dinamis (1/3, 1/2, 2/3, Full).</p>
+            <p style="font-size:9px; color:var(--text-muted); line-height:1.5;">Drag ikon ⠿ di tab Preview untuk mengatur ulang posisi elemen. Atur "Lebar Elemen" di tiap kartu untuk membentuk grid dinamis (1/3, 1/2, 2/3, Full). Elemen "Kolom" bisa dipilih desainnya & ditambah tanpa batas.</p>
 
             <div id="forms-wrapper"></div>
         </div>
@@ -558,29 +633,21 @@
 
     <!-- JAVASCRIPT ENGINE -->
     <script>
-        // =========================================================
-        // VARIABEL UTAMA — edit di sini sesuai kebutuhanmu
-        // =========================================================
         let BRAND_NAME = 'Malevin';
-        let PURPOSE_TAGS = ['', 'Creative Deck', 'Laporan Bulanan']; // tambahkan sendiri jenis lain di sini kalau perlu
+        let PURPOSE_TAGS = ['', 'Creative Deck', 'Laporan Bulanan'];
 
         const CHART_PALETTE = ['#C49A57', '#8A6831', '#E8C888', '#5B4A2F', '#77664A', '#A68653'];
-
-        // Akun / Brand yang tersedia — pilih di topbar
         const ACCOUNTS = ['Malevin Official', 'Malevin ID', 'Housemart ID'];
         let currentAccount = ACCOUNTS[0];
 
-        // Penanda khusus yang ditulis ke metadata PDF saat export, supaya saat
-        // import kita bisa pastikan PDF-nya memang hasil generate dari aplikasi ini.
         const MALEVIN_PDF_SIGNATURE = 'MALEVIN_DECK_V1::';
 
         const ELEM_LABELS = {
-            cover: 'COVER', header: 'HEADER', text: 'TEKS', grid2: '2 KOLOM',
-            table: 'TABEL', kpi: 'STAT', chart: 'GRAFIK', comparison: 'PERBANDINGAN',
+            cover: 'COVER', header: 'HEADER', text: 'TEKS', grid2: 'KOLOM (LAMA)', columns: 'KOLOM',
+            table: 'TABEL', kpi: 'KPI', chart: 'GRAFIK', comparison: 'PERBANDINGAN',
             social: 'STATISTIK SOSIAL', breakdown: 'WAWASAN'
         };
 
-        // State Data Modular
         let slidesData = [
             {
                 id: 1,
@@ -618,9 +685,8 @@
             }
         ];
 
-        /* ============================
-           VARIABLE ENGINE (Comparison)
-           ============================ */
+        function dirArrow(dir) { return dir === 'up' ? '▲' : dir === 'down' ? '▼' : '—'; }
+
         function computeVariables() {
             const vars = {};
             slidesData.forEach(s => s.elements.forEach(e => {
@@ -632,7 +698,22 @@
                     if (prev !== 0) pct = Math.abs(diff / Math.abs(prev) * 100);
                     else pct = curr !== 0 ? 100 : 0;
                     const dir = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
-                    vars[e.varName] = { pct: pct.toFixed(1), dir, diff, prev, curr, unit: e.unit || '' };
+                    vars[e.varName] = { display: `${dirArrow(dir)} ${pct.toFixed(1)}%`, dir };
+                }
+                if (e.type === 'social') {
+                    (e.metrics || []).forEach(m => {
+                        if (!m.varName) return;
+                        const dir = m.dir || 'flat';
+                        const pctText = (m.deltaPercent || '').trim();
+                        const display = pctText ? `${dirArrow(dir)} ${pctText.replace(/^[+-]/, '')}` : (m.value || '-');
+                        vars[m.varName] = { display, dir };
+                    });
+                }
+                if (e.type === 'breakdown') {
+                    (e.items || []).forEach(it => {
+                        if (!it.varName) return;
+                        vars[it.varName] = { display: `${it.percent || 0}%`, dir: 'flat' };
+                    });
                 }
             }));
             return vars;
@@ -643,15 +724,11 @@
             return str.replace(/\{\{(\w+)\}\}/g, (m, name) => {
                 const v = vars[name];
                 if (!v) return m;
-                const arrow = v.dir === 'up' ? '▲' : v.dir === 'down' ? '▼' : '—';
                 const cls = v.dir === 'up' ? 'var-up' : v.dir === 'down' ? 'var-down' : '';
-                return `<span class="${cls}">${arrow} ${v.pct}%</span>`;
+                return `<span class="${cls}">${v.display}</span>`;
             });
         }
 
-        /* ============================
-           AKUN / BRAND SWITCHER
-           ============================ */
         function setAccount(name) {
             currentAccount = name;
             BRAND_NAME = name;
@@ -659,9 +736,6 @@
             renderPreview();
         }
 
-        /* ============================
-           PERIODE OTOMATIS — Hari Ini / Bulan Lalu / Tahun Lalu dll.
-           ============================ */
         function computePeriodLabel(preset) {
             const bulanID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
             const now = new Date();
@@ -685,15 +759,28 @@
             renderForms();
         }
 
-        /* ============================
-           STATISTIK SOSIAL — CRUD metrik dinamis
-           ============================ */
+        function updateColumnItem(sIdx, eIdx, cIdx, key, value) {
+            slidesData[sIdx].elements[eIdx].cols[cIdx][key] = value;
+            renderPreview();
+        }
+        function addColumnItem(sIdx, eIdx) {
+            const cols = slidesData[sIdx].elements[eIdx].cols;
+            cols.push({ title: 'Kolom ' + (cols.length + 1), text: 'Isi...' });
+            renderForms();
+        }
+        function removeColumnItem(sIdx, eIdx, cIdx) {
+            const cols = slidesData[sIdx].elements[eIdx].cols;
+            if (cols.length <= 1) { alert('Minimal harus ada 1 kolom!'); return; }
+            cols.splice(cIdx, 1);
+            renderForms();
+        }
+
         function updateSocialMetric(sIdx, eIdx, mIdx, key, value) {
             slidesData[sIdx].elements[eIdx].metrics[mIdx][key] = value;
             renderPreview();
         }
         function addSocialMetric(sIdx, eIdx) {
-            slidesData[sIdx].elements[eIdx].metrics.push({ label: 'Metrik Baru', value: '0', deltaValue: '', deltaPercent: '', dir: 'up' });
+            slidesData[sIdx].elements[eIdx].metrics.push({ label: 'Metrik Baru', value: '0', deltaValue: '', deltaPercent: '', dir: 'up', varName: '' });
             renderForms();
         }
         function removeSocialMetric(sIdx, eIdx, mIdx) {
@@ -701,15 +788,12 @@
             renderForms();
         }
 
-        /* ============================
-           WAWASAN / BREAKDOWN — CRUD baris dinamis
-           ============================ */
         function updateBreakdownItem(sIdx, eIdx, iIdx, key, value) {
             slidesData[sIdx].elements[eIdx].items[iIdx][key] = value;
             renderPreview();
         }
         function addBreakdownItem(sIdx, eIdx) {
-            slidesData[sIdx].elements[eIdx].items.push({ label: 'Kategori Baru', percent: '0' });
+            slidesData[sIdx].elements[eIdx].items.push({ label: 'Kategori Baru', percent: '0', varName: '' });
             renderForms();
         }
         function removeBreakdownItem(sIdx, eIdx, iIdx) {
@@ -764,6 +848,32 @@
                             <div class="form-group"><label>Teks Kolom 1</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'c1Text', this.value)">${elem.c1Text || ''}</textarea></div>
                             <div class="form-group"><label>Judul Kolom 2</label><input type="text" class="form-control" value="${elem.c2Title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'c2Title', this.value)"></div>
                             <div class="form-group"><label>Teks Kolom 2</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'c2Text', this.value)">${elem.c2Text || ''}</textarea></div>
+                        `;
+                    } else if (elem.type === 'columns') {
+                        const designOptions = [
+                            ['accent', 'Aksen Garis Emas'],
+                            ['plain', 'Kartu Polos'],
+                            ['minimal', 'Minimalis (Tanpa Kotak)'],
+                            ['numbered', 'Kartu Bernomor']
+                        ].map(([v, l]) => `<option value="${v}" ${(elem.design || 'accent') === v ? 'selected' : ''}>${l}</option>`).join('');
+
+                        const colRows = (elem.cols || []).map((c, cIdx) => `
+                            <div class="element-box">
+                                <div class="element-header">
+                                    <span>KOLOM ${cIdx + 1}</span>
+                                    <button class="btn btn-danger" onclick="removeColumnItem(${sIdx}, ${eIdx}, ${cIdx})">Hapus</button>
+                                </div>
+                                <div class="form-group"><label>Judul Kolom</label><input type="text" class="form-control" value="${c.title || ''}" oninput="updateColumnItem(${sIdx}, ${eIdx}, ${cIdx}, 'title', this.value)"></div>
+                                <div class="form-group"><label>Isi Teks</label><textarea class="form-control" oninput="updateColumnItem(${sIdx}, ${eIdx}, ${cIdx}, 'text', this.value)">${c.text || ''}</textarea></div>
+                            </div>
+                        `).join('');
+
+                        fields = `
+                            <div class="form-group"><label>Desain Kolom</label>
+                                <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'design', this.value)">${designOptions}</select>
+                            </div>
+                            ${colRows}
+                            <button class="btn" onclick="addColumnItem(${sIdx}, ${eIdx})">+ Tambah Kolom</button>
                         `;
                     } else if (elem.type === 'table') {
                         fields = `
@@ -835,7 +945,8 @@
                                     <span>METRIK ${mIdx + 1}</span>
                                     <button class="btn btn-danger" onclick="removeSocialMetric(${sIdx}, ${eIdx}, ${mIdx})">Hapus</button>
                                 </div>
-                                <div class="form-group"><label>Nama Metrik (cth: Tayangan Postingan, Pengikut, Penonton)</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
+                                <div class="form-group"><label>Nama Metrik</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
+                                <div class="form-group"><label>Nama Variabel (opsional)</label><input type="text" class="form-control" value="${m.varName || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'varName', this.value)"></div>
                                 <div style="display:flex; gap:6px;">
                                     <div class="form-group" style="flex:1;"><label>Nilai</label><input type="text" class="form-control" value="${m.value || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'value', this.value)"></div>
                                     <div class="form-group" style="flex:1;"><label>Arah Perubahan</label>
@@ -847,42 +958,46 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:6px;">
-                                    <div class="form-group" style="flex:1;"><label>Perubahan Nilai (opsional)</label><input type="text" class="form-control" placeholder="cth: +91 / -10,5 rb" value="${m.deltaValue || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaValue', this.value)"></div>
-                                    <div class="form-group" style="flex:1;"><label>Perubahan Persen (opsional)</label><input type="text" class="form-control" placeholder="cth: +13.6%" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
+                                    <div class="form-group" style="flex:1;"><label>Perubahan Nilai</label><input type="text" class="form-control" placeholder="cth: +91" value="${m.deltaValue || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaValue', this.value)"></div>
+                                    <div class="form-group" style="flex:1;"><label>Perubahan Persen</label><input type="text" class="form-control" placeholder="cth: +13.6%" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
                                 </div>
                             </div>
                         `).join('');
 
                         fields = `
-                            <div class="form-group"><label>Judul Section (cth: Ikhtisar, Pengikut, Penonton)</label><input type="text" class="form-control" value="${elem.sectionTitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'sectionTitle', this.value)"></div>
+                            <div class="form-group"><label>Judul Section</label><input type="text" class="form-control" value="${elem.sectionTitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'sectionTitle', this.value)"></div>
                             <div style="display:flex; gap:6px;">
                                 <div class="form-group" style="flex:1;"><label>Periode Cepat</label>
                                     <select class="form-control" onchange="onSocialPresetChange(${sIdx}, ${eIdx}, this.value)">${presetOptions}</select>
                                 </div>
-                                <div class="form-group" style="flex:1;"><label>Teks Periode (tampil di preview)</label><input type="text" class="form-control" value="${elem.period || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'period', this.value)"></div>
+                                <div class="form-group" style="flex:1;"><label>Teks Periode</label><input type="text" class="form-control" value="${elem.period || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'period', this.value)"></div>
                             </div>
-                            <p style="font-size:8px; color:var(--text-muted); line-height:1.4;">Pilih Periode Cepat untuk isi teks otomatis (hari ini, bulan lalu, tahun lalu, dst) — atau pilih Kustom lalu ketik manual, misalnya rentang tanggal sendiri.</p>
                             ${metricRows}
                             <button class="btn" onclick="addSocialMetric(${sIdx}, ${eIdx})">+ Tambah Metrik</button>
                         `;
                     } else if (elem.type === 'breakdown') {
                         const itemRows = (elem.items || []).map((it, iIdx) => `
-                            <div style="display:flex; gap:6px; align-items:flex-end;">
-                                <div class="form-group" style="flex:2;"><label>Label</label><input type="text" class="form-control" value="${it.label || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'label', this.value)"></div>
-                                <div class="form-group" style="flex:1;"><label>Persen (%)</label><input type="text" class="form-control" value="${it.percent || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'percent', this.value)"></div>
-                                <button class="btn btn-danger" onclick="removeBreakdownItem(${sIdx}, ${eIdx}, ${iIdx})">Hapus</button>
+                            <div class="element-box">
+                                <div class="element-header">
+                                    <span>BARIS ${iIdx + 1}</span>
+                                    <button class="btn btn-danger" onclick="removeBreakdownItem(${sIdx}, ${eIdx}, ${iIdx})">Hapus</button>
+                                </div>
+                                <div style="display:flex; gap:6px;">
+                                    <div class="form-group" style="flex:2;"><label>Label</label><input type="text" class="form-control" value="${it.label || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'label', this.value)"></div>
+                                    <div class="form-group" style="flex:1;"><label>Persen (%)</label><input type="text" class="form-control" value="${it.percent || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'percent', this.value)"></div>
+                                </div>
+                                <div class="form-group"><label>Nama Variabel</label><input type="text" class="form-control" value="${it.varName || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'varName', this.value)"></div>
                             </div>
                         `).join('');
 
                         fields = `
-                            <div class="form-group"><label>Judul (cth: Wawasan Pengikut, Wawasan Penonton)</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
-                            <div class="form-group"><label>Kategori (Gender / Usia / Lokasi)</label><input type="text" class="form-control" value="${elem.category || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'category', this.value)"></div>
+                            <div class="form-group"><label>Judul</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
+                            <div class="form-group"><label>Kategori</label><input type="text" class="form-control" value="${elem.category || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'category', this.value)"></div>
                             ${itemRows}
                             <button class="btn" onclick="addBreakdownItem(${sIdx}, ${eIdx})">+ Tambah Baris</button>
                         `;
                     }
 
-                    // Universal width control (dynamic grid span)
                     const widthField = `
                         <div class="form-group"><label>Lebar Elemen</label>
                             <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'w', parseInt(this.value))">
@@ -919,15 +1034,18 @@
                         <input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)">
                     </div>
                     <div>
-                        <label style="font-size:9px; color:var(--text-muted); font-weight:700;">+ TAMBAH ELEMEN MODULAR:</label>
+                        <label class="micro-label">+ TAMBAH ELEMEN KONTEN:</label>
                         <div class="add-element-bar">
                             <button class="btn" onclick="addElem(${sIdx}, 'cover')">+ Cover</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'header')">+ Header</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'text')">+ Teks</button>
-                            <button class="btn" onclick="addElem(${sIdx}, 'grid2')">+ 2 Kolom</button>
+                            <button class="btn" onclick="addElem(${sIdx}, 'columns')">+ Kolom</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'table')">+ Tabel</button>
-                            <button class="btn" onclick="addElem(${sIdx}, 'kpi')">+ Stat</button>
+                            <button class="btn" onclick="addElem(${sIdx}, 'kpi')">+ KPI</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'chart')">+ Grafik</button>
+                        </div>
+                        <label class="micro-label" style="margin-top:10px; display:block; color:var(--accent-gold);">+ TAMBAH ELEMEN ANALISIS:</label>
+                        <div class="add-element-bar">
                             <button class="btn" onclick="addElem(${sIdx}, 'comparison')">+ Perbandingan</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'social')">+ Statistik</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'breakdown')">+ Wawasan</button>
@@ -992,6 +1110,8 @@
                                 </div>
                             </div>
                         `;
+                    } else if (elem.type === 'columns') {
+                        piece = renderColumnsElement(elem, vars);
                     } else if (elem.type === 'table') {
                         const headersArr = elem.headers ? elem.headers.split(',') : [];
                         const rowsArr = elem.rows ? elem.rows.split('\n') : [];
@@ -1117,7 +1237,6 @@
                 `;
             }
 
-            // Default: bar chart
             return `
                 <div class="chart-wrap">
                     ${elem.title ? `<div class="elem-card-title">${elem.title}</div>` : ''}
@@ -1162,8 +1281,22 @@
             `;
         }
 
+        function renderColumnsElement(elem, vars) {
+            const cols = elem.cols || [];
+            const design = elem.design || 'accent';
+            const items = cols.map((c, i) => `
+                <div class="col-item col-card--${design}">
+                    ${design === 'numbered' ? `<div class="col-num-badge">${i + 1}</div>` : ''}
+                    <div class="col-title">${c.title || ''}</div>
+                    <p>${renderVars(c.text || '', vars)}</p>
+                </div>
+            `).join('');
+            return `<div class="col-wrap">${items}</div>`;
+        }
+
         function renderSocialElement(elem) {
             const metrics = elem.metrics || [];
+            const activeVars = metrics.filter(m => m.varName).map(m => m.varName);
             const cards = metrics.map(m => {
                 const dir = m.dir || 'flat';
                 const arrow = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '—';
@@ -1184,12 +1317,14 @@
                         ${elem.period ? `<span class="social-period">${elem.period}</span>` : ''}
                     </div>
                     <div class="social-grid">${cards}</div>
+                    ${activeVars.length ? `<div class="var-tag">Variabel teks: ${activeVars.map(v => '{{' + v + '}}').join(', ')}</div>` : ''}
                 </div>
             `;
         }
 
         function renderBreakdownElement(elem) {
             const items = elem.items || [];
+            const activeVars = items.filter(it => it.varName).map(it => it.varName);
             const segs = items.map((it, i) => `<div style="flex:${Math.max(parseFloat(it.percent) || 0, 0.001)}; background:${CHART_PALETTE[i % CHART_PALETTE.length]};"></div>`).join('');
             const rows = items.map((it, i) => `
                 <div class="breakdown-row">
@@ -1205,12 +1340,13 @@
                     </div>
                     <div class="breakdown-bar">${segs}</div>
                     <div class="breakdown-list">${rows}</div>
+                    ${activeVars.length ? `<div class="var-tag">Variabel teks: ${activeVars.map(v => '{{' + v + '}}').join(', ')}</div>` : ''}
                 </div>
             `;
         }
 
         /* ============================
-           3. DRAG & DROP — DYNAMIC GRID
+           3. DRAG & DROP
            ============================ */
         let dragSrc = null;
 
@@ -1265,6 +1401,14 @@
             if (type === 'header') newElem = { type, tag: 'Section Tag', title: 'Judul Baru', w: 6 };
             if (type === 'text') newElem = { type, style: 'paragraf', tag: '', content: 'Ketikkan teks di sini...', card: false, w: 6 };
             if (type === 'grid2') newElem = { type, c1Title: 'Kolom 1', c1Text: 'Isi...', c2Title: 'Kolom 2', c2Text: 'Isi...', w: 6 };
+            if (type === 'columns') newElem = {
+                type, design: 'accent',
+                cols: [
+                    { title: 'Kolom 1', text: 'Isi...' },
+                    { title: 'Kolom 2', text: 'Isi...' }
+                ],
+                w: 6
+            };
             if (type === 'table') newElem = { type, headers: 'Item, Target, Status', rows: 'Video A, 10K Views, Done\nVideo B, 50K Views, Process', w: 6 };
             if (type === 'kpi') newElem = { type, k1Val: '100', k1Lbl: 'Stat 1', k2Val: '50%', k2Lbl: 'Stat 2', k3Val: '24/7', k3Lbl: 'Stat 3', w: 6 };
             if (type === 'chart') newElem = { type, chartType: 'bar', title: 'Judul Grafik', labels: 'Jan, Feb, Mar', values: '10, 20, 15', showPercent: true, w: 3 };
@@ -1272,20 +1416,20 @@
             if (type === 'social') newElem = {
                 type, sectionTitle: 'Ikhtisar', period: '', periodPreset: 'kustom',
                 metrics: [
-                    { label: 'Tayangan Postingan', value: '40,3 rb', deltaValue: '-10,5 rb', deltaPercent: '-20.7%', dir: 'down' },
-                    { label: 'Tampilan Profil', value: '762', deltaValue: '+91', deltaPercent: '+13.6%', dir: 'up' },
-                    { label: 'Suka', value: '733', deltaValue: '+341', deltaPercent: '+87%', dir: 'up' },
-                    { label: 'Komentar', value: '31', deltaValue: '+21', deltaPercent: '+210%', dir: 'up' },
-                    { label: 'Bagikan', value: '313', deltaValue: '+115', deltaPercent: '+58.1%', dir: 'up' },
-                    { label: 'Jumlah Pengikut', value: '4.528', deltaValue: '+9', deltaPercent: '0%', dir: 'flat' }
+                    { label: 'Tayangan Postingan', value: '40,3 rb', deltaValue: '-10,5 rb', deltaPercent: '-20.7%', dir: 'down', varName: '' },
+                    { label: 'Tampilan Profil', value: '762', deltaValue: '+91', deltaPercent: '+13.6%', dir: 'up', varName: '' },
+                    { label: 'Suka', value: '733', deltaValue: '+341', deltaPercent: '+87%', dir: 'up', varName: '' },
+                    { label: 'Komentar', value: '31', deltaValue: '+21', deltaPercent: '+210%', dir: 'up', varName: '' },
+                    { label: 'Bagikan', value: '313', deltaValue: '+115', deltaPercent: '+58.1%', dir: 'up', varName: '' },
+                    { label: 'Jumlah Pengikut', value: '4.528', deltaValue: '+9', deltaPercent: '0%', dir: 'flat', varName: '' }
                 ],
                 w: 6
             };
             if (type === 'breakdown') newElem = {
                 type, title: 'Wawasan Pengikut', category: 'Gender',
                 items: [
-                    { label: 'Laki-laki', percent: '45' },
-                    { label: 'Perempuan', percent: '55' }
+                    { label: 'Laki-laki', percent: '45', varName: '' },
+                    { label: 'Perempuan', percent: '55', varName: '' }
                 ],
                 w: 6
             };
@@ -1322,54 +1466,67 @@
         }
 
         /* ============================
-           5. EXPORT PDF
+           5. EXPORT ENGINE (VEKTOR NATIVE PDF)
            ============================ */
         function exportPDF() {
-            const element = document.getElementById('deck-container');
-            const options = {
-                margin: 0,
-                filename: `${BRAND_NAME.replace(/\s+/g, '_')}_Modular_Deck.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#0A0B0A' },
-                jsPDF: { unit: 'px', format: [850, 478.125], orientation: 'landscape' }
-            };
+            setMode('preview');
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
 
-            // Simpan seluruh data deck ke dalam metadata PDF (field Keywords),
-            // ditandai dengan MALEVIN_PDF_SIGNATURE. Ini yang membuat PDF hasil
-            // export dari aplikasi ini bisa di-import & diedit lagi nanti —
-            // sementara PDF dari aplikasi lain (tanpa penanda ini) akan ditolak.
-            const payload = MALEVIN_PDF_SIGNATURE + encodeURIComponent(JSON.stringify({
+        function exportJSON() {
+            const payload = {
                 brand: BRAND_NAME,
                 account: currentAccount,
                 slides: slidesData
-            }));
-
-            html2pdf().set(options).from(element).toPdf().get('pdf').then(function (pdf) {
-                pdf.setProperties({
-                    title: `${BRAND_NAME} Modular Deck`,
-                    subject: 'Malevin Modular Deck Studio Export',
-                    creator: 'Malevin Modular Deck Studio',
-                    keywords: payload
-                });
-            }).save();
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `${BRAND_NAME.replace(/\s+/g, '_')}_Deck_Project.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
 
         /* ============================
-           IMPORT PDF — hanya PDF hasil generate aplikasi ini yang bisa diedit lagi
+           6. IMPORT DECK (PROJECT / PDF)
            ============================ */
         async function handleImportPDF(event) {
             const file = event.target.files[0];
-            event.target.value = ''; // reset supaya file yang sama bisa dipilih ulang
+            event.target.value = '';
             if (!file) return;
 
             try {
+                if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                    const text = await file.text();
+                    const parsed = JSON.parse(text);
+                    if (parsed && Array.isArray(parsed.slides)) {
+                        slidesData = parsed.slides;
+                        if (parsed.brand) {
+                            BRAND_NAME = parsed.brand;
+                            document.getElementById('brandNameLabel').textContent = BRAND_NAME.toUpperCase();
+                        }
+                        if (parsed.account) {
+                            currentAccount = parsed.account;
+                            const sel = document.getElementById('accountSelect');
+                            if (sel) sel.value = currentAccount;
+                        }
+                        renderForms();
+                        setMode('edit');
+                        alert('Project deck berhasil diimpor!');
+                        return;
+                    }
+                }
+
                 const buffer = await file.arrayBuffer();
                 const { PDFDocument } = PDFLib;
                 const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true, updateMetadata: false });
                 const keywords = pdfDoc.getKeywords() || '';
 
                 if (!keywords.startsWith(MALEVIN_PDF_SIGNATURE)) {
-                    alert('PDF ini bukan hasil generate dari Malevin Modular Deck Studio, jadi tidak bisa diimpor untuk diedit ulang. Hanya PDF yang di-export dari aplikasi ini yang bisa dibuka kembali.');
+                    alert('File PDF/Project ini tidak memiliki data deck Malevin valid.');
                     return;
                 }
 
@@ -1395,12 +1552,12 @@
                 alert('Deck berhasil diimpor dari PDF. Silakan lanjutkan mengedit.');
             } catch (err) {
                 console.error(err);
-                alert('Gagal membaca PDF ini. Pastikan file yang dipilih memang hasil export dari Malevin Modular Deck Studio dan tidak rusak.');
+                alert('Gagal membaca file. Pastikan file yang dipilih adalah PDF hasil export Malevin atau file .json deck valid.');
             }
         }
 
         /* ============================
-           6. MODE SWITCH — EDIT / PREVIEW (terpisah, biar gak bingung)
+           7. MODE SWITCH — EDIT / PREVIEW
            ============================ */
         function setMode(mode) {
             const editorPanel = document.getElementById('editorPanel');
