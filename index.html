@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malevin — Canvas & Vector PDF Deck Studio</title>
     
-    <!-- Mengganti pdfMake dengan html2canvas & jsPDF untuk hasil 100% sama dengan Preview -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -21,11 +20,7 @@
             --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
         }
 
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg-obsidian);
@@ -50,153 +45,37 @@
             gap: 10px;
         }
 
-        .brand-title {
-            font-size: 14px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-badge {
-            background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%);
-            color: #0A0B0A;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 2px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
+        .brand-title { font-size: 14px; font-weight: 800; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; }
+        .brand-badge { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 9px; padding: 2px 6px; border-radius: 2px; font-weight: 800; letter-spacing: 1px; }
         .topbar-actions { display: flex; gap: 10px; align-items: center; }
 
         .mode-tabs { display: flex; gap: 4px; background: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 3px; }
-        .mode-tab-btn {
-            background: transparent; border: none; color: var(--text-muted);
-            padding: 6px 14px; font-size: 10px; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase; border-radius: 4px; cursor: pointer; transition: all 0.2s ease;
-        }
+        .mode-tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 14px; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px; cursor: pointer; transition: all 0.2s ease; }
         .mode-tab-btn.active { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; }
         .mode-tab-btn:not(.active):hover { color: var(--accent-gold); }
 
-        .app-container {
-            display: flex;
-            flex: 1;
-            height: calc(100vh - 53px);
-            overflow: hidden;
-        }
+        .app-container { display: flex; flex: 1; height: calc(100vh - 53px); overflow: hidden; }
 
         /* EDITOR PANEL */
-        .editor-panel {
-            width: 100%;
-            max-width: 650px;
-            margin: 0 auto;
-            background-color: var(--surface-dark);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            padding: 20px;
-            gap: 16px;
-        }
-
-        .slide-accordion {
-            background-color: var(--card-obsidian);
-            border: 1px solid var(--border-obsidian);
-            border-radius: 6px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .slide-accordion-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-obsidian);
-            padding-bottom: 8px;
-        }
-
-        .section-label-btn {
-            font-size: 9px;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 6px;
-            margin-bottom: 4px;
-        }
-
-        .btn-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-        }
-
-        .add-elem-btn {
-            background-color: var(--surface-dark);
-            color: var(--text-white);
-            border: 1px solid var(--border-obsidian);
-            font-size: 9px;
-            padding: 6px 4px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-align: center;
-        }
+        .editor-panel { width: 100%; max-width: 650px; margin: 0 auto; background-color: var(--surface-dark); display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 16px; }
+        .slide-accordion { background-color: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .slide-accordion-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; }
+        .section-label-btn { font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; margin-bottom: 4px; }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        
+        .add-elem-btn { background-color: var(--surface-dark); color: var(--text-white); border: 1px solid var(--border-obsidian); font-size: 9px; padding: 6px 4px; border-radius: 4px; cursor: pointer; font-weight: 700; letter-spacing: 0.5px; text-align: center; }
         .add-elem-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
 
-        .element-box {
-            background-color: var(--bg-obsidian);
-            border: 1px solid var(--border-obsidian);
-            border-left: 3px solid var(--accent-gold);
-            border-radius: 4px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .element-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        .element-box { background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); border-left: 3px solid var(--accent-gold); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .element-header { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; }
+        
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-group label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-        .form-control {
-            background-color: var(--surface-dark);
-            border: 1px solid var(--border-obsidian);
-            color: var(--text-white);
-            padding: 7px 9px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-family: inherit;
-            width: 100%;
-        }
+        .form-control { background-color: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); padding: 7px 9px; border-radius: 4px; font-size: 11px; font-family: inherit; width: 100%; }
         .form-control:focus { outline: none; border-color: var(--accent-gold); }
         textarea.form-control { resize: vertical; min-height: 50px; line-height: 1.4; }
 
-        .btn {
-            background-color: var(--card-obsidian);
-            color: var(--text-white);
-            border: 1px solid var(--border-obsidian);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .btn { background-color: var(--card-obsidian); color: var(--text-white); border: 1px solid var(--border-obsidian); padding: 6px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
         .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; border: none; font-weight: 800; }
         .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
@@ -205,7 +84,7 @@
         .preview-panel {
             flex: 1;
             background-color: #050505;
-            overflow-y: auto;
+            overflow: auto; /* Mengizinkan scroll horizontal jika layar kecil */
             padding: 30px;
             display: flex;
             flex-direction: column;
@@ -216,14 +95,14 @@
             display: flex;
             flex-direction: column;
             gap: 30px;
-            width: 100%;
-            max-width: 850px;
+            width: 850px; /* DIBUAT FIX AGAR TIDAK MENGECIL */
+            margin: 0 auto;
         }
 
-        /* SLIDE AUTO HEIGHT */
+        /* SLIDE AUTO HEIGHT + FIX WIDTH */
         .slide {
-            width: 850px;
-            min-height: 478.125px; /* Minimal tinggi standar 16:9, otomatis melar ke bawah */
+            width: 850px !important; /* LEBAR DIKUNCI MATI */
+            min-height: 478.125px; /* Standar 16:9, otomatis melar ke bawah */
             height: auto;
             background-color: var(--bg-obsidian);
             border: 1px solid var(--border-obsidian);
@@ -236,7 +115,7 @@
             box-sizing: border-box;
             gap: 20px;
             flex-shrink: 0;
-            overflow: hidden; /* Mencegah konten luber saat export */
+            overflow: hidden;
         }
 
         .slide::before {
@@ -247,108 +126,29 @@
             background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%);
         }
 
-        .corner-accent {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-color: var(--accent-gold);
-            border-style: solid;
-            opacity: 0.3;
-            pointer-events: none;
-        }
+        .corner-accent { position: absolute; width: 10px; height: 10px; border-color: var(--accent-gold); border-style: solid; opacity: 0.3; pointer-events: none; }
         .corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
         .corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
 
-        .slide-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            justify-content: flex-start;
-            margin: 10px 0;
-            position: relative;
-        }
-
-        .slide-body.has-cover {
-            justify-content: center;
-            align-items: flex-start;
-        }
+        .slide-body { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; margin: 10px 0; position: relative; }
+        .slide-body.has-cover { justify-content: center; align-items: flex-start; }
 
         /* DRAGGABLE STYLING */
-        .draggable-element {
-            position: relative;
-            cursor: grab;
-            user-select: none;
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-            border: 1px dashed transparent;
-            padding: 4px;
-            border-radius: 4px;
-            width: 100%;
-        }
-        .draggable-element:hover {
-            border-color: rgba(196, 154, 87, 0.5);
-            background: rgba(196, 154, 87, 0.02);
-        }
-        .draggable-element.dragging {
-            opacity: 0.4;
-            cursor: grabbing;
-            border-color: var(--accent-gold);
-        }
-
-        .snap-guide-line {
-            position: absolute;
-            left: 0; right: 0;
-            height: 1px;
-            background-color: var(--accent-gold);
-            box-shadow: 0 0 8px var(--accent-gold);
-            z-index: 10;
-            pointer-events: none;
-            display: none;
-        }
-
-        .drag-drop-target {
-            border-top: 2px solid var(--accent-gold) !important;
-            box-shadow: 0 -4px 10px rgba(196, 154, 87, 0.3);
-        }
+        .draggable-element { position: relative; cursor: grab; user-select: none; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; border: 1px dashed transparent; padding: 4px; border-radius: 4px; width: 100%; }
+        .draggable-element:hover { border-color: rgba(196, 154, 87, 0.5); background: rgba(196, 154, 87, 0.02); }
+        .draggable-element.dragging { opacity: 0.4; cursor: grabbing; border-color: var(--accent-gold); }
+        .snap-guide-line { position: absolute; left: 0; right: 0; height: 1px; background-color: var(--accent-gold); box-shadow: 0 0 8px var(--accent-gold); z-index: 10; pointer-events: none; display: none; }
+        .drag-drop-target { border-top: 2px solid var(--accent-gold) !important; box-shadow: 0 -4px 10px rgba(196, 154, 87, 0.3); }
 
         /* ELEMENT STYLING */
-        .elem-brand-pill {
-            background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%);
-            color: #0A0B0A;
-            font-size: 8px;
-            font-weight: 800;
-            padding: 3px 8px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            display: inline-block;
-        }
-
+        .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
         .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
         .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
-
         p.slide-text { color: #C0C2C0; font-size: 11px; line-height: 1.5; white-space: pre-line; }
 
-        .malevin-list {
-            list-style: none;
-            padding-left: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .malevin-list li {
-            position: relative;
-            padding-left: 16px;
-            font-size: 11px;
-            color: #C0C2C0;
-        }
-        .malevin-list li::before {
-            content: '■';
-            position: absolute;
-            left: 0;
-            top: 0;
-            color: var(--accent-gold);
-            font-size: 8px;
-        }
+        .malevin-list { list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 6px; }
+        .malevin-list li { position: relative; padding-left: 16px; font-size: 11px; color: #C0C2C0; }
+        .malevin-list li::before { content: '■'; position: absolute; left: 0; top: 0; color: var(--accent-gold); font-size: 8px; }
 
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
         .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; }
@@ -360,33 +160,14 @@
         .kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
         .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 10px; font-size: 11px; color: #E0E0E0; }
+        .img-preview-box { max-width: 100%; max-height: 250px; object-fit: contain; display: block; }
 
-        .img-preview-box {
-            max-width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-            display: block;
-        }
-
-        .slide-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border-obsidian);
-            padding-top: 8px;
-            font-size: 8px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-top: auto;
-        }
-
+        .slide-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-obsidian); padding-top: 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; }
         .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
     </style>
 </head>
 <body>
 
-    <!-- TOP CONTROL BAR -->
     <div class="topbar">
         <div class="brand-title">
             <span>MALEVIN</span> <span class="brand-badge">DECK STUDIO</span>
@@ -396,14 +177,12 @@
             <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Canvas Preview</button>
         </div>
         <div class="topbar-actions">
-            <!-- Tombol Export Kini Lebih Keren -->
             <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Download Deck (PDF)</button>
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER -->
     <div class="app-container">
-        <!-- LEFT: MODULAR EDITOR PANEL -->
+        <!-- LEFT PANEL -->
         <div class="editor-panel" id="editorPanel">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
@@ -412,70 +191,38 @@
             <div id="forms-wrapper"></div>
         </div>
 
-        <!-- RIGHT: LIVE PREVIEW & DRAG CANVAS -->
+        <!-- RIGHT PANEL -->
         <div class="preview-panel" id="previewPanel">
             <div id="deck-container"></div>
         </div>
     </div>
 
     <script>
-        const ELEM_LABELS = {
-            cover: 'COVER', header: 'HEADER', text: 'TEKS',
-            list: 'POIN LIST', table: 'TABEL', kpi: 'KPI METRIK',
-            wawasan: 'WAWASAN', image: 'GAMBAR'
-        };
+        const ELEM_LABELS = { cover: 'COVER', header: 'HEADER', text: 'TEKS', list: 'POIN LIST', table: 'TABEL', kpi: 'KPI METRIK', wawasan: 'WAWASAN', image: 'GAMBAR' };
 
-        // Data awal dari desain Malevin Campaign Deck[span_0](start_span)[span_0](end_span)
         let slidesData = [
             {
-                id: 1,
-                footerLeft: 'PREPARED BY MALEVIN CREATIVE & PRODUCTION TEAM',
+                id: 1, footerLeft: 'PREPARED BY MALEVIN CREATIVE & PRODUCTION TEAM',
                 elements: [
-                    { 
-                        type: 'cover', 
-                        brand: 'MALEVIN OFFICIAL', 
-                        tag: 'Creative Proposal', 
-                        title: 'CAMPAIGN DECK 2026', 
-                        subtitle: 'Dynamic Brand Strategy & Visual Direction',
-                        shapeStyle: 'sharp'
-                    }
+                    { type: 'cover', brand: 'MALEVIN OFFICIAL', tag: 'Creative Proposal', title: 'CAMPAIGN DECK 2026', subtitle: 'Dynamic Brand Strategy & Visual Direction', shapeStyle: 'sharp' }
                 ]
             },
             {
-                id: 2,
-                footerLeft: 'SECTION 01 - PERFORMANCE & DELIVERABLES',
+                id: 2, footerLeft: 'SECTION 01 - PERFORMANCE & DELIVERABLES',
                 elements: [
-                    { type: 'header', brand: 'MALEVIN IO', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
+                    { type: 'header', brand: 'MALEVIN 10', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
                     {
-                        type: 'kpi',
-                        brand: 'METRICS',
-                        shapeStyle: 'rounded',
-                        items: [
-                            { val: '1.2M+', lbl: 'Monthly Reach' },
-                            { val: '4.8%', lbl: 'Eng. Rate' },
-                            { val: '120+', lbl: 'Video Assets' }
-                        ]
+                        type: 'kpi', brand: 'METRICS', shapeStyle: 'rounded',
+                        items: [ { val: '1.2M+', lbl: 'Monthly Reach' }, { val: '4.8%', lbl: 'Eng. Rate' } ]
                     },
                     {
-                        type: 'table',
-                        brand: 'CLIENT ID: 40921',
-                        shapeStyle: 'sharp',
+                        type: 'table', brand: 'CLIENT ID: 40921', shapeStyle: 'sharp',
                         headers: ['Platform', 'Format', 'Target Output'],
-                        rows: [
-                            ['TikTok', 'Short Video', '40 Clips / Mo'],
-                            ['Instagram', 'Reels & Grid', '20 Posts / Mo'],
-                            ['YouTube', 'Shorts', '15 Clips / Mo']
-                        ]
+                        rows: [ ['TikTok', 'Short Video', '40 Clips / Mo'], ['Instagram', 'Reels & Grid', '20 Posts / Mo'], ['YouTube', 'Shorts', '15 Clips / Mo'] ]
                     },
                     {
-                        type: 'list',
-                        brand: 'DELIVERABLES',
-                        shapeStyle: 'pill',
-                        items: [
-                            'High Quality 4K Video Render & Raw Files',
-                            'Custom Sound Design & Color Grading',
-                            'Full Commercial Rights License'
-                        ]
+                        type: 'list', brand: 'DELIVERABLES', shapeStyle: 'pill',
+                        items: [ 'High Quality 4K Video Render & Raw Files', 'Custom Sound Design & Color Grading', 'Full Commercial Rights License' ]
                     }
                 ]
             }
@@ -490,181 +237,37 @@
             slidesData.forEach((slide, sIdx) => {
                 const card = document.createElement('div');
                 card.className = 'slide-accordion';
-
                 let elementsHTML = '';
 
                 slide.elements.forEach((elem, eIdx) => {
                     const styleShape = elem.shapeStyle || 'sharp';
+                    let shapeSelector = `<div class="form-group"><label>Style Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option><option value="pill" ${styleShape === 'pill' ? 'selected' : ''}>Kapsul</option></select></div>`;
+                    let fields = `<div class="form-group"><label>Brand / ID</label><input type="text" class="form-control" value="${elem.brand || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>${shapeSelector}`;
 
-                    let shapeSelector = `
-                        <div class="form-group">
-                            <label>Bentuk / Style Ujung (Corner Style)</label>
-                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)">
-                                <option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak Presisi (Sharp / 0px)</option>
-                                <option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Sudut Melengkung (Rounded / 6px)</option>
-                                <option value="pill" ${styleShape === 'pill' ? 'selected' : ''}>Bentuk Kapsul (Pill / 20px)</option>
-                            </select>
-                        </div>
-                    `;
+                    if (elem.type === 'cover') { fields += `<div class="form-group"><label>Tag</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div><div class="form-group"><label>Judul</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div><div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>`; } 
+                    else if (elem.type === 'header') { fields += `<div class="form-group"><label>Tag</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div><div class="form-group"><label>Judul</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>`; } 
+                    else if (elem.type === 'text') { fields += `<div class="form-group"><label>Isi Teks</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; } 
+                    else if (elem.type === 'image') { fields += `<div class="form-group"><label>Upload Gambar</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; } 
+                    else if (elem.type === 'list') { fields += `<div class="form-group"><label>Poin List</label><div>${(elem.items || []).map((item, lIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${item}" oninput="updateListItem(${sIdx}, ${eIdx}, ${lIdx}, this.value)"><button class="btn btn-danger" onclick="deleteListItem(${sIdx}, ${eIdx}, ${lIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin</button></div>`; } 
+                    else if (elem.type === 'kpi') { fields += `<div class="form-group"><label>KPI Metrik</label><div>${(elem.items || []).map((k, kIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${k.val || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)"><input type="text" class="form-control" value="${k.lbl || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)"><button class="btn btn-danger" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah KPI</button></div>`; } 
+                    else if (elem.type === 'table') { fields += `<div class="form-group"><label>Kolom Header</label><div>${(elem.headers || []).map((h, cIdx) => `<div style="display:flex; gap:4px;"><input type="text" class="form-control" value="${h}" oninput="updateTableHeader(${sIdx}, ${eIdx}, ${cIdx}, this.value)"><button class="btn btn-danger" onclick="deleteTableColumn(${sIdx}, ${eIdx}, ${cIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableColumn(${sIdx}, ${eIdx})">+ Tambah Kolom</button></div><div class="form-group"><div>${(elem.rows || []).map((row, rIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><div style="display:flex; gap:4px; flex:1;">${(elem.headers || []).map((_, cIdx) => `<input type="text" class="form-control" value="${row[cIdx] || ''}" oninput="updateTableCell(${sIdx}, ${eIdx}, ${rIdx}, ${cIdx}, this.value)">`).join('')}</div><button class="btn btn-danger" onclick="deleteTableRow(${sIdx}, ${eIdx}, ${rIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableRow(${sIdx}, ${eIdx})">+ Tambah Baris</button></div>`; } 
+                    else if (elem.type === 'wawasan') { fields += `<div class="form-group"><label>Catatan</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; }
 
-                    let fields = `
-                        <div class="form-group">
-                            <label>Brand / ID / Label Elemen (Opsional)</label>
-                            <input type="text" class="form-control" value="${elem.brand || ''}" placeholder="contoh: MALEVIN OFFICIAL" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)">
-                        </div>
-                        ${shapeSelector}
-                    `;
-
-                    if (elem.type === 'cover') {
-                        fields += `
-                            <div class="form-group"><label>Tag / Sub-Label</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div>
-                            <div class="form-group"><label>Judul Utama</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
-                            <div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>
-                        `;
-                    } else if (elem.type === 'header') {
-                        fields += `
-                            <div class="form-group"><label>Tag Section</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div>
-                            <div class="form-group"><label>Judul Section</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
-                        `;
-                    } else if (elem.type === 'text') {
-                        fields += `
-                            <div class="form-group"><label>Isi Teks Penjelasan</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
-                        `;
-                    } else if (elem.type === 'image') {
-                        fields += `
-                            <div class="form-group">
-                                <label>Unggah Gambar (Input Asset)</label>
-                                <input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)">
-                            </div>
-                        `;
-                    } else if (elem.type === 'list') {
-                        let listInputs = (elem.items || []).map((item, lIdx) => `
-                            <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
-                                <input type="text" class="form-control" value="${item}" placeholder="Poin list ${lIdx+1}" oninput="updateListItem(${sIdx}, ${eIdx}, ${lIdx}, this.value)">
-                                <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteListItem(${sIdx}, ${eIdx}, ${lIdx})">✕</button>
-                            </div>
-                        `).join('');
-
-                        fields += `
-                            <div class="form-group">
-                                <label>Poin-Poin List</label>
-                                <div>${listInputs}</div>
-                                <button class="btn" style="font-size:8px; padding:4px 8px; margin-top:4px;" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin List</button>
-                            </div>
-                        `;
-                    } else if (elem.type === 'kpi') {
-                        let kpiInputs = (elem.items || []).map((k, kIdx) => `
-                            <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
-                                <input type="text" class="form-control" value="${k.val || ''}" placeholder="Nilai (cth: 100K)" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)">
-                                <input type="text" class="form-control" value="${k.lbl || ''}" placeholder="Label Metrik" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)">
-                                <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button>
-                            </div>
-                        `).join('');
-
-                        fields += `
-                            <div class="form-group">
-                                <label>Daftar Metrik KPI</label>
-                                <div>${kpiInputs}</div>
-                                <button class="btn" style="font-size:8px; padding:4px 8px; margin-top:4px;" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah KPI Metrik</button>
-                            </div>
-                        `;
-                    } else if (elem.type === 'table') {
-                        let headersInputs = (elem.headers || []).map((h, cIdx) => `
-                            <div style="display:flex; gap:4px; align-items:center;">
-                                <input type="text" class="form-control" value="${h}" placeholder="Nama Kolom ${cIdx+1}" oninput="updateTableHeader(${sIdx}, ${eIdx}, ${cIdx}, this.value)">
-                                <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteTableColumn(${sIdx}, ${eIdx}, ${cIdx})">✕</button>
-                            </div>
-                        `).join('');
-
-                        let rowsInputs = (elem.rows || []).map((row, rIdx) => {
-                            let cells = (elem.headers || []).map((_, cIdx) => `
-                                <input type="text" class="form-control" value="${row[cIdx] || ''}" placeholder="Sel ${cIdx+1}" oninput="updateTableCell(${sIdx}, ${eIdx}, ${rIdx}, ${cIdx}, this.value)">
-                            `).join('');
-
-                            return `
-                                <div style="display:flex; gap:4px; align-items:center; margin-bottom:4px;">
-                                    <span style="font-size:9px; color:var(--text-muted); font-weight:bold; min-width:18px;">B${rIdx+1}</span>
-                                    <div style="display:grid; grid-template-columns: repeat(${(elem.headers || []).length || 1}, 1fr); gap:4px; flex:1;">
-                                        ${cells}
-                                    </div>
-                                    <button class="btn btn-danger" style="padding:2px 6px;" onclick="deleteTableRow(${sIdx}, ${eIdx}, ${rIdx})">✕</button>
-                                </div>
-                            `;
-                        }).join('');
-
-                        fields += `
-                            <div class="form-group">
-                                <label>Header Kolom Tabel</label>
-                                <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:6px;">${headersInputs}</div>
-                                <button class="btn" style="font-size:8px; padding:4px 8px;" onclick="addTableColumn(${sIdx}, ${eIdx})">+ Tambah Kolom Header</button>
-                            </div>
-                            <div class="form-group" style="margin-top:8px;">
-                                <label>Baris Data Tabel</label>
-                                <div>${rowsInputs}</div>
-                                <button class="btn" style="font-size:8px; padding:4px 8px; margin-top:4px;" onclick="addTableRow(${sIdx}, ${eIdx})">+ Tambah Baris Data</button>
-                            </div>
-                        `;
-                    } else if (elem.type === 'wawasan') {
-                        fields += `
-                            <div class="form-group"><label>Catatan Wawasan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
-                        `;
-                    }
-
-                    elementsHTML += `
-                        <div class="element-box">
-                            <div class="element-header">
-                                <span>ELEMEN ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type.toUpperCase()}</span>
-                                <button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus Elemen</button>
-                            </div>
-                            ${fields}
-                        </div>
-                    `;
+                    elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEMEN ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
                 });
 
-                card.innerHTML = `
-                    <div class="slide-accordion-header">
-                        <strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong>
-                        <button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button>
-                    </div>
-                    <div class="form-group">
-                        <label>Teks Footer Kiri</label>
-                        <input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)">
-                    </div>
-
-                    ${elementsHTML}
-
-                    <div class="section-label-btn">+ TAMBAH ELEMEN DECK:</div>
-                    <div class="btn-grid">
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ POIN LIST</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI METRIK</button>
-                        <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')">+ WAWASAN</button>
-                    </div>
-                `;
-
+                card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div><div class="form-group"><label>Footer</label><input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)"></div>${elementsHTML}<div class="btn-grid"><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ POIN LIST</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')">+ WAWASAN</button></div>`;
                 wrapper.appendChild(card);
             });
-
             renderPreview();
         }
 
-        function getRadiusCss(style) {
-            if (style === 'rounded') return '6px';
-            if (style === 'pill') return '20px';
-            return '0px';
-        }
+        function getRadiusCss(style) { return style === 'rounded' ? '6px' : (style === 'pill' ? '20px' : '0px'); }
 
         function handleImageUpload(sIdx, eIdx, input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    slidesData[sIdx].elements[eIdx].imgData = e.target.result;
-                    renderPreview();
-                };
+                reader.onload = function (e) { slidesData[sIdx].elements[eIdx].imgData = e.target.result; renderPreview(); };
                 reader.readAsDataURL(input.files[0]);
             }
         }
@@ -676,217 +279,66 @@
             slidesData.forEach((slide, sIdx) => {
                 const slideEl = document.createElement('div');
                 slideEl.className = 'slide';
-
-                const slideNum = sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1;
                 const slideBody = document.createElement('div');
-                
-                const isCoverSlide = slide.elements.some(e => e.type === 'cover');
-                slideBody.className = `slide-body ${isCoverSlide ? 'has-cover' : ''}`;
-
-                const snapLine = document.createElement('div');
-                snapLine.className = 'snap-guide-line';
-                slideBody.appendChild(snapLine);
+                slideBody.className = `slide-body ${slide.elements.some(e => e.type === 'cover') ? 'has-cover' : ''}`;
+                const snapLine = document.createElement('div'); snapLine.className = 'snap-guide-line'; slideBody.appendChild(snapLine);
 
                 slide.elements.forEach((elem, eIdx) => {
                     const elemWrapper = document.createElement('div');
-                    elemWrapper.className = 'draggable-element';
-                    elemWrapper.draggable = true;
-                    elemWrapper.dataset.sIdx = sIdx;
-                    elemWrapper.dataset.eIdx = eIdx;
+                    elemWrapper.className = 'draggable-element'; elemWrapper.draggable = true; elemWrapper.dataset.sIdx = sIdx; elemWrapper.dataset.eIdx = eIdx;
 
-                    elemWrapper.addEventListener('dragstart', (e) => {
-                        draggedItem = { sIdx, eIdx };
-                        elemWrapper.classList.add('dragging');
-                        e.dataTransfer.effectAllowed = 'move';
-                    });
+                    elemWrapper.addEventListener('dragstart', (e) => { draggedItem = { sIdx, eIdx }; elemWrapper.classList.add('dragging'); });
+                    elemWrapper.addEventListener('dragend', () => { elemWrapper.classList.remove('dragging'); snapLine.style.display = 'none'; document.querySelectorAll('.draggable-element').forEach(el => el.classList.remove('drag-drop-target')); draggedItem = null; });
+                    elemWrapper.addEventListener('dragover', (e) => { e.preventDefault(); if (!draggedItem || draggedItem.sIdx !== sIdx) return; snapLine.style.display = 'block'; snapLine.style.top = `${elemWrapper.offsetTop}px`; elemWrapper.classList.add('drag-drop-target'); });
+                    elemWrapper.addEventListener('dragleave', () => elemWrapper.classList.remove('drag-drop-target'));
+                    elemWrapper.addEventListener('drop', (e) => { e.preventDefault(); snapLine.style.display = 'none'; elemWrapper.classList.remove('drag-drop-target'); if (draggedItem && (draggedItem.sIdx === sIdx)) { const fIdx = draggedItem.eIdx; if (fIdx !== eIdx) { const mItem = slidesData[sIdx].elements.splice(fIdx, 1)[0]; slidesData[sIdx].elements.splice(eIdx, 0, mItem); renderForms(); } } });
 
-                    elemWrapper.addEventListener('dragend', () => {
-                        elemWrapper.classList.remove('dragging');
-                        snapLine.style.display = 'none';
-                        document.querySelectorAll('.draggable-element').forEach(el => el.classList.remove('drag-drop-target'));
-                        draggedItem = null;
-                    });
+                    const br = getRadiusCss(elem.shapeStyle);
+                    const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${elem.brand}</span>` : '';
+                    let p = '';
 
-                    elemWrapper.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
+                    if (elem.type === 'cover') p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : ''}</div><div class="elem-title" style="font-size:36px; margin: 10px 0;">${elem.title || ''}</div><p style="font-size:14px; color:var(--accent-gold);">${elem.subtitle || ''}</p></div>`;
+                    else if (elem.type === 'header') p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${elem.tag || ''}</span></div><div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div></div>`;
+                    else if (elem.type === 'text') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<p class="slide-text">${elem.content || ''}</p></div>`;
+                    else if (elem.type === 'image') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${br};">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center; color: var(--text-muted); font-size: 10px;">[ Gambar Kosong ]</div>'}</div>`;
+                    else if (elem.type === 'list') p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<ul class="malevin-list">${(elem.items || []).map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+                    else if (elem.type === 'kpi') p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${(elem.items || []).map(k => `<div class="kpi-card" style="border-radius: ${br};"><div class="kpi-value">${k.val || '0'}</div><div class="kpi-label">${k.lbl || ''}</div></div>`).join('')}</div></div>`;
+                    else if (elem.type === 'table') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<table class="malevin-table"><thead><tr>${(elem.headers || []).map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${(elem.rows || []).map(r => `<tr>${(elem.headers || []).map((_, cIdx) => `<td>${r[cIdx] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+                    else if (elem.type === 'wawasan') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">💡 ANALISIS:</strong>${elem.content || ''}</div></div>`;
 
-                        if (!draggedItem || draggedItem.sIdx !== sIdx) return;
-
-                        snapLine.style.display = 'block';
-                        snapLine.style.top = `${elemWrapper.offsetTop}px`;
-
-                        elemWrapper.classList.add('drag-drop-target');
-                    });
-
-                    elemWrapper.addEventListener('dragleave', () => {
-                        elemWrapper.classList.remove('drag-drop-target');
-                    });
-
-                    elemWrapper.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        snapLine.style.display = 'none';
-                        elemWrapper.classList.remove('drag-drop-target');
-
-                        if (draggedItem && (draggedItem.sIdx === sIdx)) {
-                            const fromIdx = draggedItem.eIdx;
-                            const toIdx = eIdx;
-                            if (fromIdx !== toIdx) {
-                                const movedItem = slidesData[sIdx].elements.splice(fromIdx, 1)[0];
-                                slidesData[sIdx].elements.splice(toIdx, 0, movedItem);
-                                renderForms();
-                            }
-                        }
-                    });
-
-                    const borderRadius = getRadiusCss(elem.shapeStyle);
-                    const brandPill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${borderRadius};">${elem.brand}</span>` : '';
-
-                    let piece = '';
-
-                    if (elem.type === 'cover') {
-                        const tagText = elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : '';
-                        piece = `
-                            <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; width: 100%; padding: 20px 0;">
-                                <div style="display:flex; align-items:center; justify-content: flex-start; gap:6px; margin-bottom:12px; flex-wrap:wrap;">
-                                    ${brandPill}
-                                    ${tagText}
-                                </div>
-                                <div class="elem-title" style="font-size:36px; margin: 10px 0; text-align: left;">${elem.title || ''}</div>
-                                <p style="font-size:14px; color:var(--accent-gold); text-align: left;">${elem.subtitle || ''}</p>
-                            </div>
-                        `;
-                    } else if (elem.type === 'header') {
-                        piece = `
-                            <div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;">
-                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                    ${brandPill}
-                                    <span class="elem-tag">${elem.tag || ''}</span>
-                                </div>
-                                <div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div>
-                            </div>
-                        `;
-                    } else if (elem.type === 'text') {
-                        piece = `
-                            <div>
-                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
-                                <p class="slide-text">${elem.content || ''}</p>
-                            </div>
-                        `;
-                    } else if (elem.type === 'image') {
-                        piece = `
-                            <div>
-                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
-                                ${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${borderRadius};">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center; color: var(--text-muted); font-size: 10px;">[ Upload Gambar di Form Editor ]</div>'}
-                            </div>
-                        `;
-                    } else if (elem.type === 'list') {
-                        const itemsHTML = (elem.items || []).map(item => `<li>${item}</li>`).join('');
-                        piece = `
-                            <div>
-                                ${brandPill ? `<div style="margin-bottom:6px;">${brandPill}</div>` : ''}
-                                <ul class="malevin-list">${itemsHTML}</ul>
-                            </div>
-                        `;
-                    } else if (elem.type === 'kpi') {
-                        const cardsHTML = (elem.items || []).map(k => `
-                            <div class="kpi-card" style="border-radius: ${borderRadius};">
-                                <div class="kpi-value">${k.val || '0'}</div>
-                                <div class="kpi-label">${k.lbl || ''}</div>
-                            </div>
-                        `).join('');
-
-                        piece = `
-                            <div>
-                                ${brandPill ? `<div style="margin-bottom:6px;">${brandPill}</div>` : ''}
-                                <div class="kpi-grid">${cardsHTML}</div>
-                            </div>
-                        `;
-                    } else if (elem.type === 'table') {
-                        const headersArr = (elem.headers || []).map(h => `<th>${h}</th>`).join('');
-                        const rowsArr = (elem.rows || []).map(r => {
-                            const cols = (elem.headers || []).map((_, cIdx) => `<td>${r[cIdx] || ''}</td>`).join('');
-                            return `<tr>${cols}</tr>`;
-                        }).join('');
-
-                        piece = `
-                            <div>
-                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
-                                <table class="malevin-table">
-                                    <thead><tr>${headersArr}</tr></thead>
-                                    <tbody>${rowsArr}</tbody>
-                                </table>
-                            </div>
-                        `;
-                    } else if (elem.type === 'wawasan') {
-                        piece = `
-                            <div>
-                                ${brandPill ? `<div style="margin-bottom:4px;">${brandPill}</div>` : ''}
-                                <div class="wawasan-box" style="border-radius: ${borderRadius};">
-                                    <strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">💡 ANALISIS & WAWASAN:</strong>
-                                    ${elem.content || ''}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    elemWrapper.innerHTML = piece;
-                    slideBody.appendChild(elemWrapper);
+                    elemWrapper.innerHTML = p; slideBody.appendChild(elemWrapper);
                 });
 
-                slideEl.innerHTML = `
-                    <div class="corner-accent corner-tl"></div>
-                    <div class="corner-accent corner-br"></div>
-                `;
-
+                slideEl.innerHTML = `<div class="corner-accent corner-tl"></div><div class="corner-accent corner-br"></div>`;
                 slideEl.appendChild(slideBody);
-
-                const footer = document.createElement('div');
-                footer.className = 'slide-footer';
-                footer.innerHTML = `
-                    <span>${slide.footerLeft || ''}</span>
-                    <span class="slide-num">${slideNum}</span>
-                `;
-                slideEl.appendChild(footer);
-
+                slideEl.innerHTML += `<div class="slide-footer"><span>${slide.footerLeft || ''}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
                 container.appendChild(slideEl);
             });
         }
 
-        /* FORM HELPER FUNCTIONS */
-        function updateElem(sIdx, eIdx, key, value) { slidesData[sIdx].elements[eIdx][key] = value; renderPreview(); }
-        function updateSlideFooter(sIdx, value) { slidesData[sIdx].footerLeft = value; renderPreview(); }
-        function addTableColumn(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.headers) elem.headers = []; elem.headers.push(`Kolom ${elem.headers.length + 1}`); renderForms(); }
-        function deleteTableColumn(sIdx, eIdx, colIdx) { const elem = slidesData[sIdx].elements[eIdx]; elem.headers.splice(colIdx, 1); if (elem.rows) elem.rows.forEach(r => r.splice(colIdx, 1)); renderForms(); }
-        function updateTableHeader(sIdx, eIdx, colIdx, val) { slidesData[sIdx].elements[eIdx].headers[colIdx] = val; renderPreview(); }
-        function addTableRow(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.rows) elem.rows = []; elem.rows.push(new Array(elem.headers ? elem.headers.length : 1).fill('')); renderForms(); }
-        function deleteTableRow(sIdx, eIdx, rowIdx) { slidesData[sIdx].elements[eIdx].rows.splice(rowIdx, 1); renderForms(); }
-        function updateTableCell(sIdx, eIdx, rowIdx, colIdx, val) { if (!slidesData[sIdx].elements[eIdx].rows[rowIdx]) { slidesData[sIdx].elements[eIdx].rows[rowIdx] = []; } slidesData[sIdx].elements[eIdx].rows[rowIdx][colIdx] = val; renderPreview(); }
-        function addListItem(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.items) elem.items = []; elem.items.push('Poin baru...'); renderForms(); }
+        function updateElem(sIdx, eIdx, k, v) { slidesData[sIdx].elements[eIdx][k] = v; renderPreview(); }
+        function updateSlideFooter(sIdx, v) { slidesData[sIdx].footerLeft = v; renderPreview(); }
+        function addTableColumn(sIdx, eIdx) { const el = slidesData[sIdx].elements[eIdx]; if (!el.headers) el.headers = []; el.headers.push(`Kolom ${el.headers.length + 1}`); renderForms(); }
+        function deleteTableColumn(sIdx, eIdx, cIdx) { const el = slidesData[sIdx].elements[eIdx]; el.headers.splice(cIdx, 1); if (el.rows) el.rows.forEach(r => r.splice(cIdx, 1)); renderForms(); }
+        function updateTableHeader(sIdx, eIdx, cIdx, v) { slidesData[sIdx].elements[eIdx].headers[cIdx] = v; renderPreview(); }
+        function addTableRow(sIdx, eIdx) { const el = slidesData[sIdx].elements[eIdx]; if (!el.rows) el.rows = []; el.rows.push(new Array(el.headers ? el.headers.length : 1).fill('')); renderForms(); }
+        function deleteTableRow(sIdx, eIdx, rIdx) { slidesData[sIdx].elements[eIdx].rows.splice(rIdx, 1); renderForms(); }
+        function updateTableCell(sIdx, eIdx, rIdx, cIdx, v) { if (!slidesData[sIdx].elements[eIdx].rows[rIdx]) slidesData[sIdx].elements[eIdx].rows[rIdx] = []; slidesData[sIdx].elements[eIdx].rows[rIdx][cIdx] = v; renderPreview(); }
+        function addListItem(sIdx, eIdx) { const el = slidesData[sIdx].elements[eIdx]; if (!el.items) el.items = []; el.items.push('Poin baru...'); renderForms(); }
         function deleteListItem(sIdx, eIdx, lIdx) { slidesData[sIdx].elements[eIdx].items.splice(lIdx, 1); renderForms(); }
-        function updateListItem(sIdx, eIdx, lIdx, val) { slidesData[sIdx].elements[eIdx].items[lIdx] = val; renderPreview(); }
-        function addKpiItem(sIdx, eIdx) { const elem = slidesData[sIdx].elements[eIdx]; if (!elem.items) elem.items = []; elem.items.push({ val: '0', lbl: 'Metrik Baru' }); renderForms(); }
+        function updateListItem(sIdx, eIdx, lIdx, v) { slidesData[sIdx].elements[eIdx].items[lIdx] = v; renderPreview(); }
+        function addKpiItem(sIdx, eIdx) { const el = slidesData[sIdx].elements[eIdx]; if (!el.items) el.items = []; el.items.push({ val: '0', lbl: 'Metrik Baru' }); renderForms(); }
         function deleteKpiItem(sIdx, eIdx, kIdx) { slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1); renderForms(); }
-        function updateKpiItem(sIdx, eIdx, kIdx, key, val) { slidesData[sIdx].elements[eIdx].items[kIdx][key] = val; renderPreview(); }
-        function addElementToSlide(sIdx, type) {
-            const newElem = { type: type, brand: '', shapeStyle: 'sharp' };
-            if (type === 'cover') { newElem.tag = 'Proposal'; newElem.title = 'COVER TITLE'; newElem.subtitle = 'Subtitle'; }
-            else if (type === 'header') { newElem.tag = 'Section'; newElem.title = 'SECTION TITLE'; }
-            else if (type === 'text') { newElem.content = 'Tulis deskripsi penjelasan di sini...'; }
-            else if (type === 'image') { newElem.imgData = ''; }
-            else if (type === 'list') { newElem.items = ['Item poin 1', 'Item poin 2']; }
-            else if (type === 'kpi') { newElem.items = [{ val: '100K', lbl: 'Metric 1' }, { val: '5.0%', lbl: 'Metric 2' }]; }
-            else if (type === 'table') { newElem.headers = ['Kolom 1', 'Kolom 2']; newElem.rows = [['Data A', 'Data B']]; }
-            else if (type === 'wawasan') { newElem.content = 'Catatan ringkasan wawasan performa campaign...'; }
-            slidesData[sIdx].elements.push(newElem); renderForms();
-        }
+        function updateKpiItem(sIdx, eIdx, kIdx, k, v) { slidesData[sIdx].elements[eIdx].items[kIdx][k] = v; renderPreview(); }
+        function addElementToSlide(sIdx, type) { const ne = { type, brand: '', shapeStyle: 'sharp' }; if (type === 'cover') { ne.tag = 'Proposal'; ne.title = 'TITLE'; ne.subtitle = 'Subtitle'; } else if (type === 'header') { ne.tag = 'Section'; ne.title = 'TITLE'; } else if (type === 'text') { ne.content = 'Teks...'; } else if (type === 'list') { ne.items = ['Item 1', 'Item 2']; } else if (type === 'kpi') { ne.items = [{ val: '100K', lbl: 'Metric 1' }]; } else if (type === 'table') { ne.headers = ['A', 'B']; ne.rows = [['D1', 'D2']]; } else if (type === 'wawasan') { ne.content = 'Catatan...'; } slidesData[sIdx].elements.push(ne); renderForms(); }
         function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); renderForms(); }
-        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'PREPARED BY MALEVIN TEAM', elements: [{ type: 'header', brand: '', tag: 'Section Tag', title: 'JUDUL SLIDE BARU', shapeStyle: 'sharp' }] }); renderForms(); }
+        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'PREPARED BY MALEVIN TEAM', elements: [{ type: 'header', brand: '', tag: 'Tag', title: 'SLIDE BARU', shapeStyle: 'sharp' }] }); renderForms(); }
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
         /* =========================================================
-           FUNGSI EXPORT PDF BARU (100% SAMA PERSIS DENGAN PREVIEW)
-           MENGGUNAKAN HTML2CANVAS & JSPDF
+           UPDATE FIX EXPORT PDF:
+           Lebar DIKUNCI MATI untuk semua halaman PDF. 
+           Tinggi menyesuaikan secara auto (proporsional).
            ========================================================= */
         async function downloadPDF() {
             const btn = document.getElementById('downloadBtn');
@@ -894,38 +346,28 @@
             btn.innerText = 'Memproses PDF (Harap Tunggu)...';
             btn.disabled = true;
 
-            // 1. Pindah otomatis ke Mode Preview agar DOM dirender sempurna
             setMode('preview');
-
-            // 2. Beri jeda waktu sebentar agar browser selesai menggambar CSS & layout
             await new Promise(r => setTimeout(r, 600));
 
             try {
-                const { jsPDF } = window.jspdf;
-                // Siapkan dokumen PDF kosong
-                const pdf = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'px',
-                    format: 'a4' // Format awal, nanti ditimpa per slide
-                });
-
+                let pdf = null;
                 const slides = document.querySelectorAll('.slide');
+                
+                // --- KUNCI LEBAR PDF ---
+                // Berapapun layar/browser user, lebar PDF DIPAKSA 850px agar sama persis dan rata!
+                const pdfWidth = 850; 
 
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
-
-                    // Simpan style asli box-shadow dan border (agar di PDF tidak ada bayangan tumpang tindih)
                     const originalBoxShadow = slide.style.boxShadow;
                     const originalBorder = slide.style.border;
                     
                     slide.style.boxShadow = 'none';
                     slide.style.border = 'none';
                     
-                    // Supaya tombol delete silang tidak ikut terfoto (meski draggable-element hovernya nyala)
                     const draggables = slide.querySelectorAll('.draggable-element');
                     draggables.forEach(d => { d.style.border = 'none'; });
 
-                    // Merender HTML jadi Gambar Resolusi Tinggi (Scale 3x)
                     const canvas = await html2canvas(slide, {
                         scale: 3, 
                         useCORS: true,
@@ -933,56 +375,43 @@
                         logging: false
                     });
 
-                    // Kembalikan style CSS setelah di-foto
                     slide.style.boxShadow = originalBoxShadow;
                     slide.style.border = originalBorder;
                     draggables.forEach(d => { d.style.border = ''; });
 
                     const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                    const slideWidth = slide.offsetWidth;
-                    const slideHeight = slide.offsetHeight;
+                    
+                    // --- AUTO HEIGHT PROPORSIONAL ---
+                    // Hitung tinggi secara matematis berdasarkan lebar agar gambar tidak gepeng
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-                    // Tambahkan ke PDF sesuai ukuran dinamis masing-masing slide (Auto Height)
                     if (i === 0) {
-                        pdf.setPage(1);
-                        pdf.internal.pageSize.setWidth(slideWidth);
-                        pdf.internal.pageSize.setHeight(slideHeight);
+                        pdf = new window.jspdf.jsPDF({
+                            orientation: 'portrait',
+                            unit: 'px',
+                            format: [pdfWidth, pdfHeight]
+                        });
                     } else {
-                        pdf.addPage([slideWidth, slideHeight], 'portrait');
+                        pdf.addPage([pdfWidth, pdfHeight], 'portrait');
                     }
 
-                    pdf.addImage(imgData, 'JPEG', 0, 0, slideWidth, slideHeight);
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                 }
 
-                // Selesai & Download
                 pdf.save('Malevin_Deck_Official.pdf');
             } catch (error) {
                 console.error("Gagal export PDF:", error);
                 alert("Terjadi kesalahan saat memproses PDF.");
             } finally {
-                // Kembalikan tombol seperti semula
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
 
         function setMode(mode) {
-            const editorPanel = document.getElementById('editorPanel');
-            const previewPanel = document.getElementById('previewPanel');
-            const tabEdit = document.getElementById('tabEditBtn');
-            const tabPreview = document.getElementById('tabPreviewBtn');
-
-            if (mode === 'preview') {
-                editorPanel.style.display = 'none';
-                previewPanel.style.display = 'flex';
-                tabEdit.classList.remove('active');
-                tabPreview.classList.add('active');
-            } else {
-                editorPanel.style.display = 'flex';
-                previewPanel.style.display = 'none';
-                tabPreview.classList.remove('active');
-                tabEdit.classList.add('active');
-            }
+            const ep = document.getElementById('editorPanel'), pp = document.getElementById('previewPanel'), te = document.getElementById('tabEditBtn'), tp = document.getElementById('tabPreviewBtn');
+            if (mode === 'preview') { ep.style.display = 'none'; pp.style.display = 'flex'; te.classList.remove('active'); tp.classList.add('active'); } 
+            else { ep.style.display = 'flex'; pp.style.display = 'none'; tp.classList.remove('active'); te.classList.add('active'); }
         }
 
         renderForms();
