@@ -985,28 +985,22 @@
                     const slideBodyContent = [];
                     const isCoverSlide = slide.elements.some(e => e.type === 'cover');
 
-                    // Top Accent Line
-                    slideBodyContent.push({
+                    // 1. Garis Aksen Emas di Atas (Menggunakan koordinat minus agar mentok ke atas/pinggir margin)
+                    docContent.push({
                         canvas: [
-                            { type: 'rect', x: 0, y: 0, w: 841.89, h: 3, color: '#C49A57' }
-                        ],
-                        absolutePosition: { x: 0, y: 0 }
+                            { type: 'rect', x: -36, y: -28, w: 841.89, h: 3, color: '#C49A57' }
+                        ]
                     });
 
-                    // Element Rendering
+                    // 2. Render Elemen Konten
                     slide.elements.forEach((elem) => {
                         const elemBlock = [];
 
                         if (elem.type === 'cover') {
                             if (elem.brand) {
                                 elemBlock.push({
-                                    text: elem.brand,
-                                    fontSize: 8,
-                                    bold: true,
-                                    color: '#0A0B0A',
-                                    background: '#C49A57',
-                                    alignment: 'left',
-                                    margin: [0, 0, 0, 6]
+                                    text: elem.brand, fontSize: 8, bold: true, color: '#0A0B0A',
+                                    background: '#C49A57', alignment: 'left', margin: [0, 0, 0, 6]
                                 });
                             }
                             if (elem.tag) {
@@ -1017,12 +1011,8 @@
                         } else {
                             if (elem.brand) {
                                 elemBlock.push({
-                                    text: elem.brand,
-                                    fontSize: 8,
-                                    bold: true,
-                                    color: '#0A0B0A',
-                                    background: '#C49A57',
-                                    margin: [0, 0, 0, 4]
+                                    text: elem.brand, fontSize: 8, bold: true, color: '#0A0B0A',
+                                    background: '#C49A57', margin: [0, 0, 0, 4]
                                 });
                             }
 
@@ -1060,7 +1050,14 @@
                                         widths: new Array((elem.headers || []).length).fill('*'),
                                         body: [tableHeaders, ...tableRows]
                                     },
-                                    layout: 'lightHorizontalLines',
+                                    // Custom Layout Tabel agar garis terlihat tegas di background gelap
+                                    layout: {
+                                        hLineWidth: function (i, node) { return 1; },
+                                        vLineWidth: function (i, node) { return 0; }, // Tanpa garis vertikal
+                                        hLineColor: function (i, node) { return (i === 1) ? '#C49A57' : '#242624'; }, // Garis bawah header warna emas
+                                        paddingTop: function(i, node) { return 6; },
+                                        paddingBottom: function(i, node) { return 6; }
+                                    },
                                     margin: [0, 4, 0, 6]
                                 });
                             } else if (elem.type === 'wawasan') {
@@ -1077,50 +1074,42 @@
 
                         slideBodyContent.push({
                             stack: elemBlock,
-                            margin: [0, 0, 0, 10]
+                            margin: [0, 0, 0, 15]
                         });
                     });
 
-                    // Footer Text & Page Number
+                    // 3. Gabungkan Konten Utama (Berikan jarak ke bawah)
+                    docContent.push({
+                        stack: slideBodyContent,
+                        margin: isCoverSlide ? [0, 60, 0, 40] : [0, 20, 0, 40]
+                    });
+
+                    // 4. Footer Slide
                     const slideNum = sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1;
-                    const footerBlock = {
+                    docContent.push({
                         columns: [
                             { text: (slide.footerLeft || '').toUpperCase(), fontSize: 8, color: '#808280', alignment: 'left' },
                             { text: slideNum, fontSize: 10, bold: true, color: '#C49A57', alignment: 'right' }
                         ],
-                        margin: [0, 15, 0, 0]
-                    };
-
-                    // Dynamic Slide Wrapper (Auto-Expanding)
-                    docContent.push({
-                        table: {
-                            widths: ['*'],
-                            heights: ['*', 'auto'],
-                            body: [
-                                [{ stack: slideBodyContent, verticalAlign: isCoverSlide ? 'middle' : 'top' }],
-                                [{ stack: [footerBlock], verticalAlign: 'bottom' }]
-                            ]
-                        },
-                        layout: 'noBorders',
+                        margin: [0, 10, 0, 0],
                         pageBreak: sIdx < slidesData.length - 1 ? 'after' : undefined
                     });
                 });
 
-                // PDF Definition dengan Ketinggian Otomatis (Dynamic Auto Height Page Size)
+                // Set Definition
                 const docDefinition = {
-                    pageSize: { width: 841.89, height: 'auto' },
+                    pageSize: { width: 841.89, height: 'auto' }, // Tinggi Fleksibel Dinamis
                     pageMargins: [36, 28, 36, 20],
-                    background: function() {
+                    background: function(currentPage, pageSize) {
                         return {
                             canvas: [
-                                { type: 'rect', x: 0, y: 0, w: 841.89, h: 2000, color: '#0A0B0A' }
+                                // Background otomatis memanjang sejauh isi konten 
+                                { type: 'rect', x: 0, y: 0, w: pageSize.width, h: Math.max(pageSize.height, 3000), color: '#0A0B0A' }
                             ]
                         };
                     },
                     content: docContent,
-                    defaultStyle: {
-                        font: 'Roboto'
-                    }
+                    defaultStyle: { font: 'Roboto' }
                 };
 
                 pdfMake.createPdf(docDefinition).download('Malevin_Vector_Deck.pdf');
