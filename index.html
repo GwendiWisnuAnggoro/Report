@@ -118,17 +118,12 @@
         .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
         .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
         
-        /* Golden Ratio Typography */
         .t-hero { font-size: 42px; font-weight: 800; color: var(--text-white); text-transform: uppercase; line-height: 1.05; }
         .t-judul { font-size: 26px; font-weight: 800; color: var(--text-white); text-transform: uppercase; line-height: 1.15; }
         .t-subjudul { font-size: 16px; font-weight: 700; color: var(--accent-gold); line-height: 1.3; }
         .t-paragraf { font-size: 11px; color: #C0C2C0; line-height: 1.5; white-space: pre-line; }
 
         .text-card-wrap { background-color: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
-
-        .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; table-layout: fixed; }
-        .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; word-wrap: break-word; }
-        .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; word-wrap: break-word; }
 
         .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
         .kpi-card { flex: 1; min-width: 80px; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
@@ -157,7 +152,6 @@
         .social-card-val { font-size: 16px; font-weight: 800; color: var(--text-white); margin: 3px 0; }
 
         .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
-
         .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
 
         .img-preview-box { max-width: 100%; max-height: 250px; object-fit: contain; display: block; }
@@ -203,7 +197,7 @@
     <script>
         const ELEM_LABELS = { 
             cover: 'COVER', header: 'HEADER', text: 'TEKS', columns: 'KOLOM DOKUMEN', table: 'TABEL', 
-            kpi: 'KPI METRIK', chart: 'GRAFIK', image: 'GAMBAR/LOGO', comparison: 'PERBANDINGAN insight', 
+            kpi: 'KPI METRIK', chart: 'GRAFIK ANALISIS', image: 'GAMBAR/LOGO', comparison: 'PERBANDINGAN INSIGHT', 
             social: 'STATISTIK SOSIAL (IKHTISAR)', breakdown: 'WAWASAN PENONTON', wawasan: 'ANALISIS KUSTOM' 
         };
 
@@ -223,17 +217,18 @@
                 elements: [
                     { type: 'header', width: 'full', brand: 'MALEVIN', tag: 'IKHTISAR KINERJA', title: 'PERFORMA KONTEN BULANAN' },
                     { 
-                        type: 'social', width: 'full', sectionTitle: 'IKHTISAR KINERJA SOSIAL', periodPreset: 'bulan-ini', period: '1 - 15 Sep 2026',
+                        type: 'chart', width: 'half', chartType: 'bar', 
+                        labels: 'Minggu 1, Minggu 2, Minggu 3, Minggu 4', data: '1200, 3400, 5800, 2100', 
+                        title: 'GRAFIK PENONTON MINGGUAN', subtitle: 'Pertumbuhan tertinggi dicapai pada Minggu ke-3' 
+                    },
+                    { 
+                        type: 'social', width: 'half', sectionTitle: 'IKHTISAR KINERJA SOSIAL', period: '1 - 15 Sep 2026',
                         metrics: [
                             { label: 'Tayangan (Views)', value: '1,245,000', deltaPercent: '18.4%', dir: 'up', varName: 'views' },
                             { label: 'Suka (Likes)', value: '84,200', deltaPercent: '12.1%', dir: 'up', varName: 'likes' },
                             { label: 'Komentar', value: '4,150', deltaPercent: '5.2%', dir: 'down', varName: 'comments' },
                             { label: 'Bagikan (Shares)', value: '12,800', deltaPercent: '24.5%', dir: 'up', varName: 'shares' }
                         ]
-                    },
-                    { 
-                        type: 'text', width: 'full', style: 'paragraf', card: true,
-                        content: 'Total tayangan mencapai {{views}} berkat optimasi video pendek. Terjadi peningkatan bagikan (shares) sebesar {{shares}} yang mendorong viralitas produk.' 
                     }
                 ]
             }
@@ -248,21 +243,18 @@
         }
 
         /* =========================================================
-           GLOBAL VARIABLE ENGINE (TEXT, NUMBERS, STATS, IMAGES)
+           GLOBAL VARIABLE ENGINE
            ========================================================= */
         function computeGlobalVariables() {
             const vars = {};
             slidesData.forEach(slide => {
                 slide.elements.forEach(elem => {
-                    // Variabel dari Gambar/Logo
                     if (elem.type === 'image' && elem.varName && elem.imgData) {
                         vars[elem.varName] = { type: 'image', value: elem.imgData };
                     }
-                    // Variabel dari Teks
                     if (elem.type === 'text' && elem.varName && elem.content) {
                         vars[elem.varName] = { type: 'text', value: elem.content };
                     }
-                    // Variabel dari Comparison
                     if (elem.type === 'comparison' && elem.varName) {
                         const prev = parseFloat(elem.prevVal) || 0;
                         const curr = parseFloat(elem.currVal) || 0;
@@ -271,26 +263,11 @@
                         const dir = diff > 0 ? 'up' : (diff < 0 ? 'down' : 'flat');
                         vars[elem.varName] = { type: 'stat', dir, pct: pct + '%', value: elem.currVal + (elem.unit || '') };
                     }
-                    // Variabel dari Social Stats (View, Like, Comment, Share, etc.)
                     if (elem.type === 'social' && elem.metrics) {
                         elem.metrics.forEach(m => {
                             if (m.varName) {
                                 vars[m.varName] = { type: 'stat', dir: m.dir || 'up', pct: m.deltaPercent || '', value: m.value || '' };
                             }
-                        });
-                    }
-                    // Variabel dari Breakdown items
-                    if (elem.type === 'breakdown' && elem.items) {
-                        elem.items.forEach(it => {
-                            if (it.varName) {
-                                vars[it.varName] = { type: 'stat', dir: 'flat', pct: (it.percent || '0') + '%', value: (it.percent || '0') + '%' };
-                            }
-                        });
-                    }
-                    // Variabel dari Wawasan dinamik
-                    if (elem.type === 'wawasan' && elem.vars) {
-                        elem.vars.forEach(v => {
-                            if (v.k) vars[v.k] = { type: 'text', value: v.v || '' };
                         });
                     }
                 });
@@ -303,9 +280,7 @@
             return str.replace(/\{\{(\w+)\}\}/g, (match, varKey) => {
                 const item = vars[varKey];
                 if (!item) return match;
-                if (item.type === 'image') {
-                    return `<img src="${item.value}" style="max-height:40px; vertical-align:middle; display:inline-block; margin:2px;">`;
-                }
+                if (item.type === 'image') return `<img src="${item.value}" style="max-height:40px; vertical-align:middle; display:inline-block; margin:2px;">`;
                 if (item.type === 'stat') {
                     const arrow = item.dir === 'up' ? '▲' : (item.dir === 'down' ? '▼' : '—');
                     const badgeClass = item.dir === 'up' ? 'var-up' : (item.dir === 'down' ? 'var-down' : 'var-flat');
@@ -357,13 +332,13 @@
                                 <option value="paragraf" ${(!elem.style || elem.style === 'paragraf') ? 'selected' : ''}>Paragraf Regular</option>
                             </select>
                         </div>
-                        <div class="form-group"><label>Nama Variable Teks (Opsional - Bisa Di-copy {{nama}})</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
-                        <div class="form-group"><label>Isi Teks (Dukung Variable {{varName}})</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
+                        <div class="form-group"><label>Nama Variable Teks</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Isi Teks</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
                         <div class="form-group"><label><input type="checkbox" ${elem.card ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'card', this.checked)"> Bungkus Dalam Kartu Obsidian</label></div>`; 
                     } 
                     else if (elem.type === 'image') { 
                         fields += `
-                        <div class="form-group"><label>Nama Variable Gambar (Opsional - Cukup Upload 1x lalu panggil {{nama}})</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Nama Variable Gambar</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
                         <div class="form-group"><label>Upload Gambar / Logo</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
                     } 
                     else if (elem.type === 'columns') {
@@ -378,8 +353,8 @@
                     }
                     else if (elem.type === 'comparison') {
                         fields += `
-                        <div class="form-group"><label>Label Metrik (cth: Total Penonton / Engagement)</label><input type="text" class="form-control" value="${elem.label || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'label', this.value)"></div>
-                        <div class="form-group"><label>Nama Variabel (Dipakai di Teks sbg {{nama}})</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Label Metrik</label><input type="text" class="form-control" value="${elem.label || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'label', this.value)"></div>
+                        <div class="form-group"><label>Nama Variabel</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
                         <div class="two-col-form">
                             <div class="form-group"><label>Data Periode Lalu</label><input type="text" class="form-control" value="${elem.prevVal || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'prevVal', this.value)"></div>
                             <div class="form-group"><label>Data Periode Sekarang</label><input type="text" class="form-control" value="${elem.currVal || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'currVal', this.value)"></div>
@@ -390,7 +365,7 @@
                         const mRows = (elem.metrics || []).map((m, mIdx) => `
                             <div class="element-box">
                                 <div class="element-header"><span>METRIK ${mIdx + 1}</span><button class="btn btn-danger" onclick="removeSocialMetric(${sIdx}, ${eIdx}, ${mIdx})">✕</button></div>
-                                <div class="form-group"><label>Label Metrik (View, Like, Comment, Share, dll)</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
+                                <div class="form-group"><label>Label Metrik</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
                                 <div class="form-group"><label>Nama Variable</label><input type="text" class="form-control" value="${m.varName || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'varName', this.value)"></div>
                                 <div class="two-col-form">
                                     <div class="form-group"><label>Nilai</label><input type="text" class="form-control" value="${m.value || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'value', this.value)"></div>
@@ -402,7 +377,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group"><label>Persentase Perubahan (misal: +18.4%)</label><input type="text" class="form-control" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
+                                <div class="form-group"><label>Persentase Perubahan</label><input type="text" class="form-control" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
                             </div>`).join('');
 
                         fields += `
@@ -418,7 +393,6 @@
                                     <div class="form-group"><label>Label</label><input type="text" class="form-control" value="${it.label || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'label', this.value)"></div>
                                     <div class="form-group"><label>Persen (%)</label><input type="text" class="form-control" value="${it.percent || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'percent', this.value)"></div>
                                 </div>
-                                <div class="form-group"><label>Nama Variable</label><input type="text" class="form-control" value="${it.varName || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'varName', this.value)"></div>
                             </div>`).join('');
                         fields += `<div class="form-group"><label>Judul Wawasan</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>${bRows}<button class="btn" onclick="addBreakdownItem(${sIdx}, ${eIdx})">+ Tambah Baris Demografi</button>`;
                     }
@@ -426,18 +400,22 @@
                         fields += `<div class="form-group"><label>Metrik KPI</label><div>${(elem.items || []).map((k, kIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nilai" value="${k.val || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)"><input type="text" class="form-control" placeholder="Label" value="${k.lbl || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)"><button class="btn btn-danger" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah Metrik</button></div>`;
                     } 
                     else if (elem.type === 'chart') { 
-                        fields += `<div class="form-group"><label>Tipe Grafik</label>
-                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
-                                <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar (Gradient Block)</option>
-                                <option value="line" ${elem.chartType === 'line' ? 'selected' : ''}>Line</option>
-                                <option value="pie" ${elem.chartType === 'pie' ? 'selected' : ''}>Pie</option>
-                                <option value="doughnut" ${elem.chartType === 'doughnut' ? 'selected' : ''}>Donut</option>
-                            </select></div>
+                        fields += `
+                            <div class="form-group"><label>Judul Utama Grafik (Bawah/Atas Canvas)</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
+                            <div class="form-group"><label>Sub-Judul / Keterangan Singkat</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>
+                            <div class="form-group"><label>Tipe Grafik</label>
+                                <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
+                                    <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar (Gradient Block & Opacity Contras)</option>
+                                    <option value="line" ${elem.chartType === 'line' ? 'selected' : ''}>Line Chart</option>
+                                    <option value="pie" ${elem.chartType === 'pie' ? 'selected' : ''}>Pie Diagram</option>
+                                    <option value="doughnut" ${elem.chartType === 'doughnut' ? 'selected' : ''}>Donut Diagram</option>
+                                </select>
+                            </div>
                             <div class="form-group"><label>Label X (Pisahkan Koma)</label><input type="text" class="form-control" value="${elem.labels || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'labels', this.value)"></div>
                             <div class="form-group"><label>Data Y (Pisahkan Koma)</label><input type="text" class="form-control" value="${elem.data || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'data', this.value)"></div>`; 
                     }
                     else if (elem.type === 'wawasan') {
-                        fields += `<div class="form-group"><label>Variabel Utama (Key Metrics)</label><div>${(elem.vars || []).map((v, vIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nama Var" value="${v.k || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'k', this.value)"><input type="text" class="form-control" placeholder="Nilai/Efek" value="${v.v || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'v', this.value)"><button class="btn btn-danger" onclick="deleteWawasanVar(${sIdx}, ${eIdx}, ${vIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addWawasanVar(${sIdx}, ${eIdx})">+ Tambah Variabel</button></div>
+                        fields += `<div class="form-group"><label>Variabel Utama</label><div>${(elem.vars || []).map((v, vIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nama Var" value="${v.k || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'k', this.value)"><input type="text" class="form-control" placeholder="Nilai/Efek" value="${v.v || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'v', this.value)"><button class="btn btn-danger" onclick="deleteWawasanVar(${sIdx}, ${eIdx}, ${vIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addWawasanVar(${sIdx}, ${eIdx})">+ Tambah Variabel</button></div>
                         <div class="form-group"><label>Kesimpulan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`;
                     }
 
@@ -447,7 +425,7 @@
                 card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
                 <div class="form-group"><label>Footer Left</label><input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)"></div>
                 ${elementsHTML}
-                <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN KONTEN & ANALISIS (TANPA LIMIT):</label>
+                <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN KONTEN & ANALISIS:</label>
                 <div class="btn-grid" style="margin-top:4px;">
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
@@ -455,7 +433,7 @@
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'columns')">+ KOLOM</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button>
-                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'chart')">+ GRAFIK</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'chart')">+ GRAFIK</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'social')">+ STATS SOSIAL</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'comparison')">+ PERBANDINGAN</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'breakdown')">+ DEMOGRAFI</button>
@@ -556,7 +534,7 @@
                         const bRows = (elem.items || []).map(it => `
                             <div class="breakdown-row"><span>${it.label || ''}</span><span style="color:var(--accent-gold); font-weight:800;">${it.percent || 0}%</span></div>
                         `).join('');
-                        p = `<div class="text-card-wrap" style="border-radius:${br};"><div class="elem-tag">${elem.title || 'WAWASAN DEMOGRAFI'}</div><div style="margin-top:6px;">${bRows}</div></div>`;
+                        p = `<div class="text-card-wrap" style="border-radius:${br};"><div class="elem-tag">${elem.title || 'WAWASAN PENONTON'}</div><div style="margin-top:6px;">${bRows}</div></div>`;
                     }
                     else if (elem.type === 'kpi') {
                         p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${(elem.items || []).map(k => `<div class="kpi-card" style="border-radius: ${br};"><div class="kpi-value">${k.val || '0'}</div><div style="font-size: 8px; color: var(--text-muted); text-transform: uppercase;">${k.lbl || ''}</div></div>`).join('')}</div></div>`;
@@ -570,9 +548,17 @@
                     }
                     else if (elem.type === 'chart') {
                         const chartId = `chart-${sIdx}-${eIdx}`;
-                        p = `<div style="display:flex; flex-direction:column; height:100%;">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
-                            <div style="background:var(--card-obsidian); padding:10px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:200px; width:100%; display:flex; align-items:center; justify-content:center;">
-                                <canvas id="${chartId}"></canvas>
+                        p = `<div style="display:flex; flex-direction:column; height:100%; width:100%;">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
+                            <div style="background:var(--card-obsidian); padding:12px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:220px; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+                                <div style="position:relative; width:100%; flex:1; min-height:160px;">
+                                    <canvas id="${chartId}"></canvas>
+                                </div>
+                                ${(elem.title || elem.subtitle) ? `
+                                    <div style="text-align:center; width:100%; border-top:1px dashed var(--border-obsidian); padding-top:6px; margin-top:2px;">
+                                        ${elem.title ? `<div style="font-size:11px; font-weight:800; color:var(--text-white); letter-spacing:0.5px; text-transform:uppercase;">${elem.title}</div>` : ''}
+                                        ${elem.subtitle ? `<div style="font-size:9px; color:var(--accent-gold); font-weight:600; margin-top:1px;">${elem.subtitle}</div>` : ''}
+                                    </div>
+                                ` : ''}
                             </div></div>`;
                         chartsToRender.push({ id: chartId, type: elem.chartType || 'bar', labels: elem.labels || 'A,B,C', data: elem.data || '10,20,30' });
                     }
@@ -585,31 +571,102 @@
                 container.appendChild(slideEl);
             });
 
-            // CHART GENERATOR
+            /* =========================================================
+               CHART ENGINE DYNAMICAL OPACITY & CENTER BADGE PLUGINS
+               ========================================================= */
             setTimeout(() => {
                 chartsToRender.forEach(c => {
                     const canvas = document.getElementById(c.id);
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
-                        let bgColor = ['rgba(196, 154, 87, 0.8)', 'rgba(255, 255, 255, 0.2)', 'rgba(128, 130, 128, 0.5)', 'rgba(229, 83, 83, 0.6)'];
-                        if (c.type === 'bar') {
-                            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.parentElement.clientHeight || 200);
-                            gradient.addColorStop(0, '#C49A57');
-                            gradient.addColorStop(1, 'rgba(138, 104, 49, 0.1)');
-                            bgColor = gradient;
-                        }
+                        const dataNums = c.data.split(',').map(Number);
+                        const maxVal = Math.max(...dataNums);
+
+                        // Opsi Opacity Dinamis: Data terbanyak dapat Opacity Penuh (100%), sisanya proporsional
+                        const bgColors = dataNums.map(v => {
+                            if (maxVal === 0) return 'rgba(196, 154, 87, 0.5)';
+                            const ratio = v / maxVal;
+                            const opacity = Math.max(0.35, ratio).toFixed(2);
+                            return `rgba(196, 154, 87, ${opacity})`;
+                        });
+
+                        const borderColors = dataNums.map(v => v === maxVal ? '#FFFFFF' : '#C49A57');
+                        const borderWidths = dataNums.map(v => v === maxVal ? 2 : 1);
+
+                        // Custom Plugin untuk Menampilkan Sekat & Badge Nilai/Persentase di Tengah
+                        const centerLabelPlugin = {
+                            id: 'malevinCenterLabels',
+                            afterDatasetsDraw(chart) {
+                                const { ctx } = chart;
+                                chart.data.datasets.forEach((dataset, datasetIdx) => {
+                                    const meta = chart.getDatasetMeta(datasetIdx);
+                                    meta.data.forEach((element, index) => {
+                                        const val = dataset.data[index];
+                                        if (val === undefined || val === null) return;
+
+                                        let text = val.toLocaleString('id-ID');
+                                        if (['pie', 'doughnut'].includes(chart.config.type)) {
+                                            const total = dataset.data.reduce((a, b) => Number(a) + Number(b), 0);
+                                            const pct = total > 0 ? ((val / total) * 100).toFixed(1) + '%' : '0%';
+                                            text = `${val} (${pct})`;
+                                        }
+
+                                        const pos = element.tooltipPosition();
+                                        ctx.save();
+                                        ctx.font = 'bold 9px var(--font-main, sans-serif)';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+
+                                        const textWidth = ctx.measureText(text).width;
+                                        const boxW = textWidth + 10;
+                                        const boxH = 15;
+
+                                        // Gambar Kotak / Badge Sekat Bergaris
+                                        ctx.fillStyle = 'rgba(10, 11, 10, 0.85)';
+                                        ctx.strokeStyle = '#C49A57';
+                                        ctx.lineWidth = 1;
+
+                                        if (ctx.roundRect) {
+                                            ctx.beginPath();
+                                            ctx.roundRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH, 3);
+                                            ctx.fill();
+                                            ctx.stroke();
+                                        } else {
+                                            ctx.fillRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH);
+                                            ctx.strokeRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH);
+                                        }
+
+                                        ctx.fillStyle = '#FEFEFE';
+                                        ctx.fillText(text, pos.x, pos.y);
+                                        ctx.restore();
+                                    });
+                                });
+                            }
+                        };
+
                         const newChart = new Chart(ctx, {
                             type: c.type,
                             data: {
                                 labels: c.labels.split(','),
-                                datasets: [{ label: 'Data', data: c.data.split(',').map(Number), backgroundColor: bgColor, borderColor: '#C49A57', borderWidth: 1 }]
+                                datasets: [{
+                                    label: 'Data',
+                                    data: dataNums,
+                                    backgroundColor: bgColors,
+                                    borderColor: borderColors,
+                                    borderWidth: borderWidths
+                                }]
                             },
+                            plugins: [centerLabelPlugin],
                             options: {
-                                responsive: true, maintainAspectRatio: false, color: '#C0C2C0',
-                                plugins: { legend: { display: ['pie', 'doughnut'].includes(c.type), labels: { color: '#C0C2C0' } } },
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                color: '#C0C2C0',
+                                plugins: {
+                                    legend: { display: ['pie', 'doughnut'].includes(c.type), labels: { color: '#C0C2C0', font: { size: 9 } } }
+                                },
                                 scales: !['pie', 'doughnut'].includes(c.type) ? {
-                                    y: { beginAtZero: true, grid: { color: '#242624' }, ticks: { color: '#808280' } },
-                                    x: { grid: { color: '#242624' }, ticks: { color: '#808280' } }
+                                    y: { beginAtZero: true, grid: { color: '#242624' }, ticks: { color: '#808280', font: { size: 9 } } },
+                                    x: { grid: { color: '#242624' }, ticks: { color: '#808280', font: { size: 9 } } }
                                 } : {}
                             }
                         });
@@ -633,7 +690,7 @@
         function updateSocialMetric(sIdx, eIdx, mIdx, k, v) { slidesData[sIdx].elements[eIdx].metrics[mIdx][k] = v; renderPreview(); }
         function removeSocialMetric(sIdx, eIdx, mIdx) { slidesData[sIdx].elements[eIdx].metrics.splice(mIdx, 1); renderForms(); }
 
-        function addBreakdownItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ label: 'Kategori', percent: '50', varName: '' }); renderForms(); }
+        function addBreakdownItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ label: 'Kategori', percent: '50' }); renderForms(); }
         function updateBreakdownItem(sIdx, eIdx, iIdx, k, v) { slidesData[sIdx].elements[eIdx].items[iIdx][k] = v; renderPreview(); }
         function removeBreakdownItem(sIdx, eIdx, iIdx) { slidesData[sIdx].elements[eIdx].items.splice(iIdx, 1); renderForms(); }
 
@@ -650,9 +707,9 @@
             if (type === 'columns') { ne.design = 'accent'; ne.cols = [{ title: 'Poin 1', text: 'Detail...' }, { title: 'Poin 2', text: 'Detail...' }]; }
             else if (type === 'comparison') { ne.label = 'PERBANDINGAN DATA'; ne.prevVal = '1000'; ne.currVal = '1500'; ne.unit = 'Views'; ne.varName = 'perbandingan'; }
             else if (type === 'social') { ne.sectionTitle = 'IKHTISAR KINERJA'; ne.period = 'Bulan Ini'; ne.metrics = [{ label: 'Tayangan (Views)', value: '100,000', deltaPercent: '10%', dir: 'up', varName: 'views' }]; }
-            else if (type === 'breakdown') { ne.title = 'WAWASAN PENONTON'; ne.items = [{ label: 'Perempuan', percent: '75', varName: 'female_pct' }]; }
+            else if (type === 'breakdown') { ne.title = 'WAWASAN PENONTON'; ne.items = [{ label: 'Perempuan', percent: '75' }]; }
             else if (type === 'wawasan') { ne.vars = [{ k: 'Korelasi', v: 'Positif' }]; ne.content = 'Tulis wawasan...'; }
-            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; }
+            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; ne.title = 'JUDUL GRAFIK'; ne.subtitle = 'Sub-judul Keterangan'; }
             slidesData[sIdx].elements.push(ne); renderForms(); 
         }
 
@@ -661,7 +718,7 @@
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
         /* =========================================================
-           PDF EXPORT & IMPORT WITH STATE RESTORATION ENGINE
+           PDF EXPORT & IMPORT ENGINE
            ========================================================= */
         async function downloadPDF() {
             const btn = document.getElementById('downloadBtn'); const ogText = btn.innerText; btn.innerText = 'Menyimpan...'; btn.disabled = true;
@@ -733,7 +790,7 @@
                         renderForms();
                         alert("Berhasil! Seluruh data slide, grafik, dan variabel telah dikembalikan.");
                     } else {
-                        alert("Gagal Import: PDF ini bukan sumber dari aplikasi Malevin ini atau tidak memiliki data metadata state.");
+                        alert("Gagal Import: PDF ini bukan berasal dari aplikasi ini atau tidak memiliki data state.");
                     }
                     btn.innerText = ogText; btn.disabled = false;
                     event.target.value = ''; 
