@@ -478,17 +478,17 @@
                             const midRadius = (element.innerRadius + element.outerRadius) / 2;
                             x = element.x + Math.cos(midAngle) * midRadius;
                             y = element.y + Math.sin(midAngle) * midRadius;
+                            ctx.fillStyle = '#FEFEFE';
                         } else if (chart.config.type === 'line') {
                             x = element.x;
                             y = element.y - 12;
+                            ctx.fillStyle = '#FEFEFE';
                         } else {
-                            /* Bar chart */
+                            /* bar: taruh di tengah-tengah tinggi bar biar gampang kebaca */
                             x = element.x;
                             y = (element.y + element.base) / 2;
+                            ctx.fillStyle = '#0A0B0A';
                         }
-
-                        // WARNA TEKS ANGKAT/PERSENTASE SELALU PUTIH
-                        ctx.fillStyle = '#FEFEFE';
                         ctx.fillText(label, x, y);
                         ctx.restore();
                     });
@@ -1816,9 +1816,20 @@
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             document.body.classList.add('exporting-pdf');
-            
+
+            // PERBAIKAN: reset transform/scale preview (mis. auto-scale di HP) SEBELUM
+            // discreenshot html2canvas, kalau tidak konten akan tumpang-tindih/berantakan
+            // karena layout asli (850px) tidak sinkron dengan tampilan yang sudah di-scale.
+            const container = document.getElementById('deck-container');
+            const originalTransform = container.style.transform;
+            const originalMarginBottom = container.style.marginBottom;
+            container.style.transform = 'none';
+            container.style.marginBottom = '0px';
+
             const slides = document.querySelectorAll('#deck-container .slide');
             if (slides.length === 0) {
+                container.style.transform = originalTransform;
+                container.style.marginBottom = originalMarginBottom;
                 document.body.classList.remove('exporting-pdf');
                 return;
             }
@@ -1871,6 +1882,10 @@
 
                 pdf.addImage(imgData, 'PNG', 0, 0, slideW, slideH, undefined, 'FAST');
             }
+
+            // PERBAIKAN: kembalikan transform/scale preview seperti semula
+            container.style.transform = originalTransform;
+            container.style.marginBottom = originalMarginBottom;
 
             document.body.classList.remove('exporting-pdf');
             pdf.save(`MALEVIN_Deck_${Date.now()}.pdf`);
