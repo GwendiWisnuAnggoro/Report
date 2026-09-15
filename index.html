@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MALEVIN STUDIO</title>
+    <title>MALEVIN</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -28,17 +28,7 @@
         --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     }
 
-    *, *::before, *::after { 
-        box-sizing: border-box; 
-        margin: 0; 
-        padding: 0; 
-    }
-
-    html, body {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body { 
         background-color: var(--bg-obsidian); 
@@ -47,6 +37,7 @@
         min-height: 100vh; 
         display: flex; 
         flex-direction: column; 
+        overflow-x: hidden; 
         padding-bottom: 60px;
         -webkit-font-smoothing: antialiased; 
     }
@@ -63,7 +54,6 @@
         overflow-x: auto;
         white-space: nowrap;
         gap: 15px; 
-        width: 100%;
     }
     .topbar::-webkit-scrollbar { height: 4px; }
     .topbar::-webkit-scrollbar-thumb { background: var(--border-obsidian); border-radius: 2px; }
@@ -94,22 +84,11 @@
     .mode-tab-btn.active { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; }
     .mode-tab-btn:not(.active):hover { color: var(--accent-gold); }
 
-    .app-container { display: flex; flex: 1; min-height: 0; overflow: hidden; width: 100%; }
+    .app-container { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
     /* EDITOR PANEL */
-    .editor-panel { 
-        width: 100%; 
-        max-width: 720px; 
-        margin: 0 auto; 
-        background-color: var(--surface-dark); 
-        display: flex; 
-        flex-direction: column; 
-        overflow-y: auto; 
-        padding: 20px; 
-        gap: 16px; 
-        box-sizing: border-box;
-    }
-    .slide-accordion { background-color: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box; }
+    .editor-panel { width: 100%; max-width: 720px; margin: 0 auto; background-color: var(--surface-dark); display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 16px; }
+    .slide-accordion { background-color: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .slide-accordion-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; flex-wrap: wrap; gap: 6px; }
     
     .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -117,15 +96,15 @@
     .add-elem-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
     .add-elem-btn.btn-ana { border-color: rgba(196, 154, 87, 0.4); color: var(--accent-gold); background: rgba(196, 154, 87, 0.05); }
 
-    .element-box { background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); border-left: 3px solid var(--accent-gold); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; width: 100%; box-sizing: border-box; }
+    .element-box { background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); border-left: 3px solid var(--accent-gold); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .element-header { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; }
     
-    .form-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
     .form-group label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-    .form-control { background-color: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); padding: 7px 9px; border-radius: 4px; font-size: 11px; font-family: inherit; width: 100%; box-sizing: border-box; }
+    .form-control { background-color: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); padding: 7px 9px; border-radius: 4px; font-size: 11px; font-family: inherit; width: 100%; }
     .form-control:focus { outline: none; border-color: var(--accent-gold); }
     textarea.form-control { resize: vertical; min-height: 50px; line-height: 1.4; }
-    .two-col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+    .two-col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     .btn { background-color: var(--card-obsidian); color: var(--text-white); border: 1px solid var(--border-obsidian); padding: 6px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
@@ -133,7 +112,7 @@
     .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
     /* GLOBAL VARIABLE WIDGET UI */
-    .global-var-panel { background: var(--surface-dark); border: 1px solid var(--accent-gold); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+    .global-var-panel { background: var(--surface-dark); border: 1px solid var(--accent-gold); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     .global-var-list { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
     .global-var-list::-webkit-scrollbar { height: 4px; }
     .global-var-list::-webkit-scrollbar-thumb { background: var(--border-obsidian); border-radius: 2px; }
@@ -151,7 +130,7 @@
     .hl-pop-btn.btn-down:hover { background: rgba(229, 83, 83, 0.15); }
 
     /* VARIABLE-AWARE INPUT (contenteditable) */
-    .var-input { background-color: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); padding: 7px 9px; border-radius: 4px; font-size: 11px; font-family: inherit; width: 100%; min-height: 32px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; cursor: text; box-sizing: border-box; }
+    .var-input { background-color: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); padding: 7px 9px; border-radius: 4px; font-size: 11px; font-family: inherit; width: 100%; min-height: 32px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; cursor: text; }
     .var-input:focus { outline: none; border-color: var(--accent-gold); }
     .var-input.var-multiline { min-height: 60px; }
     .var-input:empty::before { content: attr(data-placeholder); color: var(--text-muted); pointer-events: none; }
@@ -185,6 +164,7 @@
     
     .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; gap: 16px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
     
+    /* COVER CONTAINER & FLEXBOX MODIFIKASI TERPUSAT VERTIKAL */
     .slide-body.has-cover { 
         justify-content: center; 
         align-items: center; 
@@ -212,11 +192,20 @@
 
     .slide-accordion { position: relative; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
     .slide-accordion.slide-dragging { opacity: .55; transform: scale(.995); }
+    .slide-accordion.slide-drop-before { border-top: 3px solid var(--accent-gold) !important; box-shadow: 0 -8px 18px var(--accent-gold-glow); }
+    .slide-accordion.slide-drop-after { border-bottom: 3px solid var(--accent-gold) !important; box-shadow: 0 8px 18px var(--accent-gold-glow); }
 
     .draggable-element { position: relative; user-select: none; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; border: 1px dashed transparent; padding: 4px; border-radius: 4px; cursor: grab; }
     .draggable-element:active { cursor: grabbing; opacity: 0.75; }
     .draggable-element:hover { border-color: rgba(196, 154, 87, 0.4); background: rgba(196, 154, 87, 0.02); }
+    .slide-body.drag-over-empty {
+        outline: 1px dashed var(--accent-gold);
+        outline-offset: 3px;
+        background: rgba(196, 154, 87, 0.025);
+        box-shadow: inset 0 0 24px rgba(196, 154, 87, 0.05);
+    }
 
+    /* GLOW INDICATOR DRAG AND DROP */
     .draggable-element.drag-over-top { border-top: 3px solid var(--accent-gold) !important; box-shadow: 0 -8px 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-bottom { border-bottom: 3px solid var(--accent-gold) !important; box-shadow: 0 8px 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-left { border-left: 3px solid var(--accent-gold) !important; box-shadow: -8px 0 15px var(--accent-gold-glow); }
@@ -226,6 +215,11 @@
     .draggable-element:hover .elem-drag-bar { display: flex; }
     .grid-opt-btn { cursor: pointer; padding: 1px 4px; border-radius: 2px; }
     .grid-opt-btn:hover { background: var(--accent-gold); color: #0A0B0A; }
+
+    .elem-width-full { width: 100%; }
+    .elem-width-half { width: calc(50% - 8px); }
+    .elem-width-third { width: calc(33.333% - 10.66px); }
+    .elem-width-twothird { width: calc(66.666% - 5.33px); }
 
     .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
     .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
@@ -238,10 +232,12 @@
 
     .text-card-wrap { background-color: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
 
+    /* KPI METRICS STYLES */
     .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
     .kpi-card { flex: 1; min-width: 100px; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
     .kpi-value { font-size: 20px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; margin-top: 4px; }
 
+    /* DOCUMENT COLUMNS STYLES */
     .col-wrap { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
     .col-item { flex: 1; min-width: 120px; }
     .col-card--accent { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 10px 12px; }
@@ -250,19 +246,23 @@
     .col-card--numbered { position: relative; background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px 10px 36px; }
     .col-num-badge { position: absolute; left: 8px; top: 10px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #8A6831); color: #0A0B0A; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
+    /* SOCIAL MEDIA STYLES */
     .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; width: 100%; }
     .social-card { background: rgba(22, 24, 22, 0.7); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 10px; }
     .social-card-val { font-size: 14px; font-weight: 800; color: var(--text-white); margin: 3px 0; word-break: break-all; }
 
+    /* AUDIENCE BREAKDOWN & INSIGHTS */
     .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
     .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
 
+    /* TREND BADGES */
     .var-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 9px; padding: 2px 6px; border-radius: 12px; white-space: nowrap; cursor: pointer; user-select: none; }
     .var-up { color: var(--positive); background: rgba(76, 175, 122, 0.15); border: 1px solid rgba(76, 175, 122, 0.3); }
     .var-up:hover { background: rgba(76, 175, 122, 0.3); }
     .var-down { color: var(--negative); background: rgba(229, 83, 83, 0.15); border: 1px solid rgba(229, 83, 83, 0.3); }
     .var-down:hover { background: rgba(229, 83, 83, 0.3); }
 
+    /* INTERACTIVE TREND BADGE ACTION POPUP */
     #badgeActionPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 6px; border-radius: 6px; z-index: 10002; box-shadow: 0 10px 25px rgba(0,0,0,0.8); flex-direction: column; gap: 4px; }
 
     .compare-box { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
@@ -272,7 +272,7 @@
     .slide-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-obsidian); padding-top: 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; width: 100%; }
     .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
 
-    /* PERBAIKAN STYLES UNTUK GENERASI PDF PRESISI */
+    /* PERBAIKAN STYLES UNTUK GENERASI PDF */
     body.exporting-pdf .elem-drag-bar,
     body.exporting-pdf #highlightPopup,
     body.exporting-pdf #badgeActionPopup,
@@ -293,38 +293,16 @@
         box-shadow: none !important;
         transform: none !important;
         margin: 0 !important;
+        page-break-after: always;
+        break-after: page;
     }
 
-    /* PERBAIKAN 3: FIX OVERFLOW / GAP DI HP SISI KANAN MODE EDIT */
     @media (max-width: 768px) {
-        html, body {
-            width: 100% !important;
-            max-width: 100% !important;
-            overflow-x: hidden !important;
-            height: auto !important;
-        }
-        .app-container { 
-            width: 100% !important;
-            max-width: 100% !important;
-            height: auto !important; 
-            overflow-x: hidden !important; 
-        }
-        .editor-panel { 
-            width: 100% !important;
-            max-width: 100% !important; 
-            padding: 12px !important; 
-            padding-bottom: 120px !important; 
-            overflow-x: hidden !important;
-            box-sizing: border-box !important;
-        }
-        .slide-accordion, .global-var-panel {
-            width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-        }
+        body { height: auto !important; overflow-y: auto !important; }
+        .app-container { height: auto !important; overflow: visible !important; }
+        .editor-panel { max-height: none !important; overflow-y: visible !important; padding: 12px !important; padding-bottom: 150px !important; }
         .btn-grid { grid-template-columns: repeat(2, 1fr); }
-        .two-col-form { grid-template-columns: 1fr !important; }
-        .preview-panel { padding: 15px 5px !important; width: 100% !important; }
+        .preview-panel { padding: 15px 5px !important; }
     }
 </style>
 </head>
@@ -385,7 +363,7 @@
         </div>
         <div class="topbar-actions">
             <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDFImport(event)">
-            <button class="btn" id="importPdfBtn" onclick="document.getElementById('pdfInput').click()">Import PDF Metadata</button>
+            <button class="btn" id="importPdfBtn" onclick="document.getElementById('pdfInput').click()">Import PDF</button>
             <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Export Deck (PDF)</button>
         </div>
     </div>
@@ -399,7 +377,7 @@
                     <button class="btn btn-gold" onclick="openVarModal(null)" style="padding: 3px 8px; font-size:8px;">+ Variabel Baru</button>
                 </div>
                 <div style="font-size:9px; color:var(--text-muted); line-height:1.4;">
-                    <strong>Petunjuk:</strong> Ketik <code>{</code> atau <code>{{</code> untuk autocomplete. Blok teks untuk opsi Variabel / Highlight.
+                    <strong>Petunjuk:</strong> (1) Ketik <code>{</code> atau <code>{{</code> di kolom input mana saja untuk autocomplete. (2) Blok teks untuk opsi Variabel / Highlight Kenaikan [up:teks] / Penurunan [down:teks]. (3) Variabel otomatis jadi pil kapsul kuning & disimpan di LocalStorage.
                 </div>
                 <div class="global-var-list" id="globalVarListUI"></div>
             </div>
@@ -449,7 +427,9 @@
 
         let chartInstances = [];
 
-        /* PERBAIKAN 1: MENGUBAH SEMUA WARNA PERSENTASE / ANGKA GRAFIK MENJADI PUTIH (#FEFEFE) */
+        /* PLUGIN CUSTOM: MENAMPILKAN VALUE/PERSENTASE DI TENGAH GRAFIK (BAR/LINE/PIE/DOUGHNUT)
+           Aktif per-grafik lewat toggle "Tampilkan Value" di editor, ambil data langsung dari
+           angka yang sudah diinput di grafik jadi tidak perlu ketik ulang manual. */
         const valueLabelPlugin = {
             id: 'valueLabelPlugin',
             afterDatasetsDraw(chart) {
@@ -496,9 +476,10 @@
             }
         };
         Chart.register(valueLabelPlugin);
-
         let draggedElemInfo = null;
         let dragHoverInfo = null;
+        let draggedSlideInfo = null;
+        let slideDropTarget = null;
         let activeBadgeTarget = null;
 
         const VAR_TYPE_LABELS = { text: 'Teks', number: 'Angka', calculation: 'Rumus / Kalkulasi', image: 'Gambar' };
@@ -831,6 +812,7 @@
             }
 
             const range = sel.getRangeAt(0);
+
             const isStartInside = el.contains(range.startContainer);
             const isEndInside = el.contains(range.endContainer);
 
@@ -878,6 +860,10 @@
 
         document.getElementById('editorPanel').addEventListener('mouseup', handleFieldSelectionEvent);
         document.getElementById('editorPanel').addEventListener('keyup', handleFieldSelectionEvent);
+        document.addEventListener('mousedown', function (e) {
+            const popup = document.getElementById('highlightPopup');
+            if (popup.style.display === 'flex' && !popup.contains(e.target)) popup.style.display = 'none';
+        });
 
         function createVariableFromHighlight() {
             if (!activeVarTarget) return;
@@ -1051,6 +1037,15 @@
                 }
             });
             return vars;
+        }
+
+        function resolveVarPlain(str, vars) {
+            if (!str) return '';
+            return String(str).replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, varKey) => {
+                const keyLower = varKey.toLowerCase();
+                const matchedKey = Object.keys(vars).find(k => k.toLowerCase() === keyLower);
+                return matchedKey ? vars[matchedKey].value : '';
+            });
         }
 
         function renderVarsInText(str, vars, sIdx, eIdx, fieldKey, subType, subIdx) {
@@ -1235,6 +1230,7 @@
             renderPreview();
         }
 
+        /* RENDER FORM EDITOR COMPLETE */
         function renderForms() {
             renderCustomVarsUI();
             const wrapper = document.getElementById('forms-wrapper');
@@ -1488,6 +1484,202 @@
             } 
         }
 
+        function clearDragIndicators() {
+            document.querySelectorAll('.draggable-element').forEach(el => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            });
+            document.querySelectorAll('.slide-body').forEach(el => el.classList.remove('drag-over-empty'));
+        }
+
+        function onElemDragStart(e, sIdx, eIdx) {
+            draggedElemInfo = { kind: 'element', sIdx, eIdx };
+            dragHoverInfo = null;
+            try {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', JSON.stringify({ sIdx, eIdx }));
+            } catch (_) {}
+            e.currentTarget.style.opacity = '0.5';
+        }
+
+        function onElemDragEnd(e) {
+            e.currentTarget.style.opacity = '1';
+            clearDragIndicators();
+            draggedElemInfo = null;
+        }
+
+        function getDropSide(e, rect) {
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            const horizontalZone = Math.max(55, Math.min(w * 0.38, 120));
+            if (x <= horizontalZone) return 'left';
+            if (x >= w - horizontalZone) return 'right';
+            const verticalZone = Math.max(35, Math.min(h * 0.32, 90));
+            if (y <= verticalZone) return 'top';
+            if (y >= h - verticalZone) return 'bottom';
+            return x < w / 2 ? 'left' : 'right';
+        }
+
+        function onElemDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!draggedElemInfo || draggedElemInfo.kind === 'slide') return;
+            try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+
+            const targetEl = e.currentTarget;
+            const targetSIdx = Number(targetEl.closest('.slide-body')?.dataset.slideIndex);
+            const targetEIdx = Number(targetEl.dataset.elemIndex);
+            const rect = targetEl.getBoundingClientRect();
+            const side = getDropSide(e, rect);
+
+            dragHoverInfo = { sIdx: targetSIdx, eIdx: targetEIdx, side };
+            targetEl.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            targetEl.classList.add('drag-over-' + side);
+        }
+
+        function onElemDragLeave(e) {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            }
+        }
+
+        function onSlideBodyDragOver(e) {
+            if (!draggedElemInfo) return;
+            if (e.target.closest('.draggable-element')) return;
+
+            e.preventDefault();
+            try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+            e.currentTarget.classList.add('drag-over-empty');
+        }
+
+        function onSlideBodyDragLeave(e) {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('drag-over-empty');
+            }
+        }
+
+        function getElementIndexFromPoint(slideBody, clientX, clientY, excludeIndex) {
+            const items = [...slideBody.querySelectorAll(':scope > .draggable-element')]
+                .filter(el => !el.classList.contains('drag-placeholder'));
+
+            let best = { index: -1, before: false, distance: Infinity };
+
+            items.forEach((el, domIndex) => {
+                const dataIndex = Number(el.dataset.elemIndex);
+                if (dataIndex === excludeIndex) return;
+
+                const r = el.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                const d = Math.hypot(clientX - cx, clientY - cy);
+                if (d < best.distance) {
+                    best = {
+                        index: dataIndex,
+                        before: clientX < cx || (Math.abs(clientX - cx) < r.width * 0.25 && clientY < cy),
+                        distance: d
+                    };
+                }
+            });
+            return best;
+        }
+
+        function setAdaptiveSideWidths(elements, movedIndex, targetIndex, side) {
+            const moved = elements[movedIndex];
+            const target = elements[targetIndex];
+            if (!moved || !target) return;
+
+            const targetWidth = target.width || 'full';
+            if (targetWidth === 'third') {
+                moved.width = 'third';
+            } else if (targetWidth === 'twothird') {
+                moved.width = 'third';
+                target.width = 'twothird';
+            } else {
+                moved.width = 'half';
+                target.width = 'half';
+            }
+        }
+
+        function onSlideBodyDrop(e, targetSIdx) {
+            if (!draggedElemInfo || draggedElemInfo.sIdx !== targetSIdx) return;
+            if (e.target.closest('.draggable-element')) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const slideBody = e.currentTarget;
+            slideBody.classList.remove('drag-over-empty');
+
+            const srcSIdx = draggedElemInfo.sIdx;
+            const srcEIdx = draggedElemInfo.eIdx;
+            const elements = slidesData[targetSIdx].elements;
+            if (!elements[srcEIdx]) return;
+
+            const point = getElementIndexFromPoint(slideBody, e.clientX, e.clientY, srcEIdx);
+            const [moved] = elements.splice(srcEIdx, 1);
+
+            let insertIdx = elements.length;
+            if (point.index >= 0) {
+                insertIdx = elements.findIndex((_, i) => i === point.index);
+                if (insertIdx < 0) insertIdx = elements.length;
+            }
+
+            if (point.index >= 0) {
+                if (point.before) {
+                    insertIdx = Math.max(0, point.index);
+                } else {
+                    insertIdx = Math.min(elements.length, point.index + 1);
+                }
+            }
+
+            elements.splice(insertIdx, 0, moved);
+            draggedElemInfo = null;
+            clearDragIndicators();
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        function onElemDrop(e, targetSIdx, targetEIdx) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!draggedElemInfo || draggedElemInfo.kind === 'slide') return;
+
+            const srcSIdx = draggedElemInfo.sIdx;
+            const srcEIdx = draggedElemInfo.eIdx;
+            if (srcSIdx !== targetSIdx) { draggedElemInfo = null; dragHoverInfo = null; clearDragIndicators(); return; }
+
+            const elements = slidesData[targetSIdx].elements;
+            if (!elements[srcEIdx] || !elements[targetEIdx] || srcEIdx === targetEIdx) {
+                draggedElemInfo = null; dragHoverInfo = null; clearDragIndicators(); return;
+            }
+
+            const targetEl = e.currentTarget;
+            const rect = targetEl.getBoundingClientRect();
+            const side = (dragHoverInfo && dragHoverInfo.sIdx === targetSIdx && dragHoverInfo.eIdx === targetEIdx)
+                ? dragHoverInfo.side : getDropSide(e, rect);
+
+            const moved = elements[srcEIdx];
+            const targetRef = elements[targetEIdx];
+
+            if (side === 'left' || side === 'right') {
+                setAdaptiveSideWidths(elements, srcEIdx, targetEIdx, side);
+            }
+
+            elements.splice(srcEIdx, 1);
+            const targetIndex = elements.indexOf(targetRef);
+            let insertIndex = targetIndex < 0 ? elements.length : targetIndex;
+            if (side === 'right' || side === 'bottom') insertIndex++;
+            insertIndex = Math.max(0, Math.min(insertIndex, elements.length));
+            elements.splice(insertIndex, 0, moved);
+
+            draggedElemInfo = null;
+            dragHoverInfo = null;
+            clearDragIndicators();
+            saveToLocalStorage();
+            renderForms();
+        }
+
         function quickSetWidth(sIdx, eIdx, widthVal) {
             slidesData[sIdx].elements[eIdx].width = widthVal;
             saveToLocalStorage();
@@ -1556,6 +1748,9 @@
                 const hasCover = slide.elements.some(e => e.type === 'cover');
                 slideBody.className = `slide-body ${hasCover ? 'has-cover' : ''}`;
                 slideBody.dataset.slideIndex = sIdx;
+                slideBody.setAttribute('ondragover', 'onSlideBodyDragOver(event)');
+                slideBody.setAttribute('ondragleave', 'onSlideBodyDragLeave(event)');
+                slideBody.setAttribute('ondrop', `onSlideBodyDrop(event, ${sIdx})`);
 
                 slide.elements.forEach((elem, eIdx) => {
                     const elemWrapper = document.createElement('div');
@@ -1564,6 +1759,12 @@
                     
                     elemWrapper.className = `draggable-element ${wClass}`;
                     elemWrapper.dataset.elemIndex = eIdx;
+                    elemWrapper.setAttribute('draggable', 'true');
+                    elemWrapper.setAttribute('ondragstart', `onElemDragStart(event, ${sIdx}, ${eIdx})`);
+                    elemWrapper.setAttribute('ondragend', `onElemDragEnd(event)`);
+                    elemWrapper.setAttribute('ondragover', `onElemDragOver(event)`);
+                    elemWrapper.setAttribute('ondragleave', `onElemDragLeave(event)`);
+                    elemWrapper.setAttribute('ondrop', `onElemDrop(event, ${sIdx}, ${eIdx})`);
 
                     const dragBar = `<div class="elem-drag-bar">
                         <span>⋮⋮ DRAG</span>
@@ -1578,6 +1779,7 @@
                     const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${parsedBrand}</span>` : '';
                     let p = '';
 
+                    /* IMPLEMENTASI COVER DENGAN ALIGNMENT & SCALING KUSTOM */
                     if (elem.type === 'cover') {
                         const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
                         const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
@@ -1607,117 +1809,169 @@
                         const styleCls = elem.style === 'hero' ? 't-hero' : (elem.style === 'judul' ? 't-judul' : (elem.style === 'subjudul' ? 't-subjudul' : 't-paragraf'));
                         const parsedContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
                         const textHtml = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="${styleCls}">${parsedContent}</div>`;
-                        p = elem.card ? `<div class="text-card-wrap" style="border-radius: ${br};">${textHtml}</div>` : textHtml;
+                        p = elem.card ? `<div class="text-card-wrap" style="border-radius:0 ${br} ${br} 0;">${textHtml}</div>` : textHtml;
                     }
                     else if (elem.type === 'columns') {
                         const cols = elem.cols || [];
-                        const styleMode = elem.colStyle || 'accent';
-                        const colsHtml = cols.map((c, cIdx) => {
-                            const pTitle = renderVarsInText(c.title || '', globalVars, sIdx, eIdx, 'title', 'col', cIdx);
-                            const pContent = renderVarsInText(c.content || '', globalVars, sIdx, eIdx, 'content', 'col', cIdx);
-                            if (styleMode === 'numbered') {
-                                return `<div class="col-item col-card--numbered" style="border-radius: ${br};"><div class="col-num-badge">${cIdx + 1}</div><div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px;">${pTitle}</div><div class="t-paragraf">${pContent}</div></div>`;
-                            } else if (styleMode === 'minimal') {
-                                return `<div class="col-item col-card--minimal"><div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px;">${pTitle}</div><div class="t-paragraf">${pContent}</div></div>`;
-                            } else if (styleMode === 'plain') {
-                                return `<div class="col-item col-card--plain" style="border-radius: ${br};"><div style="font-size:11px; font-weight:800; color:var(--text-white); margin-bottom:4px;">${pTitle}</div><div class="t-paragraf">${pContent}</div></div>`;
+                        const colStyle = elem.colStyle || 'accent';
+                        let colsHTML = cols.map((c, cIdx) => {
+                            const parsedTitle = renderVarsInText(c.title || '', globalVars, sIdx, eIdx, 'title', 'col', cIdx);
+                            const parsedContent = renderVarsInText(c.content || '', globalVars, sIdx, eIdx, 'content', 'col', cIdx);
+
+                            if (colStyle === 'numbered') {
+                                return `<div class="col-item col-card--numbered" style="border-radius:${br};">
+                                    <div class="col-num-badge">${cIdx + 1}</div>
+                                    <div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
+                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
+                                </div>`;
+                            } else if (colStyle === 'minimal') {
+                                return `<div class="col-item col-card--minimal">
+                                    <div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
+                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
+                                </div>`;
+                            } else if (colStyle === 'plain') {
+                                return `<div class="col-item col-card--plain" style="border-radius:${br};">
+                                    <div style="font-size:11px; font-weight:800; color:var(--text-white); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
+                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
+                                </div>`;
                             } else {
-                                return `<div class="col-item col-card--accent" style="border-radius: ${br};"><div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px;">${pTitle}</div><div class="t-paragraf">${pContent}</div></div>`;
+                                return `<div class="col-item col-card--accent" style="border-radius:0 ${br} ${br} 0;">
+                                    <div style="font-size:11px; font-weight:800; color:var(--accent-gold); margin-bottom:4px; text-transform:uppercase;">${parsedTitle}</div>
+                                    <div style="font-size:10px; color:#C0C2C0; line-height:1.4;">${parsedContent}</div>
+                                </div>`;
                             }
                         }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="col-wrap">${colsHtml}</div>`;
+
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="col-wrap">${colsHTML}</div>`;
                     }
                     else if (elem.type === 'kpi') {
                         const metrics = elem.metrics || [];
-                        const kpiHtml = metrics.map((m, mIdx) => {
-                            const pLabel = renderVarsInText(m.label || '', globalVars, sIdx, eIdx, 'label', 'metric', mIdx);
-                            const pVal = renderVarsInText(m.value || '', globalVars, sIdx, eIdx, 'value', 'metric', mIdx);
-                            return `<div class="kpi-card" style="border-radius: ${br};"><div style="font-size:9px; color:var(--text-muted); font-weight:800;">${pLabel}</div><div class="kpi-value">${pVal}</div></div>`;
+                        let cardsHTML = metrics.map((m, mIdx) => {
+                            const parsedLabel = renderVarsInText(m.label || '', globalVars, sIdx, eIdx, 'label', 'metric', mIdx);
+                            const parsedVal = renderVarsInText(m.value || '', globalVars, sIdx, eIdx, 'value', 'metric', mIdx);
+                            return `<div class="kpi-card" style="border-radius:${br};">
+                                <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-weight:800;">${parsedLabel}</div>
+                                <div class="kpi-value">${parsedVal}</div>
+                            </div>`;
                         }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${kpiHtml}</div>`;
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${cardsHTML}</div>`;
                     }
                     else if (elem.type === 'table') {
-                        const headers = (elem.headers || '').split(',').map(h => h.trim());
-                        const rows = (elem.rowsData || '').split('\n').filter(r => r.trim());
-                        
-                        const thHtml = headers.map(h => `<th style="text-align:left; padding:6px 8px; font-size:9px; color:var(--accent-gold); border-bottom:1px solid var(--border-obsidian); text-transform:uppercase;">${renderVarsInText(h, globalVars, sIdx, eIdx, 'headers')}</th>`).join('');
-                        const trHtml = rows.map(r => {
-                            const cells = r.split(',').map(c => c.trim());
-                            const td = cells.map(c => `<td style="padding:6px 8px; font-size:10px; color:var(--text-white); border-bottom:1px solid var(--border-obsidian);">${renderVarsInText(c, globalVars, sIdx, eIdx, 'rowsData')}</td>`).join('');
-                            return `<tr>${td}</tr>`;
-                        }).join('');
+                        const parsedHeadersStr = resolveVarPlain(elem.headers || '', globalVars);
+                        const parsedRowsStr = resolveVarPlain(elem.rowsData || '', globalVars);
 
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<table style="width:100%; border-collapse:collapse; background:rgba(22,24,22,0.6); border:1px solid var(--border-obsidian); border-radius:${br}; overflow:hidden;"><thead><tr>${thHtml}</tr></thead><tbody>${trHtml}</tbody></table>`;
+                        const headers = parsedHeadersStr.split(',').map(h => h.trim());
+                        const rows = parsedRowsStr.split('\n').filter(r => r.trim()).map(r => r.split(',').map(c => c.trim()));
+
+                        let thHTML = headers.map(h => `<th style="border-bottom: 2px solid var(--accent-gold); padding: 8px 10px; text-align: left; font-size: 10px; color: var(--accent-gold); text-transform: uppercase;">${escapeHtml(h)}</th>`).join('');
+                        let trHTML = rows.map(r => `<tr>${r.map(c => `<td style="border-bottom: 1px solid var(--border-obsidian); padding: 8px 10px; font-size: 10px; color: var(--text-white);">${escapeHtml(c)}</td>`).join('')}</tr>`).join('');
+
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
+                        <div style="overflow-x: auto; width: 100%; border: 1px solid var(--border-obsidian); border-radius: ${br}; background: rgba(22, 24, 22, 0.6);">
+                            <table style="width: 100%; border-collapse: collapse; font-family: inherit;">
+                                <thead><tr>${thHTML}</tr></thead>
+                                <tbody>${trHTML}</tbody>
+                            </table>
+                        </div>`;
                     }
                     else if (elem.type === 'social') {
                         const links = elem.socialLinks || [];
-                        const sHtml = links.map((l, lIdx) => {
-                            const pPlat = renderVarsInText(l.platform || '', globalVars, sIdx, eIdx, 'platform', 'social', lIdx);
-                            const pHandle = renderVarsInText(l.handle || '', globalVars, sIdx, eIdx, 'handle', 'social', lIdx);
-                            const pStat = renderVarsInText(l.stat || '', globalVars, sIdx, eIdx, 'stat', 'social', lIdx);
-                            return `<div class="social-card" style="border-radius: ${br};"><div style="font-size:8px; color:var(--accent-gold); font-weight:800; text-transform:uppercase;">${pPlat}</div><div class="social-card-val">${pStat}</div><div style="font-size:9px; color:var(--text-muted);">${pHandle}</div></div>`;
+                        let cardsHTML = links.map((l, lIdx) => {
+                            const parsedPlat = renderVarsInText(l.platform || '', globalVars, sIdx, eIdx, 'platform', 'social', lIdx);
+                            const parsedHandle = renderVarsInText(l.handle || '', globalVars, sIdx, eIdx, 'handle', 'social', lIdx);
+                            const parsedStat = renderVarsInText(l.stat || '', globalVars, sIdx, eIdx, 'stat', 'social', lIdx);
+                            return `<div class="social-card" style="border-radius:${br};">
+                                <div style="font-size:9px; color:var(--accent-gold); text-transform:uppercase; font-weight:800;">${parsedPlat}</div>
+                                <div class="social-card-val">${parsedStat}</div>
+                                <div style="font-size:8px; color:var(--text-muted); font-weight:700;">${parsedHandle}</div>
+                            </div>`;
                         }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${sHtml}</div>`;
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${cardsHTML}</div>`;
                     }
                     else if (elem.type === 'breakdown') {
-                        const parsedTitle = renderVarsInText(elem.title || 'WAWASAN AUDIENS', globalVars, sIdx, eIdx, 'title');
-                        const rows = (elem.rowsData || '').split('\n').filter(r => r.trim());
-                        const rHtml = rows.map(r => {
-                            const [label, val] = r.split(',').map(s => s ? s.trim() : '');
-                            return `<div class="breakdown-row"><span>${renderVarsInText(label || '', globalVars, sIdx, eIdx, 'rowsData')}</span><strong style="color:var(--text-white);">${renderVarsInText(val || '', globalVars, sIdx, eIdx, 'rowsData')}</strong></div>`;
-                        }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div style="background:rgba(22,24,22,0.6); border:1px solid var(--border-obsidian); padding:10px; border-radius:${br};"><div style="font-size:10px; font-weight:800; color:var(--accent-gold); margin-bottom:6px; letter-spacing:1px;">${parsedTitle}</div>${rHtml}</div>`;
+                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
+                        const parsedRowsStr = resolveVarPlain(elem.rowsData || '', globalVars);
+                        const rows = parsedRowsStr.split('\n').filter(r => r.trim()).map(r => r.split(',').map(c => c.trim()));
+
+                        let rowsHTML = rows.map(r => `
+                            <div class="breakdown-row">
+                                <span>${escapeHtml(r[0] || '')}</span>
+                                <span style="font-weight:800; color:var(--text-white);">${escapeHtml(r[1] || '')}</span>
+                            </div>
+                        `).join('');
+
+                        p = `<div style="background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 12px; border-radius: ${br}; width: 100%;">
+                            <div style="font-size: 10px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px; text-transform: uppercase;">${parsedTitle}</div>
+                            ${rowsHTML}
+                        </div>`;
                     }
                     else if (elem.type === 'wawasan') {
-                        const parsedTitle = renderVarsInText(elem.title || 'CATATAN', globalVars, sIdx, eIdx, 'title');
+                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
                         const parsedContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><div style="font-size:10px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">${parsedTitle}</div><div style="font-size:11px; line-height:1.4;">${parsedContent}</div></div>`;
+                        p = `<div class="wawasan-box" style="border-radius: ${br};">
+                            <div style="font-size: 10px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase;"> ${parsedTitle}</div>
+                            <div style="line-height: 1.5; white-space: pre-line;">${parsedContent}</div>
+                        </div>`;
                     }
                     else if (elem.type === 'image') {
-                        p = elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius:${br}">` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px; border-radius:${br}">Belum ada gambar/logo diupload</div>`;
+                        p = elem.imgData ? `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<img src="${elem.imgData}" class="img-preview-box" style="border-radius:${br};">` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px;">[Belum Ada Gambar Ditambahkan]</div>`;
                     }
                     else if (elem.type === 'comparison') {
-                        const parsedLabel = renderVarsInText(elem.label || 'PERBANDINGAN', globalVars, sIdx, eIdx, 'label');
+                        const parsedLabel = renderVarsInText(elem.label || '', globalVars, sIdx, eIdx, 'label');
                         if (elem.compareMode === 'boolean') {
-                            const isTrue = (elem.boolVal === 'true' || elem.boolVal === true);
-                            const textCustom = renderVarsInText(elem.boolText || (isTrue ? 'YA' : 'TIDAK'), globalVars, sIdx, eIdx, 'boolText');
-                            const colorClass = isTrue ? 'var-up' : 'var-down';
-                            const iconSymbol = isTrue ? '✓' : '✕';
-                            p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="compare-box" style="border-radius: ${br};"><div><div style="font-size:9px; color:var(--text-muted); font-weight:800;">${parsedLabel}</div><div class="compare-num">${textCustom}</div></div><span class="var-badge ${colorClass}" style="font-size:12px; padding:4px 10px;">${iconSymbol} ${isTrue ? 'AKTIF' : 'NON-AKTIF'}</span></div>`;
+                            const isTrue = elem.boolVal === 'true';
+                            const parsedBoolText = renderVarsInText(elem.boolText || 'Status', globalVars, sIdx, eIdx, 'boolText');
+                            p = `<div class="compare-box" style="border-radius:${br};">
+                                <div>
+                                    <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:800;">${parsedLabel}</div>
+                                    <div class="compare-num">${parsedBoolText}</div>
+                                </div>
+                                <span class="var-badge ${isTrue ? 'var-up' : 'var-down'}" style="font-size:12px; padding:4px 10px;">${isTrue ? '✓ AKTIF / YA' : '✕ NONAKTIF / TIDAK'}</span>
+                            </div>`;
                         } else {
-                            const pVal = parseFloat(renderVarsInText(elem.prevVal || '0', globalVars, sIdx, eIdx, 'prevVal')) || 0;
-                            const cVal = parseFloat(renderVarsInText(elem.currVal || '0', globalVars, sIdx, eIdx, 'currVal')) || 0;
-                            const diff = cVal - pVal;
-                            const pct = pVal !== 0 ? Math.abs((diff / pVal) * 100).toFixed(1) : '0';
+                            const prev = parseFloat(resolveVarPlain(elem.prevVal, globalVars)) || 0;
+                            const curr = parseFloat(resolveVarPlain(elem.currVal, globalVars)) || 0;
+                            const diff = curr - prev;
+                            const pct = prev !== 0 ? Math.abs((diff / prev) * 100).toFixed(1) : '0';
                             const isUp = diff >= 0;
-                            p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="compare-box" style="border-radius: ${br};"><div><div style="font-size:9px; color:var(--text-muted); font-weight:800;">${parsedLabel}</div><div class="compare-num">${cVal}</div></div><span class="var-badge ${isUp ? 'var-up' : 'var-down'}" style="font-size:11px; padding:4px 8px;">${isUp ? '▲' : '▼'} ${pct}% (${isUp ? '+' : ''}${diff})</span></div>`;
+
+                            p = `<div class="compare-box" style="border-radius:${br};">
+                                <div>
+                                    <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:800;">${parsedLabel}</div>
+                                    <div class="compare-num">${curr}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span class="var-badge ${isUp ? 'var-up' : 'var-down'}" style="font-size:11px;">${isUp ? '▲' : '▼'} ${pct}%</span>
+                                    <div style="font-size:8px; color:var(--text-muted); margin-top:2px;">Sebelumnya: ${prev}</div>
+                                </div>
+                            </div>`;
                         }
                     }
                     else if (elem.type === 'chart') {
-                        const chartId = `chart-${sIdx}-${eIdx}`;
-                        const rawLabels = (elem.labels || 'A, B').split(',').map(s => renderVarsInText(s.trim(), globalVars, sIdx, eIdx, 'labels'));
-                        const dataArr = (elem.data || '10, 20').split(',').map(s => parseFloat(renderVarsInText(s.trim(), globalVars, sIdx, eIdx, 'data')) || 0);
-
-                        const { badgeClass, badgeIcon, badgeText } = computeChartBadge(elem.badgeType || 'trend', dataArr);
-                        const parsedTitle = renderVarsInText(elem.title || 'GRAFIK ANALISIS', globalVars, sIdx, eIdx, 'title');
+                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
                         const parsedSub = renderVarsInText(elem.subtitle || '', globalVars, sIdx, eIdx, 'subtitle');
+                        const canvasId = `chart_${sIdx}_${eIdx}`;
 
-                        p = `<div style="background:rgba(22,24,22,0.6); border:1px solid var(--border-obsidian); border-radius:${br}; padding:12px; width:100%;">
-                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                                    <div>
-                                        ${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}
-                                        <div style="font-size:12px; font-weight:800; color:var(--text-white);">${parsedTitle}</div>
-                                        ${parsedSub ? `<div style="font-size:9px; color:var(--text-muted);">${parsedSub}</div>` : ''}
-                                    </div>
-                                    <span class="var-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+                        const dataArr = resolveVarPlain(elem.data || '', globalVars).split(',').map(n => parseFloat(n.trim()) || 0);
+                        const badgeInfo = computeChartBadge(elem.badgeType || 'trend', dataArr);
+
+                        p = `<div style="background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-radius: ${br}; padding: 12px; width: 100%;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <div>
+                                    <div style="font-size: 11px; font-weight: 800; color: var(--text-white); text-transform: uppercase;">${parsedTitle}</div>
+                                    <div style="font-size: 9px; color: var(--text-muted);">${parsedSub}</div>
                                 </div>
-                                <div style="height:170px; width:100%; position:relative;"><canvas id="${chartId}"></canvas></div>
-                             </div>`;
+                                <span class="var-badge ${badgeInfo.badgeClass}">${badgeInfo.badgeIcon} ${badgeInfo.badgeText}</span>
+                            </div>
+                            <div style="height: 160px; position: relative; width: 100%;">
+                                <canvas id="${canvasId}"></canvas>
+                            </div>
+                        </div>`;
 
                         chartsToRender.push({
-                            id: chartId,
-                            type: elem.chartType || 'bar',
-                            labels: rawLabels,
+                            canvasId,
+                            chartType: elem.chartType || 'bar',
+                            labels: resolveVarPlain(elem.labels || '', globalVars).split(',').map(l => l.trim()),
                             data: dataArr,
                             showValues: !!elem.showValues,
                             valueSuffix: elem.valueSuffix || ''
@@ -1728,167 +1982,145 @@
                     slideBody.appendChild(elemWrapper);
                 });
 
-                const slideFooter = document.createElement('div'); slideFooter.className = 'slide-footer';
-                const parsedFooterLeft = renderVarsInText(slide.footerLeft || 'MALEVIN', globalVars, sIdx, null, 'footerLeft');
-                slideFooter.innerHTML = `<div>${parsedFooterLeft}</div><div class="slide-num">${sIdx + 1}</div>`;
+                const parsedFooter = renderVarsInText(slide.footerLeft || 'MALEVIN', globalVars, sIdx, null, 'footerLeft');
+                const footerHTML = `<div class="slide-footer">
+                    <span>${parsedFooter}</span>
+                    <span class="slide-num">${sIdx + 1}</span>
+                </div>`;
 
                 slideEl.appendChild(slideBody);
-                slideEl.appendChild(slideFooter);
+                slideEl.appendChild(document.createRange().createContextualFragment(footerHTML));
                 container.appendChild(slideEl);
             });
 
+            // INSTANSIASI CANVASES HARUS DILAKUKAN SETELAH ELEMENT DIBUAT DI DOM
             setTimeout(() => {
                 chartsToRender.forEach(c => {
-                    const ctx = document.getElementById(c.id);
-                    if (ctx) {
-                        const instance = new Chart(ctx, {
-                            type: c.type,
-                            data: {
-                                labels: c.labels,
-                                datasets: [{
-                                    data: c.data,
-                                    backgroundColor: c.type === 'line' ? 'rgba(196, 154, 87, 0.2)' : ['#C49A57', '#8A6831', '#4CAF7A', '#E55353', '#3182CE'],
-                                    borderColor: '#C49A57',
-                                    borderWidth: 2,
-                                    fill: c.type === 'line'
-                                }]
+                    const canvas = document.getElementById(c.canvasId);
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    
+                    const newChart = new Chart(ctx, {
+                        type: c.chartType,
+                        data: {
+                            labels: c.labels,
+                            datasets: [{
+                                label: 'Data',
+                                data: c.data,
+                                backgroundColor: c.chartType === 'pie' || c.chartType === 'doughnut' 
+                                    ? ['#C49A57', '#A37E43', '#8A6831', '#4CAF7A', '#E55353'] 
+                                    : 'rgba(196, 154, 87, 0.4)',
+                                borderColor: '#C49A57',
+                                borderWidth: 1,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: c.chartType === 'pie' || c.chartType === 'doughnut' },
+                                valueLabelPlugin: { enabled: c.showValues, suffix: c.valueSuffix }
                             },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { 
-                                    legend: { display: (c.type === 'pie' || c.type === 'doughnut'), labels: { color: '#FEFEFE', font: { size: 9 } } },
-                                    valueLabelPlugin: { enabled: c.showValues, suffix: c.valueSuffix }
-                                },
-                                scales: (c.type === 'pie' || c.type === 'doughnut') ? {} : {
-                                    x: { ticks: { color: '#808280', font: { size: 8 } }, grid: { display: false } },
-                                    y: { ticks: { color: '#808280', font: { size: 8 } }, grid: { color: '#242624' } }
-                                }
+                            scales: (c.chartType === 'pie' || c.chartType === 'doughnut') ? {} : {
+                                x: { ticks: { color: '#808280', font: { size: 8 } }, grid: { color: '#242624' } },
+                                y: { ticks: { color: '#808280', font: { size: 8 } }, grid: { color: '#242624' } }
                             }
-                        });
-                        chartInstances.push(instance);
-                    }
+                        }
+                    });
+                    chartInstances.push(newChart);
                 });
             }, 50);
         }
 
-        /* PERBAIKAN 2: REAL IMPORT METADATA PDF DARI HASIL EXPORT MALEVIN */
-        async function handlePDFImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                const meta = await pdfDoc.getMetadata();
-
-                let metadataString = null;
-                if (meta && meta.info && meta.info.Subject) {
-                    if (meta.info.Subject.startsWith('MALEVIN_METADATA:')) {
-                        metadataString = meta.info.Subject.replace('MALEVIN_METADATA:', '');
-                    }
-                }
-
-                if (!metadataString) {
-                    alert("Gagal Import PDF!\nFile PDF ini tidak mengandung metadata MALEVIN yang valid atau dibuat dari aplikasi luar/lain.");
-                    event.target.value = '';
-                    return;
-                }
-
-                const payload = JSON.parse(metadataString);
-                if (payload && payload.slidesData && payload.customVariables) {
-                    slidesData = payload.slidesData;
-                    customVariables = payload.customVariables;
-                    saveToLocalStorage();
-                    renderForms();
-                    alert("Metadata PDF Berhasil Diimport!\nSemua variabel dan komponen slide telah dipulihkan dan dapat diedit langsung.");
-                } else {
-                    alert("Format metadata PDF rusak atau tidak sesuai.");
-                }
-            } catch (err) {
-                console.error("PDF Import Error:", err);
-                alert("Tidak dapat membaca file PDF. Pastikan file PDF valid dan berasal dari Export MALEVIN.");
-            }
-            event.target.value = '';
-        }
-
-        /* PERBAIKAN 4: EXPORT PDF PRESISI, RENDER RASIO PAS, HIGH-RESOLUTION VECTOR CRISPNESS & EMBED METADATA */
+        /* PERBAIKAN FUNGSI PDF DENGAN SCALE ADJUSTMENT SAMA DENGAN DISPLAY */
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             document.body.classList.add('exporting-pdf');
 
-            // PERBAIKAN: reset transform/scale preview (mis. auto-scale di HP) SEBELUM
-            // discreenshot html2canvas, kalau tidak konten akan tumpang-tindih/berantakan
-            // karena layout asli (850px) tidak sinkron dengan tampilan yang sudah di-scale.
             const container = document.getElementById('deck-container');
             const originalTransform = container.style.transform;
             const originalMarginBottom = container.style.marginBottom;
             container.style.transform = 'none';
             container.style.marginBottom = '0px';
 
-            const slides = document.querySelectorAll('#deck-container .slide');
-            if (slides.length === 0) {
-                container.style.transform = originalTransform;
-                container.style.marginBottom = originalMarginBottom;
-                document.body.classList.remove('exporting-pdf');
-                return;
-            }
-
             let pdf = null;
+            const pageWidth = 850;
 
-            // DOKUMEN METADATA BISA DIBACA KEMBALI KETIKA DIIMPORT
-            const metadataPayload = {
-                app: "MALEVIN_DECK_STUDIO",
-                version: "3.0",
-                slidesData: slidesData,
-                customVariables: customVariables
-            };
+            const slideElements = document.querySelectorAll('.slide');
 
-            for (let i = 0; i < slides.length; i++) {
-                const slideEl = slides[i];
+            for (let i = 0; i < slideElements.length; i++) {
+                const slide = slideElements[i];
                 
-                // RENDERING CANVAS HIGH-DPI DENGAN SKALA 3 SUPAYA TEKS TIDAK BLUR/GEPENG
-                const canvas = await html2canvas(slideEl, {
-                    scale: 3,
+                const canvas = await html2canvas(slide, {
+                    scale: 2,
                     useCORS: true,
                     backgroundColor: '#0A0B0A',
-                    logging: false,
-                    windowWidth: 850
+                    logging: false
                 });
 
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                
-                // MENGUKUR RASIO PAS SESUAI UKURAN ASLI SLIDE TANPA GEPE
-                const slideW = 850;
-                const slideH = slideEl.offsetHeight || 478;
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                /* Tinggi halaman mengikuti rasio asli canvas slide, bukan dipaksa 478pt,
+                   supaya slide yang kontennya lebih tinggi dari 478px tidak gepeng saat di-export */
+                const pageHeight = canvas.height * (pageWidth / canvas.width);
 
                 if (i === 0) {
                     pdf = new jsPDF({
-                        orientation: slideW > slideH ? 'landscape' : 'portrait',
+                        orientation: 'landscape',
                         unit: 'pt',
-                        format: [slideW, slideH]
-                    });
-                    
-                    // MEMASUKKAN METADATA PROJECT KE DALAM PROPERTIES PDF
-                    pdf.setProperties({
-                        title: "MALEVIN Deck Presentation",
-                        subject: "MALEVIN_METADATA:" + JSON.stringify(metadataPayload),
-                        keywords: "MALEVIN_STUDIO_DECK",
-                        author: "MALEVIN"
+                        format: [pageWidth, pageHeight]
                     });
                 } else {
-                    pdf.addPage([slideW, slideH], slideW > slideH ? 'landscape' : 'portrait');
+                    pdf.addPage([pageWidth, pageHeight], 'landscape');
                 }
-
-                pdf.addImage(imgData, 'PNG', 0, 0, slideW, slideH, undefined, 'FAST');
+                pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
             }
 
-            // PERBAIKAN: kembalikan transform/scale preview seperti semula
             container.style.transform = originalTransform;
             container.style.marginBottom = originalMarginBottom;
-
             document.body.classList.remove('exporting-pdf');
-            pdf.save(`MALEVIN_Deck_${Date.now()}.pdf`);
+
+            pdf.save('Malevin-Presentation.pdf');
+        }
+
+        /* IMPORT PDF KE DALAM SLIDES DECK */
+        async function handlePDFImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+
+                slidesData = []; // RESET SLIDES UNTUK IMPORT
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    const imgData = canvas.toDataURL('image/png');
+
+                    slidesData.push({
+                        id: i,
+                        footerLeft: 'PDF IMPORT',
+                        elements: [
+                            { type: 'image', width: 'full', imgData: imgData, shapeStyle: 'sharp' }
+                        ]
+                    });
+                }
+
+                saveToLocalStorage();
+                renderForms();
+            };
+            fileReader.readAsArrayBuffer(file);
+            e.target.value = '';
         }
     </script>
 </body>
