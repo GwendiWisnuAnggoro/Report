@@ -28,6 +28,29 @@
         --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     }
 
+    /* PASTE KODE INI DI PALING BAWAH TAG <style> */
+@media (max-width: 768px) {
+    html, body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+    }
+
+    .app-container, 
+    .editor-panel, 
+    .slide-accordion {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    /* Memberi ruang scroll ekstra 150px di paling bawah kontainer editor */
+    .editor-panel {
+        padding-bottom: 150px !important;
+    }
+}
+
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body { 
