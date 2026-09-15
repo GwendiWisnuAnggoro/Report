@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malevin — Canvas & Vector PDF Deck Studio</title>
+    <title>Malevin — Advanced Deck Studio & Dynamic Variable Engine</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,6 +23,8 @@
             --accent-gold: #C49A57;
             --text-white: #FEFEFE;
             --text-muted: #808280;
+            --success-green: #2ECC71;
+            --danger-red: #E74C3C;
             --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
         }
 
@@ -43,7 +45,10 @@
         .app-container { display: flex; flex: 1; height: calc(100vh - 53px); overflow: hidden; }
 
         /* EDITOR PANEL */
-        .editor-panel { width: 100%; max-width: 650px; margin: 0 auto; background-color: var(--surface-dark); display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 16px; }
+        .editor-panel { width: 100%; max-width: 680px; margin: 0 auto; background-color: var(--surface-dark); display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 16px; }
+        
+        .global-vars-section { background-color: rgba(196,154,87,0.05); border: 1px dashed var(--accent-gold); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+        
         .slide-accordion { background-color: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         .slide-accordion-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -60,58 +65,60 @@
         .form-control:focus { outline: none; border-color: var(--accent-gold); }
         textarea.form-control { resize: vertical; min-height: 50px; line-height: 1.4; }
         .two-col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .three-col-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
 
         .btn { background-color: var(--card-obsidian); color: var(--text-white); border: 1px solid var(--border-obsidian); padding: 6px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
         .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; border: none; font-weight: 800; }
         .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
-        /* LIVE PREVIEW CANVAS */
+        /* PREVIEW PANEL */
         .preview-panel { flex: 1; background-color: #050505; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; }
         #deck-container { display: flex; flex-direction: column; gap: 30px; width: 850px; margin: 0 auto; }
 
         .slide {
             width: 850px !important; min-height: 478px; height: auto; background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); padding: 28px 36px 20px 36px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; gap: 20px; flex-shrink: 0; overflow: hidden;
         }
-
         .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%); }
         
-        /* SISTEM KOLOM / GRID PADA SLIDE BODY */
         .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; gap: 20px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
         .slide-body.has-cover { justify-content: center; align-items: flex-start; flex-direction: column; }
 
-        .draggable-element { position: relative; cursor: grab; user-select: none; transition: transform 0.15s ease, border-color 0.15s ease; border: 1px dashed transparent; padding: 4px; border-radius: 4px; }
-        
-        /* LEBAR DINAMIS */
+        .draggable-element { position: relative; user-select: none; border: 1px dashed transparent; padding: 4px; border-radius: 4px; }
         .elem-width-full { width: 100%; }
         .elem-width-half { width: calc(50% - 10px); }
         .elem-width-third { width: calc(33.333% - 13.33px); }
 
-        .draggable-element:hover { border-color: rgba(196, 154, 87, 0.5); background: rgba(196, 154, 87, 0.02); }
-        .draggable-element.dragging { opacity: 0.4; cursor: grabbing; border-color: var(--accent-gold); }
-
-        /* ELEMENT STYLING */
+        /* ELEMEN KOMPONEN */
         .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
         .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
         .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
         p.slide-text { color: #C0C2C0; font-size: 11px; line-height: 1.5; white-space: pre-line; }
 
+        /* LIST DINAMIS */
         .malevin-list { list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 6px; }
         .malevin-list li { position: relative; padding-left: 16px; font-size: 11px; color: #C0C2C0; }
         .malevin-list li::before { content: '■'; position: absolute; left: 0; top: 0; color: var(--accent-gold); font-size: 8px; }
 
+        /* TABEL */
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; table-layout: fixed; }
         .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; word-wrap: break-word; }
         .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; word-wrap: break-word; }
 
-        .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
-        .kpi-card { flex: 1; min-width: 80px; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
-        .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
+        /* SOSIAL MEDIA / INSIGHT GRID & TREND BADGE */
+        .social-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+        .social-card { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+        .social-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .social-val { font-size: 16px; font-weight: 800; color: var(--text-white); }
+        
+        .trend-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-top: 4px; }
+        .trend-up { background: rgba(46, 204, 113, 0.15); color: var(--success-green); border: 1px solid rgba(46, 204, 113, 0.3); }
+        .trend-down { background: rgba(231, 76, 60, 15); color: var(--danger-red); border: 1px solid rgba(231, 76, 60, 0.3); }
 
-        /* Wawasan Dinamis Styling */
+        /* WAWASAN & IKHTISAR */
         .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 10px; }
         .wawasan-vars { display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px dashed rgba(196, 154, 87, 0.3); padding-bottom: 10px; }
-        .w-var-item { background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-obsidian); display: flex; flex-direction: column; flex: 1; min-width: 100px; }
+        .w-var-item { background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-obsidian); display: flex; flex-direction: column; flex: 1; min-width: 90px; }
         .w-var-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .w-var-value { font-size: 12px; font-weight: 700; color: var(--text-white); margin-top: 2px; }
         
@@ -123,13 +130,12 @@
 <body>
 
     <div class="topbar">
-        <div class="brand-title"><span>MALEVIN</span> <span class="brand-badge">DECK STUDIO</span></div>
+        <div class="brand-title"><span>MALEVIN</span> <span class="brand-badge">STUDIO X</span></div>
         <div class="mode-tabs">
             <button class="mode-tab-btn" id="tabEditBtn" onclick="setMode('edit')">Form Editor</button>
             <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Canvas Preview</button>
         </div>
         <div class="topbar-actions">
-            <!-- File input untuk Import State PDF -->
             <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handleMalevinPDFImport(event)">
             <button class="btn" id="importPdfBtn" onclick="document.getElementById('pdfInput').click()">Import PDF (Edit Ulang)</button>
             <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Download Deck (PDF)</button>
@@ -138,31 +144,88 @@
 
     <div class="app-container">
         <div class="editor-panel" id="editorPanel">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            
+            <!-- GLOBAL REUSABLE VARIABLES ENGINE -->
+            <div class="global-vars-section">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">⚡ VARIABEL GLOBAL (REUSABLE KOP & ASSET)</span>
+                    <button class="btn btn-gold" onclick="addGlobalVar()">+ Variabel Baru</button>
+                </div>
+                <div style="font-size:9px; color:var(--text-muted);">Ketik kunci seperti <code style="color:var(--accent-gold)">{{brand_name}}</code> atau <code style="color:var(--accent-gold)">{{logo_utama}}</code> pada teks atau upload gambar sekali, lalu panggil di slide manapun secara dinamis!</div>
+                <div id="global-vars-container"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                 <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
                 <button class="btn btn-gold" onclick="addSlide()">+ Slide Baru</button>
             </div>
             <div id="forms-wrapper"></div>
         </div>
+
         <div class="preview-panel" id="previewPanel">
             <div id="deck-container"></div>
         </div>
     </div>
 
     <script>
-        const ELEM_LABELS = { cover: 'COVER', header: 'HEADER', text: 'TEKS', list: 'POIN LIST', table: 'TABEL', kpi: 'KPI METRIK', wawasan: 'ANALISIS', image: 'GAMBAR', chart: 'GRAFIK' };
+        const ELEM_LABELS = { 
+            cover: 'COVER', header: 'HEADER', text: 'TEKS & VARIABEL', list: 'POIN LIST (FLEKSIBEL)', 
+            table: 'TABEL DATA', social: 'SOSIAL / VIEW LIKES', wawasan: 'ANALISIS & IKHTISAR', image: 'GAMBAR', chart: 'GRAFIK' 
+        };
+
+        // State Global Aplikasi
+        let globalVars = [
+            { key: 'brand_name', type: 'text', val: 'KAWAITTA OFFICIAL' },
+            { key: 'current_month', type: 'text', val: 'Maret 2026' },
+            { key: 'prev_month', type: 'text', val: 'Februari 2026' }
+        ];
 
         let slidesData = [
             {
                 id: 1, footerLeft: 'PREPARED BY MALEVIN CREATIVE TEAM',
-                elements: [{ type: 'cover', width: 'full', brand: 'MALEVIN', tag: 'Deck', title: 'Q1 REPORT 2026', subtitle: 'Strategic Growth', shapeStyle: 'sharp' }]
+                elements: [
+                    { type: 'cover', width: 'full', brand: '{{brand_name}}', tag: 'Analytics Report', title: 'PERFORMA BULANAN {{current_month}}', subtitle: 'Perbandingan Insight & Growth vs {{prev_month}}', shapeStyle: 'sharp' }
+                ]
             }
         ];
 
-        let draggedItem = null;
         let chartInstances = [];
 
+        // Fungsi Interpolasi Variabel Global ({{key}}) ke dalam Teks/Title
+        function parseVariables(text) {
+            if (!text) return '';
+            let parsed = text;
+            globalVars.forEach(v => {
+                if (v.type === 'text') {
+                    const regex = new RegExp(`\\{\\{${v.key}\\}\\}`, 'g');
+                    parsed = parsed.replace(regex, v.val || '');
+                }
+            });
+            return parsed;
+        }
+
+        // Render Panel Editor Form
         function renderForms() {
+            // 1. Render Global Variables Form
+            const gVarContainer = document.getElementById('global-vars-container');
+            gVarContainer.innerHTML = '';
+            globalVars.forEach((gv, gIdx) => {
+                gVarContainer.innerHTML += `
+                    <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+                        <input type="text" class="form-control" style="width:35%;" placeholder="Nama Key (contoh: logo_utama)" value="${gv.key}" oninput="updateGlobalVarKey(${gIdx}, this.value)">
+                        <select class="form-control" style="width:25%;" onchange="updateGlobalVarType(${gIdx}, this.value)">
+                            <option value="text" ${gv.type==='text'?'selected':''}>Teks / Angka</option>
+                            <option value="image" ${gv.type==='image'?'selected':''}>Gambar / Aset</option>
+                        </select>
+                        ${gv.type === 'image' ? 
+                            `<input type="file" class="form-control" accept="image/*" style="width:30%;" onchange="handleGlobalImageUpload(${gIdx}, this)">` : 
+                            `<input type="text" class="form-control" style="width:30%;" placeholder="Nilai teks..." value="${gv.val}" oninput="updateGlobalVarVal(${gIdx}, this.value)">`
+                        }
+                        <button class="btn btn-danger" onclick="deleteGlobalVar(${gIdx})">✕</button>
+                    </div>`;
+            });
+
+            // 2. Render Slides Accordion
             const wrapper = document.getElementById('forms-wrapper');
             wrapper.innerHTML = '';
 
@@ -172,12 +235,11 @@
                 let elementsHTML = '';
 
                 slide.elements.forEach((elem, eIdx) => {
-                    // Opsi Ukuran Lebar (Kolom) yang baru
                     const widthVal = elem.width || 'full';
                     let layoutSelector = `
-                        <div class="form-group"><label>Lebar Elemen (Sistem Kolom)</label>
+                        <div class="form-group"><label>Lebar Kolom</label>
                         <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'width', this.value)">
-                            <option value="full" ${widthVal === 'full' ? 'selected' : ''}>1 Kolom Penuh (100%)</option>
+                            <option value="full" ${widthVal === 'full' ? 'selected' : ''}>Penuh (100%)</option>
                             <option value="half" ${widthVal === 'half' ? 'selected' : ''}>1/2 Kolom (Berdampingan)</option>
                             <option value="third" ${widthVal === 'third' ? 'selected' : ''}>1/3 Kolom</option>
                         </select></div>`;
@@ -185,21 +247,57 @@
                     const styleShape = elem.shapeStyle || 'sharp';
                     let shapeSelector = `<div class="form-group"><label>Style Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option></select></div>`;
                     
-                    let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / ID</label><input type="text" class="form-control" value="${elem.brand || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>`;
+                    let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / ID (Bisa pakai {{var}})</label><input type="text" class="form-control" value="${elem.brand || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>`;
 
                     if (elem.type === 'cover' || elem.type === 'header') { 
                         fields += `<div class="form-group"><label>Tag</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div><div class="form-group"><label>Judul</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>`; 
                         if(elem.type==='cover') fields += `<div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>`;
                     } 
-                    else if (elem.type === 'text') { fields += `<div class="form-group"><label>Isi Teks</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; } 
-                    else if (elem.type === 'image') { fields += `<div class="form-group"><label>Upload Gambar</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; } 
-                    else if (elem.type === 'kpi' || elem.type === 'list' || elem.type === 'table') {
-                         fields += `<div style="font-size:10px; color:var(--accent-gold); margin-top:10px;">[ Edit data langsung di form dinamis sebelumnya. Struktur telah dipadatkan untuk mendukung kolom layout ]</div>`; 
-                         // Note: Untuk ringkas kodenya, fungsional list/tabel lama dipertahankan, saya sertakan KPI sbg contoh dinamis di form ini.
-                         if(elem.type==='kpi') {
-                             fields += `<div class="form-group"><label>KPI Data</label><div>${(elem.items || []).map((k, kIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nilai" value="${k.val || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)"><input type="text" class="form-control" placeholder="Label" value="${k.lbl || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)"><button class="btn btn-danger" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah Metrik</button></div>`;
-                         }
+                    else if (elem.type === 'text') { 
+                        fields += `<div class="form-group"><label>Isi Teks (Mendukung {{variabel}})</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; 
                     } 
+                    else if (elem.type === 'image') { 
+                        fields += `<div class="form-group"><label>Atau Pilih Variabel Gambar</label><input type="text" class="form-control" placeholder="Contoh: logo_utama" value="${elem.varRef || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varRef', this.value)"></div>
+                                   <div class="form-group"><label>Upload Gambar Mandiri</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
+                    } 
+                    else if (elem.type === 'list') {
+                        // FITUR LIST FLEKSIBEL: Bisa tambah & kurang tanpa batas di slide manapun
+                        fields += `<div class="form-group"><label>Poin-Poin List (Bisa Tambah/Hapus Bebas)</label>
+                            <div>${(elem.items || []).map((itemVal, iIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${itemVal}" oninput="updateListItem(${sIdx}, ${eIdx}, ${iIdx}, this.value)"><button class="btn btn-danger" onclick="deleteListItem(${sIdx}, ${eIdx}, ${iIdx})">✕</button></div>`).join('')}</div>
+                            <button class="btn" style="margin-top:4px;" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin List</button>
+                        </div>`;
+                    }
+                    else if (elem.type === 'social') {
+                        // DATA ANALISIS VIEW, LIKE, SHARE, DLL DENGAN TREN KELOMPOK
+                        fields += `<div class="form-group"><label>Metrik Sosial / Insight</label>
+                            <div>${(elem.items || []).map((sc, scIdx) => `
+                                <div style="background:var(--bg-obsidian); border:1px solid var(--border-obsidian); padding:8px; border-radius:4px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
+                                    <div class="two-col-form">
+                                        <input type="text" class="form-control" placeholder="Label (Views/Likes/Shares)" value="${sc.lbl || ''}" oninput="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'lbl', this.value)">
+                                        <input type="text" class="form-control" placeholder="Nilai (Cth: 45.2K)" value="${sc.val || ''}" oninput="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'val', this.value)">
+                                    </div>
+                                    <div class="two-col-form">
+                                        <input type="text" class="form-control" placeholder="% Perubahan (Cth: +12.4%)" value="${sc.pct || ''}" oninput="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'pct', this.value)">
+                                        <select class="form-control" onchange="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'trend', this.value)">
+                                            <option value="up" ${sc.trend==='up'?'selected':''}>Tren Naik (Hijau)</option>
+                                            <option value="down" ${sc.trend==='down'?'selected':''}>Tren Turun (Merah)</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-danger" style="align-self:flex-end;" onclick="deleteSocialItem(${sIdx}, ${eIdx}, ${scIdx})">Hapus Metrik</button>
+                                </div>`).join('')}
+                            </div>
+                            <button class="btn" style="margin-top:4px;" onclick="addSocialItem(${sIdx}, ${eIdx})">+ Tambah Metrik Insight</button>
+                        </div>`;
+                    }
+                    else if (elem.type === 'wawasan') {
+                        // ANALISIS DAN IKHTISAR DENGAN VARIABEL & PERBANDINGAN BULAN LALU
+                        fields += `
+                        <div class="form-group"><label>Variabel Metrik Utama (Key-Value untuk Analisis)</label>
+                            <div>${(elem.vars || []).map((v, vIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nama Var" value="${v.k || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'k', this.value)"><input type="text" class="form-control" placeholder="Nilai / vs Bulan Lalu" value="${v.v || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'v', this.value)"><button class="btn btn-danger" onclick="deleteWawasanVar(${sIdx}, ${eIdx}, ${vIdx})">✕</button></div>`).join('')}</div>
+                            <button class="btn" onclick="addWawasanVar(${sIdx}, ${eIdx})">+ Tambah Variabel Metrik</button>
+                        </div>
+                        <div class="form-group"><label>Ikhtisar & Kesimpulan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`;
+                    }
                     else if (elem.type === 'chart') { 
                         fields += `<div class="form-group"><label>Tipe Grafik</label>
                             <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
@@ -210,10 +308,6 @@
                             </select></div>
                             <div class="form-group"><label>Label X (Pisahkan Koma)</label><input type="text" class="form-control" value="${elem.labels || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'labels', this.value)"></div>
                             <div class="form-group"><label>Data Y (Pisahkan Koma)</label><input type="text" class="form-control" value="${elem.data || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'data', this.value)"></div>`; 
-                    }
-                    else if (elem.type === 'wawasan') {
-                        fields += `<div class="form-group"><label>Variabel Utama (Key Metrics)</label><div>${(elem.vars || []).map((v, vIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nama Var" value="${v.k || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'k', this.value)"><input type="text" class="form-control" placeholder="Nilai/Efek" value="${v.v || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'v', this.value)"><button class="btn btn-danger" onclick="deleteWawasanVar(${sIdx}, ${eIdx}, ${vIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addWawasanVar(${sIdx}, ${eIdx})">+ Tambah Variabel</button></div>
-                        <div class="form-group"><label>Kesimpulan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`;
                     }
 
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type]}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
@@ -227,9 +321,10 @@
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
-                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ LIST</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'social')">+ SOSIAL METRIK</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'chart')">+ GRAFIK</button>
-                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')" style="grid-column: span 2;">+ ANALISIS DINAMIS</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')" style="grid-column: span 4;">+ ANALISIS & IKHTISAR</button>
                 </div>`;
                 wrapper.appendChild(card);
             });
@@ -237,45 +332,19 @@
         }
 
         function getRadiusCss(style) { return style === 'rounded' ? '6px' : '0px'; }
+        
+        // Handler Upload Gambar Mandiri atau Variabel Global
         function handleImageUpload(sIdx, eIdx, input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { slidesData[sIdx].elements[eIdx].imgData = e.target.result; renderPreview(); }; reader.readAsDataURL(input.files[0]); } }
+        function handleGlobalImageUpload(gIdx, input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { globalVars[gIdx].val = e.target.result; renderForms(); }; reader.readAsDataURL(input.files[0]); } }
 
-        /* =========================================================================
-           FITUR BARU: PDF IMPORT DENGAN STATE RESTORATION (MEMBACA METADATA)
-           ========================================================================= */
-        async function handleMalevinPDFImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // Manajemen Variabel Global
+        function addGlobalVar() { globalVars.push({ key: 'new_var', type: 'text', val: 'Nilai Baru' }); renderForms(); }
+        function updateGlobalVarKey(idx, val) { globalVars[idx].key = val.trim(); renderPreview(); }
+        function updateGlobalVarType(idx, val) { globalVars[idx].type = val; globalVars[idx].val = ''; renderForms(); }
+        function updateGlobalVarVal(idx, val) { globalVars[idx].val = val; renderPreview(); }
+        function deleteGlobalVar(idx) { globalVars.splice(idx, 1); renderForms(); }
 
-            const btn = document.getElementById('importPdfBtn');
-            const ogText = btn.innerText;
-            btn.innerText = 'Membaca Data Asli...'; btn.disabled = true;
-
-            try {
-                const fileReader = new FileReader();
-                fileReader.onload = async function() {
-                    const typedarray = new Uint8Array(this.result);
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    const metadata = await pdf.getMetadata();
-
-                    // Cek apakah ada metadata State dari jsPDF Malevin
-                    if (metadata && metadata.info && metadata.info.Subject && metadata.info.Subject.startsWith('MALEVIN_STATE:')) {
-                        const rawState = metadata.info.Subject.replace('MALEVIN_STATE:', '');
-                        slidesData = JSON.parse(decodeURIComponent(rawState));
-                        renderForms();
-                        alert("Berhasil! Semua tabel, grafik, dan teks telah dikembalikan ke format yang bisa diedit.");
-                    } else {
-                        alert("Gagal Import: PDF ini bukan file sumber yang di-generate dari aplikasi Malevin ini, atau menggunakan versi lama yang tidak menyimpan struktur data.");
-                    }
-                    
-                    btn.innerText = ogText; btn.disabled = false;
-                    event.target.value = ''; 
-                };
-                fileReader.readAsArrayBuffer(file);
-            } catch (error) {
-                console.error(error); alert("Terjadi kesalahan membaca PDF."); btn.innerText = ogText; btn.disabled = false;
-            }
-        }
-
+        // Render Canvas Preview
         function renderPreview() {
             chartInstances.forEach(c => c.destroy()); chartInstances = [];
             const container = document.getElementById('deck-container'); container.innerHTML = '';
@@ -288,62 +357,82 @@
 
                 slide.elements.forEach((elem, eIdx) => {
                     const elemWrapper = document.createElement('div');
-                    
-                    // PENERAPAN SISTEM KOLOM BERDASARKAN WIDTH PROPERTY
                     const wClass = elem.width === 'half' ? 'elem-width-half' : (elem.width === 'third' ? 'elem-width-third' : 'elem-width-full');
                     elemWrapper.className = `draggable-element ${wClass}`; 
-                    
-                    elemWrapper.draggable = true;
-                    // ... [Sistem Drag Drop disembunyikan untuk ringkas] ...
 
                     const br = getRadiusCss(elem.shapeStyle);
-                    const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${elem.brand}</span>` : '';
+                    const parsedBrand = parseVariables(elem.brand);
+                    const pill = parsedBrand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${parsedBrand}</span>` : '';
                     let p = '';
 
-                    if (elem.type === 'cover') p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : ''}</div><div class="elem-title" style="font-size:36px; margin: 10px 0;">${elem.title || ''}</div><p style="font-size:14px; color:var(--accent-gold);">${elem.subtitle || ''}</p></div>`;
-                    else if (elem.type === 'header') p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${elem.tag || ''}</span></div><div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div></div>`;
-                    else if (elem.type === 'text') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<p class="slide-text">${elem.content || ''}</p></div>`;
-                    else if (elem.type === 'image') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${br}; width: 100%;">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center;">[ Gambar Kosong ]</div>'}</div>`;
-                    else if (elem.type === 'kpi') p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${(elem.items || []).map(k => `<div class="kpi-card" style="border-radius: ${br};"><div class="kpi-value">${k.val || '0'}</div><div style="font-size: 8px; color: var(--text-muted); text-transform: uppercase;">${k.lbl || ''}</div></div>`).join('')}</div></div>`;
-                    else if (elem.type === 'wawasan') {
-                        // ANALISIS DINAMIS DENGAN VARIABEL
+                    const parsedTitle = parseVariables(elem.title);
+                    const parsedSubtitle = parseVariables(elem.subtitle);
+                    const parsedContent = parseVariables(elem.content);
+
+                    if (elem.type === 'cover') {
+                        p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : ''}</div><div class="elem-title" style="font-size:34px; margin: 10px 0;">${parsedTitle || ''}</div><p style="font-size:13px; color:var(--accent-gold);">${parsedSubtitle || ''}</p></div>`;
+                    } else if (elem.type === 'header') { 
+                        p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${elem.tag || ''}</span></div><div class="elem-title" style="margin-top:4px;">${parsedTitle || ''}</div></div>`;
+                    } else if (elem.type === 'text') { 
+                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<p class="slide-text">${parsedContent || ''}</p></div>`;
+                    } else if (elem.type === 'image') { 
+                        let imgSrc = elem.imgData;
+                        if (elem.varRef) {
+                            const foundVar = globalVars.find(v => v.key === elem.varRef && v.type === 'image');
+                            if (foundVar) imgSrc = foundVar.val;
+                        }
+                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${imgSrc ? `<img src="${imgSrc}" class="img-preview-box" style="border-radius: ${br}; width: 100%;">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center;">[ Aset Gambar Kosong / Variabel Belum Ada ]</div>'}</div>`;
+                    } else if (elem.type === 'list') {
+                        // Render List Fleksibel
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<ul class="malevin-list">${(elem.items || []).map(item => `<li>${parseVariables(item)}</li>`).join('')}</ul></div>`;
+                    } else if (elem.type === 'social') {
+                        // Render Grid Sosial Media / Views, Likes, Shares dengan Indikator Tren Naik/Turun
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${(elem.items || []).map(sc => {
+                            const isUp = sc.trend === 'up';
+                            const trendClass = isUp ? 'trend-up' : 'trend-down';
+                            const arrow = isUp ? '▲' : '▼';
+                            return `<div class="social-card" style="border-radius: ${br};">
+                                <span class="social-label">${sc.lbl || 'Metric'}</span>
+                                <span class="social-val">${sc.val || '0'}</span>
+                                ${sc.pct ? `<div class="trend-badge ${trendClass}">${arrow} ${sc.pct} vs bln lalu</div>` : ''}
+                            </div>`;
+                        }).join('')}</div></div>`;
+                    } else if (elem.type === 'wawasan') {
+                        // Render Analisis & Ikhtisar dengan Variabel Perbandingan
                         let varsHTML = '';
                         if (elem.vars && elem.vars.length > 0) {
                             varsHTML = `<div class="wawasan-vars">${elem.vars.map(v => `<div class="w-var-item"><span class="w-var-label">${v.k}</span><span class="w-var-value">${v.v}</span></div>`).join('')}</div>`;
                         }
-                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><strong style="color:var(--accent-gold);">💡 ANALISIS DATA:</strong>${varsHTML}<div>${elem.content || 'Tidak ada kesimpulan tertulis.'}</div></div></div>`;
-                    }
-                    else if (elem.type === 'chart') {
+                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><strong style="color:var(--accent-gold);">💡 IKHTISAR & ANALISIS:</strong>${varsHTML}<div>${parsedContent || 'Tidak ada kesimpulan.'}</div></div></div>`;
+                    } else if (elem.type === 'chart') {
                         const chartId = `chart-${sIdx}-${eIdx}`;
                         p = `<div style="display:flex; flex-direction:column; height:100%;">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
                             <div style="background:var(--card-obsidian); padding:10px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:220px; width:100%; display:flex; align-items:center; justify-content:center;">
                                 <canvas id="${chartId}"></canvas>
                             </div></div>`;
-                        chartsToRender.push({ id: chartId, type: elem.chartType || 'bar', labels: elem.labels || 'Q1,Q2,Q3', data: elem.data || '10,20,30' });
+                        chartsToRender.push({ id: chartId, type: elem.chartType || 'bar', labels: elem.labels || 'A,B,C', data: elem.data || '10,20,30' });
                     }
 
                     elemWrapper.innerHTML = p; slideBody.appendChild(elemWrapper);
                 });
 
                 slideEl.appendChild(slideBody);
-                slideEl.innerHTML += `<div class="slide-footer"><span>${slide.footerLeft || ''}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
+                slideEl.innerHTML += `<div class="slide-footer"><span>${parseVariables(slide.footerLeft) || ''}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
                 container.appendChild(slideEl);
             });
 
-            // RENDER CHART BESERTA GRADIENT BAR DAN DONUT
+            // Render ChartJS dengan Gradient Bar & Donut
             setTimeout(() => {
                 chartsToRender.forEach(c => {
                     const canvas = document.getElementById(c.id);
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
-                        
                         let bgColor = ['rgba(196, 154, 87, 0.7)', 'rgba(255, 255, 255, 0.2)', 'rgba(128, 130, 128, 0.5)', 'rgba(229, 83, 83, 0.6)'];
                         
-                        // Fitur Spesial: Bar dengan Linear Gradient
                         if (c.type === 'bar') {
                             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.parentElement.clientHeight || 200);
-                            gradient.addColorStop(0, '#C49A57');   // Emas Terang di atas
-                            gradient.addColorStop(1, 'rgba(138, 104, 49, 0.1)'); // Transparan di bawah
+                            gradient.addColorStop(0, '#C49A57');   
+                            gradient.addColorStop(1, 'rgba(138, 104, 49, 0.1)'); 
                             bgColor = gradient;
                         }
 
@@ -351,7 +440,7 @@
                             type: c.type,
                             data: {
                                 labels: c.labels.split(','),
-                                datasets: [{ label: 'Data', data: c.data.split(',').map(Number), backgroundColor: bgColor, borderColor: '#C49A57', borderWidth: 1 }]
+                                datasets: [{ label: 'Metric Data', data: c.data.split(',').map(Number), backgroundColor: bgColor, borderColor: '#C49A57', borderWidth: 1 }]
                             },
                             options: {
                                 responsive: true, maintainAspectRatio: false, color: '#C0C2C0',
@@ -368,30 +457,72 @@
             }, 50);
         }
 
-        // Form functions dinamis baru
+        // Action Update Form & Data State
         function updateElem(sIdx, eIdx, k, v) { slidesData[sIdx].elements[eIdx][k] = v; renderPreview(); }
         function updateSlideFooter(sIdx, v) { slidesData[sIdx].footerLeft = v; renderPreview(); }
-        function addKpiItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ val: '0', lbl: 'New' }); renderForms(); }
-        function updateKpiItem(sIdx, eIdx, kIdx, k, v) { slidesData[sIdx].elements[eIdx].items[kIdx][k] = v; renderPreview(); }
-        function deleteKpiItem(sIdx, eIdx, kIdx) { slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1); renderForms(); }
-        
-        function addWawasanVar(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].vars) slidesData[sIdx].elements[eIdx].vars = []; slidesData[sIdx].elements[eIdx].vars.push({ k: 'Variabel', v: 'Nilai' }); renderForms(); }
+
+        // Fungsi List Fleksibel (Tambah/Kurang Bebas di Slide Manapun)
+        function addListItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push('Poin baru...'); renderForms(); }
+        function updateListItem(sIdx, eIdx, iIdx, val) { slidesData[sIdx].elements[eIdx].items[iIdx] = val; renderPreview(); }
+        function deleteListItem(sIdx, eIdx, iIdx) { slidesData[sIdx].elements[eIdx].items.splice(iIdx, 1); renderForms(); }
+
+        // Fungsi Sosial Insight Metrik
+        function addSocialItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ lbl: 'Views', val: '10K', pct: '+15.2%', trend: 'up' }); renderForms(); }
+        function updateSocialItem(sIdx, eIdx, scIdx, k, val) { slidesData[sIdx].elements[eIdx].items[scIdx][k] = val; renderPreview(); }
+        function deleteSocialItem(sIdx, eIdx, scIdx) { slidesData[sIdx].elements[eIdx].items.splice(scIdx, 1); renderForms(); }
+
+        // Fungsi Wawasan & Variabel Analisis
+        function addWawasanVar(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].vars) slidesData[sIdx].elements[eIdx].vars = []; slidesData[sIdx].elements[eIdx].vars.push({ k: 'Growth', v: '+24% vs Bln Lalu' }); renderForms(); }
         function updateWawasanVar(sIdx, eIdx, vIdx, k, val) { slidesData[sIdx].elements[eIdx].vars[vIdx][k] = val; renderPreview(); }
         function deleteWawasanVar(sIdx, eIdx, vIdx) { slidesData[sIdx].elements[eIdx].vars.splice(vIdx, 1); renderForms(); }
 
         function addElementToSlide(sIdx, type) { 
-            const ne = { type, width: 'full', brand: '', shapeStyle: 'rounded' }; 
-            if (type === 'wawasan') { ne.vars = [{ k: 'Korelasi', v: 'Positif' }]; ne.content = 'Tulis wawasan...'; }
-            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; }
+            const ne = { type, width: 'full', brand: '{{brand_name}}', shapeStyle: 'rounded' }; 
+            if (type === 'wawasan') { ne.vars = [{ k: 'Retensi', v: '88%' }]; ne.content = 'Kesimpulan performa secara keseluruhan...'; }
+            else if (type === 'list') { ne.items = ['Poin pertama', 'Poin kedua']; }
+            else if (type === 'social') { ne.items = [{ lbl: 'Total Views', val: '124.5K', pct: '+18.4%', trend: 'up' }, { lbl: 'Engagement', val: '8.2%', pct: '-2.1%', trend: 'down' }]; }
+            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'Jan,Feb,Mar'; ne.data = '40,65,90'; }
             slidesData[sIdx].elements.push(ne); renderForms(); 
         }
         function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); renderForms(); }
-        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'MALEVIN TEAM', elements: [{ type: 'header', width: 'full', title: 'NEW SLIDE' }] }); renderForms(); }
+        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'MALEVIN TEAM', elements: [{ type: 'header', width: 'full', title: 'SLIDE BARU' }] }); renderForms(); }
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
-        /* =========================================================
-           MENYIMPAN STATE JSON KE METADATA PDF SEBELUM DI-DOWNLOAD
-           ========================================================= */
+        // PDF Import State Restoration (Membaca Metadata Tersembunyi)
+        async function handleMalevinPDFImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const btn = document.getElementById('importPdfBtn');
+            const ogText = btn.innerText;
+            btn.innerText = 'Memulihkan State...'; btn.disabled = true;
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    const metadata = await pdf.getMetadata();
+
+                    if (metadata && metadata.info && metadata.info.Subject && metadata.info.Subject.startsWith('MALEVIN_STATE_V2:')) {
+                        const rawState = metadata.info.Subject.replace('MALEVIN_STATE_V2:', '');
+                        const parsed = JSON.parse(decodeURIComponent(rawState));
+                        slidesData = parsed.slides;
+                        if(parsed.globals) globalVars = parsed.globals;
+                        renderForms();
+                        alert("Berhasil! Seluruh data slide, list fleksibel, variabel global, dan grafik telah dipulihkan sepenuhnya.");
+                    } else {
+                        alert("Gagal Import: Pastikan file PDF ini di-export langsung dari studio aplikasi ini.");
+                    }
+                    btn.innerText = ogText; btn.disabled = false;
+                    event.target.value = ''; 
+                };
+                fileReader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error(error); alert("Terjadi kesalahan saat membaca PDF."); btn.innerText = ogText; btn.disabled = false;
+            }
+        }
+
+        // Export PDF dengan Menyimpan State JSON Lengkap di Metadata Subject
         async function downloadPDF() {
             const btn = document.getElementById('downloadBtn'); const ogText = btn.innerText; btn.innerText = 'Menyimpan...'; btn.disabled = true;
             setMode('preview'); await new Promise(r => setTimeout(r, 500)); 
@@ -404,7 +535,6 @@
 
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
-                    
                     const isolatedBox = document.createElement('div');
                     isolatedBox.style.position = 'absolute'; isolatedBox.style.left = '-9999px'; isolatedBox.style.top = '0'; isolatedBox.style.width = '850px';
                     
@@ -429,17 +559,18 @@
                     pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                 }
 
-                // INJEKSI STATE DATA KE METADATA PDF (Subject)
-                const stateData = encodeURIComponent(JSON.stringify(slidesData));
+                // Injeksi State Lengkap ke Metadata PDF
+                const fullStatePayload = { slides: slidesData, globals: globalVars };
+                const stateData = encodeURIComponent(JSON.stringify(fullStatePayload));
                 pdf.setProperties({
-                    title: 'Malevin Deck Export',
-                    subject: 'MALEVIN_STATE:' + stateData,
+                    title: 'Malevin Deck Studio Pro Export',
+                    subject: 'MALEVIN_STATE_V2:' + stateData,
                     creator: 'Malevin Deck Studio'
                 });
 
-                pdf.save('Malevin_Deck_Editable.pdf');
+                pdf.save('Malevin_Interactive_Deck.pdf');
             } catch (error) {
-                console.error(error); alert("Terjadi kesalahan.");
+                console.error(error); alert("Gagal melakukan export PDF.");
             } finally { btn.innerText = ogText; btn.disabled = false; }
         }
 
