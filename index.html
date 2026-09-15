@@ -5,8 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malevin — Canvas & Vector PDF Deck Studio</title>
     
+    <!-- Library Eksternal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Tambahan Library untuk PDF Import & Grafik -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Setup worker untuk PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 
     <style>
         :root {
@@ -81,23 +90,8 @@
         .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
         /* LIVE PREVIEW CANVAS */
-        .preview-panel {
-            flex: 1;
-            background-color: #050505;
-            overflow: auto;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #deck-container {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            width: 850px;
-            margin: 0 auto;
-        }
+        .preview-panel { flex: 1; background-color: #050505; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; }
+        #deck-container { display: flex; flex-direction: column; gap: 30px; width: 850px; margin: 0 auto; }
 
         /* SLIDE AUTO HEIGHT + FIX WIDTH */
         .slide {
@@ -118,14 +112,7 @@
             overflow: hidden;
         }
 
-        .slide::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%);
-        }
-
+        .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%); }
         .corner-accent { position: absolute; width: 10px; height: 10px; border-color: var(--accent-gold); border-style: solid; opacity: 0.3; pointer-events: none; }
         .corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
         .corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
@@ -150,12 +137,10 @@
         .malevin-list li { position: relative; padding-left: 16px; font-size: 11px; color: #C0C2C0; }
         .malevin-list li::before { content: '■'; position: absolute; left: 0; top: 0; color: var(--accent-gold); font-size: 8px; }
 
-        /* TABEL PERBAIKAN */
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; table-layout: fixed; }
         .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; word-wrap: break-word; }
         .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; word-wrap: break-word; }
 
-        /* KPI PERBAIKAN */
         .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: nowrap; }
         .kpi-card { flex: 1; min-width: 0; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
         .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
@@ -179,6 +164,9 @@
             <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Canvas Preview</button>
         </div>
         <div class="topbar-actions">
+            <!-- Tombol Import PDF Baru -->
+            <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDFImport(event)">
+            <button class="btn" id="importPdfBtn" onclick="document.getElementById('pdfInput').click()">Import PDF</button>
             <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Download Deck (PDF)</button>
         </div>
     </div>
@@ -200,7 +188,8 @@
     </div>
 
     <script>
-        const ELEM_LABELS = { cover: 'COVER', header: 'HEADER', text: 'TEKS', list: 'POIN LIST', table: 'TABEL', kpi: 'KPI METRIK', wawasan: 'WAWASAN', image: 'GAMBAR' };
+        // ELEM_LABELS diupdate dengan tambahan 'chart' (Grafik)
+        const ELEM_LABELS = { cover: 'COVER', header: 'HEADER', text: 'TEKS', list: 'POIN LIST', table: 'TABEL', kpi: 'KPI METRIK', wawasan: 'WAWASAN (ANALISIS)', image: 'GAMBAR', chart: 'GRAFIK' };
 
         let slidesData = [
             {
@@ -216,21 +205,13 @@
                     {
                         type: 'kpi', brand: 'METRICS', shapeStyle: 'rounded',
                         items: [ { val: '1.2M+', lbl: 'Monthly Reach' }, { val: '4.8%', lbl: 'Eng. Rate' }, { val: '120+', lbl: 'Video Assets' } ]
-                    },
-                    {
-                        type: 'table', brand: 'CLIENT ID: 40921', shapeStyle: 'sharp',
-                        headers: ['Platform', 'Format', 'Target Output'],
-                        rows: [ ['TikTok', 'Short Video', '40 Clips / Mo'], ['Instagram', 'Reels & Grid', '20 Posts / Mo'], ['YouTube', 'Shorts', '15 Clips / Mo'] ]
-                    },
-                    {
-                        type: 'list', brand: 'DELIVERABLES', shapeStyle: 'pill',
-                        items: [ 'High Quality 4K Video Render & Raw Files', 'Custom Sound Design & Color Grading', 'Full Commercial Rights License' ]
                     }
                 ]
             }
         ];
 
         let draggedItem = null;
+        let chartInstances = []; // Menyimpan instance chart agar bisa di-destroy sebelum re-render
 
         function renderForms() {
             const wrapper = document.getElementById('forms-wrapper');
@@ -253,12 +234,37 @@
                     else if (elem.type === 'list') { fields += `<div class="form-group"><label>Poin List</label><div>${(elem.items || []).map((item, lIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${item}" oninput="updateListItem(${sIdx}, ${eIdx}, ${lIdx}, this.value)"><button class="btn btn-danger" onclick="deleteListItem(${sIdx}, ${eIdx}, ${lIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin</button></div>`; } 
                     else if (elem.type === 'kpi') { fields += `<div class="form-group"><label>KPI Metrik</label><div>${(elem.items || []).map((k, kIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${k.val || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)"><input type="text" class="form-control" value="${k.lbl || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)"><button class="btn btn-danger" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah KPI</button></div>`; } 
                     else if (elem.type === 'table') { fields += `<div class="form-group"><label>Kolom Header</label><div>${(elem.headers || []).map((h, cIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${h}" oninput="updateTableHeader(${sIdx}, ${eIdx}, ${cIdx}, this.value)"><button class="btn btn-danger" onclick="deleteTableColumn(${sIdx}, ${eIdx}, ${cIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableColumn(${sIdx}, ${eIdx})">+ Tambah Kolom</button></div><div class="form-group"><label>Baris Data</label><div>${(elem.rows || []).map((row, rIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><div style="display:flex; gap:4px; flex:1;">${(elem.headers || []).map((_, cIdx) => `<input type="text" class="form-control" value="${row[cIdx] || ''}" oninput="updateTableCell(${sIdx}, ${eIdx}, ${rIdx}, ${cIdx}, this.value)">`).join('')}</div><button class="btn btn-danger" onclick="deleteTableRow(${sIdx}, ${eIdx}, ${rIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableRow(${sIdx}, ${eIdx})">+ Tambah Baris</button></div>`; } 
-                    else if (elem.type === 'wawasan') { fields += `<div class="form-group"><label>Catatan</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; }
+                    else if (elem.type === 'wawasan') { fields += `<div class="form-group"><label>Catatan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; }
+                    else if (elem.type === 'chart') { 
+                        // Form Khusus Grafik
+                        fields += `<div class="form-group"><label>Tipe Grafik</label>
+                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
+                                <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar</option>
+                                <option value="line" ${elem.chartType === 'line' ? 'selected' : ''}>Line</option>
+                                <option value="pie" ${elem.chartType === 'pie' ? 'selected' : ''}>Pie</option>
+                            </select></div>
+                            <div class="form-group"><label>Label (Koma)</label><input type="text" class="form-control" value="${elem.labels || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'labels', this.value)"></div>
+                            <div class="form-group"><label>Data (Koma)</label><input type="text" class="form-control" value="${elem.data || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'data', this.value)"></div>`; 
+                    }
 
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEMEN ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
                 });
 
-                card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div><div class="form-group"><label>Footer</label><input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)"></div>${elementsHTML}<div class="btn-grid"><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ POIN LIST</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button><button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')">+ WAWASAN</button></div>`;
+                // Perbaikan Button Grid: Memasukkan Chart dan Analisis ke setiap Slide Accordion
+                card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
+                <div class="form-group"><label>Footer</label><input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)"></div>
+                ${elementsHTML}
+                <div class="btn-grid">
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ POIN LIST</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'chart')">+ GRAFIK</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')" style="grid-column: span 4;">+ WAWASAN (ANALISIS)</button>
+                </div>`;
                 wrapper.appendChild(card);
             });
             renderPreview();
@@ -274,9 +280,65 @@
             }
         }
 
+        // FITUR BARU: Handle Import PDF
+        async function handlePDFImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('importPdfBtn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Mengimport...';
+            btn.disabled = true;
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    
+                    // Looping dan konversi setiap halaman PDF menjadi slide
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: 2 }); // Scale 2 agar HD
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                        
+                        slidesData.push({
+                            id: Date.now() + i,
+                            footerLeft: `IMPORTED DOCUMENT - PAGE ${i}`,
+                            elements: [
+                                { type: 'image', brand: 'PDF IMPORT', shapeStyle: 'sharp', imgData: imgData }
+                            ]
+                        });
+                    }
+                    renderForms();
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    event.target.value = ''; // Reset input file
+                };
+                fileReader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error("Gagal Import PDF:", error);
+                alert("Terjadi kesalahan saat memproses file PDF.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
         function renderPreview() {
+            // Hancurkan instance chart lama untuk mencegah memory leak
+            chartInstances.forEach(c => c.destroy());
+            chartInstances = [];
+
             const container = document.getElementById('deck-container');
             container.innerHTML = '';
+            
+            let chartsToRender = []; // Menyimpan data sementara untuk dirender setelah div masuk ke DOM
 
             slidesData.forEach((slide, sIdx) => {
                 const slideEl = document.createElement('div');
@@ -302,11 +364,25 @@
                     if (elem.type === 'cover') p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : ''}</div><div class="elem-title" style="font-size:36px; margin: 10px 0;">${elem.title || ''}</div><p style="font-size:14px; color:var(--accent-gold);">${elem.subtitle || ''}</p></div>`;
                     else if (elem.type === 'header') p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${elem.tag || ''}</span></div><div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div></div>`;
                     else if (elem.type === 'text') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<p class="slide-text">${elem.content || ''}</p></div>`;
-                    else if (elem.type === 'image') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${br};">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center; color: var(--text-muted); font-size: 10px;">[ Gambar Kosong ]</div>'}</div>`;
+                    else if (elem.type === 'image') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${br}; width: 100%;">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center; color: var(--text-muted); font-size: 10px;">[ Gambar Kosong ]</div>'}</div>`;
                     else if (elem.type === 'list') p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<ul class="malevin-list">${(elem.items || []).map(i => `<li>${i}</li>`).join('')}</ul></div>`;
                     else if (elem.type === 'kpi') p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${(elem.items || []).map(k => `<div class="kpi-card" style="border-radius: ${br};"><div class="kpi-value">${k.val || '0'}</div><div class="kpi-label">${k.lbl || ''}</div></div>`).join('')}</div></div>`;
                     else if (elem.type === 'table') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<table class="malevin-table"><thead><tr>${(elem.headers || []).map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${(elem.rows || []).map(r => `<tr>${(elem.headers || []).map((_, cIdx) => `<td>${r[cIdx] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
                     else if (elem.type === 'wawasan') p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">💡 ANALISIS:</strong>${elem.content || ''}</div></div>`;
+                    else if (elem.type === 'chart') {
+                        // Persiapkan wadah canvas untuk Chart.js
+                        const chartId = `chart-${sIdx}-${eIdx}`;
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
+                            <div style="background:var(--card-obsidian); padding:10px; border-radius:${br}; border:1px solid var(--border-obsidian); height:220px; width:100%;">
+                                <canvas id="${chartId}"></canvas>
+                            </div></div>`;
+                        chartsToRender.push({
+                            id: chartId,
+                            type: elem.chartType || 'bar',
+                            labels: elem.labels || 'Q1,Q2,Q3,Q4',
+                            data: elem.data || '25,50,75,100'
+                        });
+                    }
 
                     elemWrapper.innerHTML = p; slideBody.appendChild(elemWrapper);
                 });
@@ -316,6 +392,39 @@
                 slideEl.innerHTML += `<div class="slide-footer"><span>${slide.footerLeft || ''}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
                 container.appendChild(slideEl);
             });
+
+            // Eksekusi Chart.js setelah seluruh slide dimasukkan ke dalam DOM (agar canvas terbaca)
+            setTimeout(() => {
+                chartsToRender.forEach(c => {
+                    const ctx = document.getElementById(c.id);
+                    if (ctx) {
+                        const newChart = new Chart(ctx, {
+                            type: c.type,
+                            data: {
+                                labels: c.labels.split(','),
+                                datasets: [{
+                                    label: 'Data',
+                                    data: c.data.split(',').map(Number),
+                                    backgroundColor: ['rgba(196, 154, 87, 0.7)', 'rgba(255, 255, 255, 0.2)', 'rgba(128, 130, 128, 0.5)'],
+                                    borderColor: '#C49A57',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                color: '#C0C2C0',
+                                plugins: { legend: { display: c.type === 'pie', labels: { color: '#C0C2C0' } } },
+                                scales: c.type !== 'pie' ? {
+                                    y: { beginAtZero: true, grid: { color: '#242624' }, ticks: { color: '#808280' } },
+                                    x: { grid: { color: '#242624' }, ticks: { color: '#808280' } }
+                                } : {}
+                            }
+                        });
+                        chartInstances.push(newChart);
+                    }
+                });
+            }, 50);
         }
 
         function updateElem(sIdx, eIdx, k, v) { slidesData[sIdx].elements[eIdx][k] = v; renderPreview(); }
@@ -332,7 +441,18 @@
         function addKpiItem(sIdx, eIdx) { const el = slidesData[sIdx].elements[eIdx]; if (!el.items) el.items = []; el.items.push({ val: '0', lbl: 'Metrik Baru' }); renderForms(); }
         function deleteKpiItem(sIdx, eIdx, kIdx) { slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1); renderForms(); }
         function updateKpiItem(sIdx, eIdx, kIdx, k, v) { slidesData[sIdx].elements[eIdx].items[kIdx][k] = v; renderPreview(); }
-        function addElementToSlide(sIdx, type) { const ne = { type, brand: '', shapeStyle: 'sharp' }; if (type === 'cover') { ne.tag = 'Proposal'; ne.title = 'TITLE'; ne.subtitle = 'Subtitle'; } else if (type === 'header') { ne.tag = 'Section'; ne.title = 'TITLE'; } else if (type === 'text') { ne.content = 'Teks...'; } else if (type === 'list') { ne.items = ['Item 1', 'Item 2']; } else if (type === 'kpi') { ne.items = [{ val: '100K', lbl: 'Metric 1' }]; } else if (type === 'table') { ne.headers = ['A', 'B']; ne.rows = [['D1', 'D2']]; } else if (type === 'wawasan') { ne.content = 'Catatan...'; } slidesData[sIdx].elements.push(ne); renderForms(); }
+        function addElementToSlide(sIdx, type) { 
+            const ne = { type, brand: '', shapeStyle: 'sharp' }; 
+            if (type === 'cover') { ne.tag = 'Proposal'; ne.title = 'TITLE'; ne.subtitle = 'Subtitle'; } 
+            else if (type === 'header') { ne.tag = 'Section'; ne.title = 'TITLE'; } 
+            else if (type === 'text') { ne.content = 'Teks...'; } 
+            else if (type === 'list') { ne.items = ['Item 1', 'Item 2']; } 
+            else if (type === 'kpi') { ne.items = [{ val: '100K', lbl: 'Metric 1' }]; } 
+            else if (type === 'table') { ne.headers = ['A', 'B']; ne.rows = [['D1', 'D2']]; } 
+            else if (type === 'wawasan') { ne.content = 'Tulis wawasan atau analisis di sini...'; } 
+            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'Q1,Q2,Q3'; ne.data = '10,50,30'; } // Data default grafik
+            slidesData[sIdx].elements.push(ne); renderForms(); 
+        }
         function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); renderForms(); }
         function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'PREPARED BY MALEVIN TEAM', elements: [{ type: 'header', brand: '', tag: 'Tag', title: 'SLIDE BARU', shapeStyle: 'sharp' }] }); renderForms(); }
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
@@ -348,7 +468,7 @@
 
             // Buka tab preview agar elemen ter-render di DOM
             setMode('preview');
-            await new Promise(r => setTimeout(r, 300));
+            await new Promise(r => setTimeout(r, 500)); // Tambah delay agar animasi chart selesai
 
             try {
                 const { jsPDF } = window.jspdf;
@@ -360,7 +480,6 @@
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
 
-                    // 1. Kloning slide ke wadah terisolasi untuk mengukur dan mengambil snapshot yang akurat
                     const isolatedBox = document.createElement('div');
                     isolatedBox.style.position = 'absolute';
                     isolatedBox.style.left = '-9999px';
@@ -373,20 +492,25 @@
                     clone.style.boxShadow = 'none';
                     clone.style.border = 'none';
                     clone.style.width = '850px';
-                    clone.style.height = 'auto'; // Biarkan tinggi menyesuaikan isi secara alami
+                    clone.style.height = 'auto'; 
                     clone.style.margin = '0';
 
-                    // Bersihkan border garis putus-putus elemen draggable
                     const draggables = clone.querySelectorAll('.draggable-element');
                     draggables.forEach(d => { d.style.border = 'none'; });
+
+                    // Pindahkan canvas chart ke dalam clone agar terbaca oleh html2canvas
+                    const originalCanvases = slide.querySelectorAll('canvas');
+                    const clonedCanvases = clone.querySelectorAll('canvas');
+                    originalCanvases.forEach((origCanvas, idx) => {
+                        const destCtx = clonedCanvases[idx].getContext('2d');
+                        destCtx.drawImage(origCanvas, 0, 0);
+                    });
 
                     isolatedBox.appendChild(clone);
                     document.body.appendChild(isolatedBox);
 
-                    // Ambil dimensi riil dari elemen
                     const actualHeight = Math.max(clone.offsetHeight, clone.scrollHeight);
 
-                    // 2. Ambil gambar canvas dengan resolusi tinggi (scale 3)
                     const canvas = await html2canvas(clone, {
                         scale: 3,
                         useCORS: true,
@@ -397,23 +521,14 @@
                         windowWidth: 1200
                     });
 
-                    // Hapus elemen terisolasi dari DOM
                     document.body.removeChild(isolatedBox);
 
                     const imgData = canvas.toDataURL('image/jpeg', 0.98);
-                    
-                    // Hitung tinggi PDF sesuai rasio canvas riil
                     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-                    // 3. Tambahkan halaman baru ke jsPDF dengan dimensi dinamis per slide
                     const orientation = pdfWidth > pdfHeight ? 'landscape' : 'portrait';
 
                     if (i === 0) {
-                        pdf = new jsPDF({
-                            orientation: orientation,
-                            unit: 'px',
-                            format: [pdfWidth, pdfHeight]
-                        });
+                        pdf = new jsPDF({ orientation: orientation, unit: 'px', format: [pdfWidth, pdfHeight] });
                     } else {
                         pdf.addPage([pdfWidth, pdfHeight], orientation);
                     }
