@@ -150,12 +150,12 @@
         .malevin-list li { position: relative; padding-left: 16px; font-size: 11px; color: #C0C2C0; }
         .malevin-list li::before { content: '■'; position: absolute; left: 0; top: 0; color: var(--accent-gold); font-size: 8px; }
 
-        /* TABEL PERBAIKAN: Diberi table-layout fixed agar tidak terpotong ke kanan */
+        /* TABEL PERBAIKAN */
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; table-layout: fixed; }
         .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; word-wrap: break-word; }
         .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; word-wrap: break-word; }
 
-        /* KPI PERBAIKAN: Diberi min-width:0 agar fleksibel pas di 850px */
+        /* KPI PERBAIKAN */
         .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: nowrap; }
         .kpi-card { flex: 1; min-width: 0; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
         .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
@@ -338,7 +338,7 @@
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
         /* =========================================================
-           SOLUSI UTAMA: RENDER DENGAN ISOLASI DOM (OFF-SCREEN CLONE)
+           SOLUSI PDF DENGAN TINGGI DINAMIS & PRESISI KONTEN
            ========================================================= */
         async function downloadPDF() {
             const btn = document.getElementById('downloadBtn');
@@ -346,8 +346,9 @@
             btn.innerText = 'Memproses PDF (Harap Tunggu)...';
             btn.disabled = true;
 
+            // Buka tab preview agar elemen ter-render di DOM
             setMode('preview');
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 300));
 
             try {
                 const { jsPDF } = window.jspdf;
@@ -359,52 +360,62 @@
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
 
-                    // 1. Buat kontainer khusus di luar layar yang leluasa tanpa batasan viewport browser
+                    // 1. Kloning slide ke wadah terisolasi untuk mengukur dan mengambil snapshot yang akurat
                     const isolatedBox = document.createElement('div');
-                    isolatedBox.style.position = 'fixed';
+                    isolatedBox.style.position = 'absolute';
                     isolatedBox.style.left = '-9999px';
                     isolatedBox.style.top = '0';
                     isolatedBox.style.width = '850px';
+                    isolatedBox.style.height = 'auto';
                     isolatedBox.style.zIndex = '-9999';
 
-                    // 2. Kloning slide asli
                     const clone = slide.cloneNode(true);
                     clone.style.boxShadow = 'none';
                     clone.style.border = 'none';
                     clone.style.width = '850px';
+                    clone.style.height = 'auto'; // Biarkan tinggi menyesuaikan isi secara alami
                     clone.style.margin = '0';
 
-                    // Hilangkan garis putus-putus pada elemen draggable saat di-foto
+                    // Bersihkan border garis putus-putus elemen draggable
                     const draggables = clone.querySelectorAll('.draggable-element');
                     draggables.forEach(d => { d.style.border = 'none'; });
 
                     isolatedBox.appendChild(clone);
                     document.body.appendChild(isolatedBox);
 
-                    // 3. Foto elemen yang terisolasi dengan resolusi tinggi (1200px simulated window)
+                    // Ambil dimensi riil dari elemen
+                    const actualHeight = Math.max(clone.offsetHeight, clone.scrollHeight);
+
+                    // 2. Ambil gambar canvas dengan resolusi tinggi (scale 3)
                     const canvas = await html2canvas(clone, {
                         scale: 3,
                         useCORS: true,
                         backgroundColor: '#0A0B0A',
                         logging: false,
                         width: 850,
+                        height: actualHeight,
                         windowWidth: 1200
                     });
 
-                    // Hapus elemen sampel setelah selesai di-foto
+                    // Hapus elemen terisolasi dari DOM
                     document.body.removeChild(isolatedBox);
 
-                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                    
+                    // Hitung tinggi PDF sesuai rasio canvas riil
                     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                    // 3. Tambahkan halaman baru ke jsPDF dengan dimensi dinamis per slide
+                    const orientation = pdfWidth > pdfHeight ? 'landscape' : 'portrait';
 
                     if (i === 0) {
                         pdf = new jsPDF({
-                            orientation: 'portrait',
+                            orientation: orientation,
                             unit: 'px',
                             format: [pdfWidth, pdfHeight]
                         });
                     } else {
-                        pdf.addPage([pdfWidth, pdfHeight], 'portrait');
+                        pdf.addPage([pdfWidth, pdfHeight], orientation);
                     }
 
                     pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
