@@ -84,7 +84,7 @@
         .preview-panel {
             flex: 1;
             background-color: #050505;
-            overflow: auto; /* Mengizinkan scroll horizontal jika layar kecil */
+            overflow: auto;
             padding: 30px;
             display: flex;
             flex-direction: column;
@@ -95,14 +95,14 @@
             display: flex;
             flex-direction: column;
             gap: 30px;
-            width: 850px; /* DIBUAT FIX AGAR TIDAK MENGECIL */
+            width: 850px;
             margin: 0 auto;
         }
 
         /* SLIDE AUTO HEIGHT + FIX WIDTH */
         .slide {
-            width: 850px !important; /* LEBAR DIKUNCI MATI */
-            min-height: 478.125px; /* Standar 16:9, otomatis melar ke bawah */
+            width: 850px !important;
+            min-height: 478px;
             height: auto;
             background-color: var(--bg-obsidian);
             border: 1px solid var(--border-obsidian);
@@ -130,7 +130,7 @@
         .corner-tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
         .corner-br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
 
-        .slide-body { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; margin: 10px 0; position: relative; }
+        .slide-body { flex: 1; display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
         .slide-body.has-cover { justify-content: center; align-items: flex-start; }
 
         /* DRAGGABLE STYLING */
@@ -150,19 +150,21 @@
         .malevin-list li { position: relative; padding-left: 16px; font-size: 11px; color: #C0C2C0; }
         .malevin-list li::before { content: '■'; position: absolute; left: 0; top: 0; color: var(--accent-gold); font-size: 8px; }
 
-        .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
-        .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; }
-        .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; }
+        /* TABEL PERBAIKAN: Diberi table-layout fixed agar tidak terpotong ke kanan */
+        .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; table-layout: fixed; }
+        .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; word-wrap: break-word; }
+        .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; word-wrap: break-word; }
 
-        .kpi-grid { display: flex; gap: 10px; width: 100%; }
-        .kpi-card { flex: 1; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
+        /* KPI PERBAIKAN: Diberi min-width:0 agar fleksibel pas di 850px */
+        .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: nowrap; }
+        .kpi-card { flex: 1; min-width: 0; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
         .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
         .kpi-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
         .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 10px; font-size: 11px; color: #E0E0E0; }
         .img-preview-box { max-width: 100%; max-height: 250px; object-fit: contain; display: block; }
 
-        .slide-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-obsidian); padding-top: 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; }
+        .slide-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-obsidian); padding-top: 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; width: 100%; }
         .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
     </style>
 </head>
@@ -210,10 +212,10 @@
             {
                 id: 2, footerLeft: 'SECTION 01 - PERFORMANCE & DELIVERABLES',
                 elements: [
-                    { type: 'header', brand: 'MALEVIN 10', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
+                    { type: 'header', brand: 'MALEVIN IO', tag: 'Section 01', title: 'PERFORMANCE & DELIVERABLES', shapeStyle: 'rounded' },
                     {
                         type: 'kpi', brand: 'METRICS', shapeStyle: 'rounded',
-                        items: [ { val: '1.2M+', lbl: 'Monthly Reach' }, { val: '4.8%', lbl: 'Eng. Rate' } ]
+                        items: [ { val: '1.2M+', lbl: 'Monthly Reach' }, { val: '4.8%', lbl: 'Eng. Rate' }, { val: '120+', lbl: 'Video Assets' } ]
                     },
                     {
                         type: 'table', brand: 'CLIENT ID: 40921', shapeStyle: 'sharp',
@@ -250,7 +252,7 @@
                     else if (elem.type === 'image') { fields += `<div class="form-group"><label>Upload Gambar</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; } 
                     else if (elem.type === 'list') { fields += `<div class="form-group"><label>Poin List</label><div>${(elem.items || []).map((item, lIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${item}" oninput="updateListItem(${sIdx}, ${eIdx}, ${lIdx}, this.value)"><button class="btn btn-danger" onclick="deleteListItem(${sIdx}, ${eIdx}, ${lIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin</button></div>`; } 
                     else if (elem.type === 'kpi') { fields += `<div class="form-group"><label>KPI Metrik</label><div>${(elem.items || []).map((k, kIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${k.val || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)"><input type="text" class="form-control" value="${k.lbl || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)"><button class="btn btn-danger" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah KPI</button></div>`; } 
-                    else if (elem.type === 'table') { fields += `<div class="form-group"><label>Kolom Header</label><div>${(elem.headers || []).map((h, cIdx) => `<div style="display:flex; gap:4px;"><input type="text" class="form-control" value="${h}" oninput="updateTableHeader(${sIdx}, ${eIdx}, ${cIdx}, this.value)"><button class="btn btn-danger" onclick="deleteTableColumn(${sIdx}, ${eIdx}, ${cIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableColumn(${sIdx}, ${eIdx})">+ Tambah Kolom</button></div><div class="form-group"><div>${(elem.rows || []).map((row, rIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><div style="display:flex; gap:4px; flex:1;">${(elem.headers || []).map((_, cIdx) => `<input type="text" class="form-control" value="${row[cIdx] || ''}" oninput="updateTableCell(${sIdx}, ${eIdx}, ${rIdx}, ${cIdx}, this.value)">`).join('')}</div><button class="btn btn-danger" onclick="deleteTableRow(${sIdx}, ${eIdx}, ${rIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableRow(${sIdx}, ${eIdx})">+ Tambah Baris</button></div>`; } 
+                    else if (elem.type === 'table') { fields += `<div class="form-group"><label>Kolom Header</label><div>${(elem.headers || []).map((h, cIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${h}" oninput="updateTableHeader(${sIdx}, ${eIdx}, ${cIdx}, this.value)"><button class="btn btn-danger" onclick="deleteTableColumn(${sIdx}, ${eIdx}, ${cIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableColumn(${sIdx}, ${eIdx})">+ Tambah Kolom</button></div><div class="form-group"><label>Baris Data</label><div>${(elem.rows || []).map((row, rIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><div style="display:flex; gap:4px; flex:1;">${(elem.headers || []).map((_, cIdx) => `<input type="text" class="form-control" value="${row[cIdx] || ''}" oninput="updateTableCell(${sIdx}, ${eIdx}, ${rIdx}, ${cIdx}, this.value)">`).join('')}</div><button class="btn btn-danger" onclick="deleteTableRow(${sIdx}, ${eIdx}, ${rIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addTableRow(${sIdx}, ${eIdx})">+ Tambah Baris</button></div>`; } 
                     else if (elem.type === 'wawasan') { fields += `<div class="form-group"><label>Catatan</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; }
 
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEMEN ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
@@ -336,9 +338,7 @@
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
         /* =========================================================
-           UPDATE FIX EXPORT PDF:
-           Lebar DIKUNCI MATI untuk semua halaman PDF. 
-           Tinggi menyesuaikan secara auto (proporsional).
+           SOLUSI UTAMA: RENDER DENGAN ISOLASI DOM (OFF-SCREEN CLONE)
            ========================================================= */
         async function downloadPDF() {
             const btn = document.getElementById('downloadBtn');
@@ -347,46 +347,58 @@
             btn.disabled = true;
 
             setMode('preview');
-            await new Promise(r => setTimeout(r, 600));
+            await new Promise(r => setTimeout(r, 400));
 
             try {
+                const { jsPDF } = window.jspdf;
                 let pdf = null;
+                const pdfWidth = 850;
+
                 const slides = document.querySelectorAll('.slide');
-                
-                // --- KUNCI LEBAR PDF ---
-                // Berapapun layar/browser user, lebar PDF DIPAKSA 850px agar sama persis dan rata!
-                const pdfWidth = 850; 
 
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
-                    const originalBoxShadow = slide.style.boxShadow;
-                    const originalBorder = slide.style.border;
-                    
-                    slide.style.boxShadow = 'none';
-                    slide.style.border = 'none';
-                    
-                    const draggables = slide.querySelectorAll('.draggable-element');
+
+                    // 1. Buat kontainer khusus di luar layar yang leluasa tanpa batasan viewport browser
+                    const isolatedBox = document.createElement('div');
+                    isolatedBox.style.position = 'fixed';
+                    isolatedBox.style.left = '-9999px';
+                    isolatedBox.style.top = '0';
+                    isolatedBox.style.width = '850px';
+                    isolatedBox.style.zIndex = '-9999';
+
+                    // 2. Kloning slide asli
+                    const clone = slide.cloneNode(true);
+                    clone.style.boxShadow = 'none';
+                    clone.style.border = 'none';
+                    clone.style.width = '850px';
+                    clone.style.margin = '0';
+
+                    // Hilangkan garis putus-putus pada elemen draggable saat di-foto
+                    const draggables = clone.querySelectorAll('.draggable-element');
                     draggables.forEach(d => { d.style.border = 'none'; });
 
-                    const canvas = await html2canvas(slide, {
-                        scale: 3, 
+                    isolatedBox.appendChild(clone);
+                    document.body.appendChild(isolatedBox);
+
+                    // 3. Foto elemen yang terisolasi dengan resolusi tinggi (1200px simulated window)
+                    const canvas = await html2canvas(clone, {
+                        scale: 3,
                         useCORS: true,
                         backgroundColor: '#0A0B0A',
-                        logging: false
+                        logging: false,
+                        width: 850,
+                        windowWidth: 1200
                     });
 
-                    slide.style.boxShadow = originalBoxShadow;
-                    slide.style.border = originalBorder;
-                    draggables.forEach(d => { d.style.border = ''; });
+                    // Hapus elemen sampel setelah selesai di-foto
+                    document.body.removeChild(isolatedBox);
 
                     const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                    
-                    // --- AUTO HEIGHT PROPORSIONAL ---
-                    // Hitung tinggi secara matematis berdasarkan lebar agar gambar tidak gepeng
                     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
                     if (i === 0) {
-                        pdf = new window.jspdf.jsPDF({
+                        pdf = new jsPDF({
                             orientation: 'portrait',
                             unit: 'px',
                             format: [pdfWidth, pdfHeight]
