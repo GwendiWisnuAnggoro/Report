@@ -224,7 +224,7 @@
                     <span style="font-size:11px; font-weight:800; color:var(--accent-gold);">MANAJEMEN VARIABEL KUSTOM</span>
                     <button class="btn btn-gold" onclick="addNewCustomVariable()" style="padding: 3px 8px; font-size:8px;">+ Variabel Baru</button>
                 </div>
-                <div style="font-size:9px; color:var(--text-muted);">Klik pil variabel di bawah untuk menyisipkannya, atau gunakan format <code>*nama&lt;kata&gt;*</code> di teks.</div>
+                <div style="font-size:9px; color:var(--text-muted); line-height:1.5;">Cara pakai: (1) Klik pil variabel di bawah untuk menyalin ke clipboard, lalu tempel di kolom yang ada tanda 🔗. (2) Atau blok/highlight sebagian teks di kolom Judul / Isi Teks, lalu klik tombol kuning "+ Jadikan Variabel" yang muncul. Satu-satunya format yang dikenali sistem: <code>{{namaVariabel}}</code>.</div>
                 <div class="global-var-list" id="globalVarListUI"></div>
             </div>
 
@@ -247,84 +247,117 @@
         };
 
         // Kumpulan Variabel Global Kustom (Support Gambar, Teks, Angka/Perhitungan Matematika)
+        // Satu contoh variabel disediakan supaya sistem langsung terlihat cara kerjanya.
         let customVariables = [
-            { name: 'logoUtama', type: 'image', value: '' },
-            { name: 'tahunRilis', type: 'number', value: '2026' },
-            { name: 'totalTarget', type: 'calculation', value: '1500 * 4' }
+            { name: 'namaProyek', type: 'text', value: 'Proyek Baru' }
         ];
 
+        // Data awal: baru 1 slide berisi teks saja (belum ada elemen lain yang ditambahkan)
         let slidesData = [
             {
-                id: 1, 
-                footerLeft: 'PREPARED BY CREATIVE TEAM',
+                id: 1,
+                footerLeft: 'TEAM',
                 elements: [
-                    { type: 'cover', width: 'full', brand: 'STUDIO', tag: 'Deck Studio', title: 'Q1 ANALYTICS DECK *tahunRilis<2026>*', subtitle: 'Growth, Engagement & Performance Insights', shapeStyle: 'sharp' }
-                ]
-            },
-            {
-                id: 2,
-                footerLeft: 'Section 01 — Executive Summary',
-                elements: [
-                    { type: 'header', width: 'full', brand: 'STUDIO', tag: 'IKHTISAR KINERJA', title: 'PERFORMA KONTEN BULANAN' },
-                    { 
-                        type: 'social', width: 'full', sectionTitle: 'IKHTISAR KINERJA SOSIAL & SOSMED', period: '1 - 15 Sep 2026',
-                        metrics: [
-                            { label: 'Tayangan', value: '1,245,000', deltaPercent: '18.4%', dir: 'up' },
-                            { label: 'Suka', value: '84,200', deltaPercent: '12.1%', dir: 'up' }
-                        ],
-                        socialLinks: [
-                            { platform: 'YouTube', name: 'Seputar Editing', url: 'https://youtube.com' },
-                            { platform: 'Instagram', name: '@studio_edit', url: 'https://instagram.com' }
-                        ]
-                    }
+                    { type: 'text', width: 'full', style: 'judul', content: 'Judul Slide Anda', varName: '', card: false, shapeStyle: 'sharp' },
+                    { type: 'text', width: 'full', style: 'paragraf', content: 'Ini adalah slide pertama Anda. Contoh variabel: nama proyek ini adalah {{namaProyek}}. Ganti nilainya di panel "Manajemen Variabel Kustom" di atas, atau blok sebagian teks ini lalu klik tombol "+ Jadikan Variabel" untuk membuat variabel baru dari teks yang dipilih.', varName: '', card: false, shapeStyle: 'sharp' }
                 ]
             }
         ];
 
         let chartInstances = [];
-        let lastSelectedText = '';
+        // Target field aktif (elemen input/textarea) beserta posisi teks yang sedang diblok
+        let activeVarTarget = null;
 
-        // Highlight selection listener untuk buat variabel otomatis
-        document.addEventListener('mouseup', function(e) {
-            const selectedText = window.getSelection().toString().trim();
+        // Nama tipe variabel yang valid (menghindari salah ketik saat membuat variabel baru)
+        const VAR_TYPE_LABELS = { text: 'Teks', number: 'Angka', calculation: 'Rumus / Kalkulasi', image: 'Gambar (URL)' };
+
+        /* ---------------------------------------------------------
+           DETEKSI TEKS YANG DIBLOK DI DALAM INPUT / TEXTAREA
+           (window.getSelection() TIDAK BISA membaca isi input/textarea,
+           jadi kita pakai selectionStart/selectionEnd dari elemen aktif)
+           --------------------------------------------------------- */
+        function handleFieldSelectionEvent(e) {
             const popup = document.getElementById('highlightPopup');
-            if (selectedText.length > 0 && document.getElementById('editorPanel').contains(e.target)) {
-                lastSelectedText = selectedText;
-                popup.style.left = `${e.pageX}px`;
-                popup.style.top = `${e.pageY - 30}px`;
-                popup.style.display = 'block';
+            const el = document.activeElement;
+            const isTextField = el && el.classList && el.classList.contains('form-control') && (el.tagName === 'TEXTAREA' || el.type === 'text');
+
+            if (!isTextField) { activeVarTarget = null; popup.style.display = 'none'; return; }
+
+            const start = el.selectionStart, end = el.selectionEnd;
+            if (end > start) {
+                activeVarTarget = { el, start, end, text: el.value.substring(start, end) };
+                let left, top;
+                if (typeof e.pageX === 'number' && (e.pageX || e.pageY)) {
+                    left = e.pageX; top = e.pageY - 32;
+                } else {
+                    const rect = el.getBoundingClientRect();
+                    left = rect.left + window.scrollX + 10; top = rect.top + window.scrollY - 32;
+                }
+                popup.style.left = `${left}px`; popup.style.top = `${top}px`; popup.style.display = 'block';
             } else {
-                if (!popup.contains(e.target)) popup.style.display = 'none';
+                activeVarTarget = null; popup.style.display = 'none';
+            }
+        }
+        document.getElementById('editorPanel').addEventListener('mouseup', handleFieldSelectionEvent);
+        document.getElementById('editorPanel').addEventListener('keyup', handleFieldSelectionEvent);
+        document.addEventListener('mousedown', function (e) {
+            const popup = document.getElementById('highlightPopup');
+            if (popup.style.display === 'block' && !popup.contains(e.target) && e.target !== (activeVarTarget && activeVarTarget.el)) {
+                popup.style.display = 'none';
             }
         });
 
-        function createVariableFromHighlight() {
-            if (!lastSelectedText) return;
-            const varName = prompt(`Masukkan nama unik variabel untuk teks: "${lastSelectedText}"`, `var_${Date.now().toString().slice(-4)}`);
-            if (!varName) return;
-            
-            // Validasi nama tidak boleh sama
-            if (customVariables.some(v => v.name === varName)) {
-                alert("Nama variabel sudah ada! Silakan gunakan nama lain.");
-                return;
-            }
+        function sanitizeVarName(raw) { return (raw || '').trim().replace(/[^a-zA-Z0-9_]/g, ''); }
 
-            customVariables.push({ name: varName, type: 'text', value: lastSelectedText });
+        // Membuat variabel baru dari teks yang diblok, LANGSUNG mengganti teks terpilih
+        // di field aslinya dengan {{namaVariabel}} — tidak perlu copy-paste manual lagi.
+        function createVariableFromHighlight() {
+            if (!activeVarTarget) return;
+            const { el, start, end, text } = activeVarTarget;
+
+            const rawName = prompt(`Buat variabel baru dari teks terpilih:\n"${text}"\n\nMasukkan nama variabel (huruf/angka/underscore, tanpa spasi):`, `var${Date.now().toString().slice(-4)}`);
+            if (!rawName) return;
+            const varName = sanitizeVarName(rawName);
+            if (!varName) { alert('Nama variabel tidak valid. Gunakan huruf, angka, atau underscore saja.'); return; }
+            if (customVariables.some(v => v.name === varName)) { alert('Nama variabel sudah ada! Silakan gunakan nama lain.'); return; }
+
+            customVariables.push({ name: varName, type: 'text', value: text });
+
+            // Ganti teks yang diblok dengan placeholder variabel, lalu picu update data model
+            el.value = el.value.substring(0, start) + `{{${varName}}}` + el.value.substring(end);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+
+            activeVarTarget = null;
             document.getElementById('highlightPopup').style.display = 'none';
             renderCustomVarsUI();
-            alert(`Variabel *${varName}<...>* berhasil dibuat! Anda bisa menyisipkannya.`);
+            alert(`Variabel {{${varName}}} berhasil dibuat dan langsung disisipkan ke field.`);
         }
 
+        // Membuat variabel baru lewat panel (bukan dari highlight teks)
         function addNewCustomVariable() {
-            const name = prompt("Masukkan nama variabel baru (unik):", "varBaru");
-            if (!name) return;
-            if (customVariables.some(v => v.name === name)) { alert("Nama variabel sudah ada!"); return; }
-            
-            const type = prompt("Tipe variabel (ketik: text, number, calculation, image):", "text");
-            const value = prompt("Masukkan nilai awal / formula / URL gambar:", "Nilai data...");
-            
-            customVariables.push({ name, type: type || 'text', value: value || '' });
+            const rawName = prompt("Nama variabel baru (huruf/angka/underscore, tanpa spasi):", "variabelBaru");
+            if (!rawName) return;
+            const name = sanitizeVarName(rawName);
+            if (!name) { alert('Nama variabel tidak valid. Gunakan huruf, angka, atau underscore saja.'); return; }
+            if (customVariables.some(v => v.name === name)) { alert('Nama variabel sudah ada! Silakan gunakan nama lain.'); return; }
+
+            const typeChoice = (prompt("Pilih tipe variabel — ketik salah satu angka:\n1 = Teks\n2 = Angka\n3 = Rumus / Kalkulasi (contoh: 1500 * 4)\n4 = Gambar (URL)", "1") || '1').trim();
+            const typeMap = { '1': 'text', '2': 'number', '3': 'calculation', '4': 'image' };
+            const type = typeMap[typeChoice] || 'text';
+
+            const valuePrompt = type === 'calculation' ? 'Masukkan rumus (contoh: 1500 * 4):'
+                : type === 'image' ? 'Masukkan URL gambar:' : 'Masukkan nilai variabel:';
+            const value = prompt(valuePrompt, type === 'calculation' ? '1500 * 4' : '');
+
+            customVariables.push({ name, type, value: value || '' });
             renderCustomVarsUI();
+            renderPreview();
+            alert(`Variabel {{${name}}} berhasil dibuat. Klik pil variabelnya untuk menyalin ke clipboard.`);
+        }
+
+        function copyVarToClipboard(name) {
+            navigator.clipboard.writeText(`{{${name}}}`);
+            alert(`Disalin: {{${name}}}\nTempel (paste) di kolom Judul atau Isi Teks manapun.`);
         }
 
         function deleteCustomVar(index) {
@@ -336,9 +369,13 @@
         function renderCustomVarsUI() {
             const container = document.getElementById('globalVarListUI');
             if (!container) return;
+            if (customVariables.length === 0) {
+                container.innerHTML = '<div style="font-size:9px; color:var(--text-muted);">Belum ada variabel. Klik "+ Variabel Baru" atau blok teks di kolom Judul/Isi Teks.</div>';
+                return;
+            }
             container.innerHTML = customVariables.map((v, idx) => `
-                <div class="var-pill-btn" title="Tipe: ${v.type}">
-                   <span onclick="navigator.clipboard.writeText('*${v.name}*'); alert('Variabel *${v.name}* disalin!');">*{${v.name}}* (${v.type})</span>
+                <div class="var-pill-btn" title="Tipe: ${VAR_TYPE_LABELS[v.type] || v.type} — klik teks untuk copy">
+                   <span onclick="copyVarToClipboard('${v.name}')">{{${v.name}}}</span>
                    <span style="color:#E55353; cursor:pointer; margin-left:4px;" onclick="deleteCustomVar(${idx})">✕</span>
                 </div>
             `).join('');
@@ -377,19 +414,12 @@
             return vars;
         }
 
+        // SATU-SATUNYA format variabel yang dikenali sistem: {{namaVariabel}}
         function renderVarsInText(str, vars) {
             if (!str) return '';
-            // Ganti format *nama<kata>* atau {{nama}} menjadi nilainya, dan sembunyikan simbol kodenya
-            let processed = str.replace(/\*([a-zA-Z0-9_]+)<([^>]*)>\*/g, (match, varKey, fallback) => {
+            return String(str).replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, varKey) => {
                 const item = vars[varKey];
-                if (!item) return fallback || match;
-                if (item.type === 'image') return `<img src="${item.value}" style="max-height:30px; vertical-align:middle; display:inline-block;">`;
-                return item.value;
-            });
-
-            return processed.replace(/\{\{(\w+)\}\}/g, (match, varKey) => {
-                const item = vars[varKey];
-                if (!item) return match;
+                if (!item) return `<span style="color:var(--negative); font-size:9px; border:1px dashed var(--negative); padding:0 3px;" title="Variabel '${varKey}' belum dibuat">{{${varKey}}}?</span>`;
                 if (item.type === 'image') return `<img src="${item.value}" style="max-height:30px; vertical-align:middle; display:inline-block;">`;
                 return item.value;
             });
@@ -425,7 +455,7 @@
                     let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / ID</label><input type="text" class="form-control" value="${elem.brand || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>`;
 
                     if (elem.type === 'cover' || elem.type === 'header') { 
-                        fields += `<div class="form-group"><label>Tag</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div><div class="form-group"><label>Judul (Bisa pakai *nama&lt;kata&gt;*)</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>`; 
+                        fields += `<div class="form-group"><label>Tag</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div><div class="form-group"><label>Judul (bisa pakai variabel, blok teks untuk membuat variabel baru)</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>`; 
                         if(elem.type==='cover') fields += `<div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>`;
                     } 
                     else if (elem.type === 'text') { 
@@ -438,13 +468,13 @@
                                 <option value="paragraf" ${(!elem.style || elem.style === 'paragraf') ? 'selected' : ''}>Paragraf Regular</option>
                             </select>
                         </div>
-                        <div class="form-group"><label>Nama Variable Teks</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
-                        <div class="form-group"><label>Isi Teks (Block & Highlight untuk buat variabel)</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
+                        <div class="form-group"><label>Daftarkan elemen ini sebagai variabel (opsional — isi jika ingin isi teks ini dipakai ulang di elemen lain via {{nama}})</label><input type="text" class="form-control" placeholder="contoh: sloganUtama" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Isi Teks (blok sebagian teks untuk membuat variabel baru dari teks itu)</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
                         <div class="form-group"><label><input type="checkbox" ${elem.card ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'card', this.checked)"> Bungkus Dalam Kartu Obsidian</label></div>`; 
                     } 
                     else if (elem.type === 'image') { 
                         fields += `
-                        <div class="form-group"><label>Nama Variable Gambar</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Daftarkan gambar ini sebagai variabel (opsional — isi jika ingin gambar ini dipakai ulang via {{nama}})</label><input type="text" class="form-control" placeholder="contoh: logoUtama" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
                         <div class="form-group"><label>Upload Gambar / Logo</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
                     } 
                     else if (elem.type === 'comparison') {
