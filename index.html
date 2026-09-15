@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malevin — Modular Deck Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
         /* =========================================================
@@ -264,7 +265,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
         }
 
         #deck-container {
@@ -288,9 +288,6 @@
             justify-content: space-between;
             box-sizing: border-box;
             page-break-after: always;
-            break-after: page;
-            page-break-inside: avoid;
-            break-inside: avoid;
             overflow: hidden;
         }
 
@@ -497,80 +494,97 @@
         .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
 
         /* =========================================================
-           4. RESPONSIVE MEDIA QUERIES
+           4. RESPONSIVE — HP & PC PREVIEW
            ========================================================= */
         @media (max-width: 900px) {
             body { height: auto; overflow: auto; }
             .app-container { flex-direction: column; height: auto; overflow: visible; }
-            .preview-panel { padding: 16px; overflow-x: auto; width: 100%; }
-            #deck-container { min-width: 650px; }
+            .preview-panel { padding: 16px; }
+            .slide { padding: 22px 18px; aspect-ratio: auto; min-height: 380px; }
+            .grid-item { grid-column: span 6 !important; }
+            .t-hero { font-size: 30px; }
+            .t-judul { font-size: 21px; }
+            .t-subjudul { font-size: 15px; }
+            .kpi-grid, .elem-grid, .compare-box, .col-wrap { flex-direction: column; }
+            .donut-wrap { flex-direction: column; align-items: flex-start; }
         }
 
         /* =========================================================
-           5. NATIVE VECTOR PRINT ENGINE (EXPORT PDF VEKTOR ASLI)
+           5. FIXED LAYOUT FOR EXPORT PDF & VECTOR PRINT
            ========================================================= */
+        .pdf-export-mode #deck-container,
         @media print {
-            @page {
-                size: 16in 9in;
-                margin: 0;
-            }
-
-            html, body {
-                background-color: #0A0B0A !important;
-                color: #FEFEFE !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            .topbar, .editor-panel, .drag-handle, .var-tag, button, select, input {
-                display: none !important;
-            }
-
-            .app-container {
-                display: block !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            .preview-panel {
-                display: block !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                background-color: #0A0B0A !important;
-                width: 100% !important;
-                overflow: visible !important;
-            }
-
             #deck-container {
-                width: 100% !important;
-                max-width: none !important;
-                min-width: 0 !important;
+                width: 850px !important;
+                max-width: 850px !important;
+                margin: 0 auto !important;
                 gap: 0 !important;
-                margin: 0 !important;
-                padding: 0 !important;
             }
-
+            
             .slide {
-                width: 100vw !important;
-                height: 56.25vw !important;
-                max-height: 100vh !important;
-                page-break-after: always !important;
-                break-after: page !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                border: none !important;
-                box-shadow: none !important;
-                margin: 0 !important;
+                width: 850px !important;
+                height: 478.125px !important;
+                aspect-ratio: 16 / 9 !important;
                 padding: 35px 40px !important;
                 box-sizing: border-box !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                background-color: var(--bg-obsidian) !important;
+                overflow: hidden !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            .slide-body {
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
+                gap: 14px !important;
+                margin: 18px 0 !important;
+            }
+
+            .grid-item {
+                grid-column: span var(--span, 6) !important;
+            }
+
+            .kpi-grid, .elem-grid, .compare-box, .col-wrap {
+                flex-direction: row !important;
+            }
+
+            .donut-wrap {
+                flex-direction: row !important;
+                align-items: center !important;
+            }
+
+            .t-hero { font-size: 47px !important; }
+            .t-judul { font-size: 29px !important; }
+            .t-subjudul { font-size: 18px !important; }
+
+            .drag-handle { display: none !important; }
+        }
+
+        @media print {
+            @page {
+                size: 850px 478.125px landscape;
+                margin: 0;
+            }
+            body {
+                background-color: #0A0B0A !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                background-color: #0A0B0A !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            .topbar, .editor-panel {
+                display: none !important;
+            }
+            .app-container {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            .preview-panel {
+                padding: 0 !important;
+                background-color: transparent !important;
+                overflow: visible !important;
             }
         }
     </style>
@@ -594,18 +608,14 @@
             </button>
         </div>
         <div class="topbar-actions">
-            <input type="file" id="importPdfInput" accept="application/pdf,.json" style="display:none" onchange="handleImportPDF(event)">
+            <input type="file" id="importPdfInput" accept="application/pdf" style="display:none" onchange="handleImportPDF(event)">
             <button class="btn" onclick="document.getElementById('importPdfInput').click()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Import Project / PDF
-            </button>
-            <button class="btn" onclick="exportJSON()">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                Simpan Project (.json)
+                Import PDF Malevin
             </button>
             <button class="btn btn-gold" onclick="exportPDF()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export PDF Vector
+                Export PDF Document
             </button>
         </div>
     </div>
@@ -619,7 +629,7 @@
                 <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
                 <button class="btn btn-gold" onclick="addSlide()">+ Halaman Baru</button>
             </div>
-            <p style="font-size:9px; color:var(--text-muted); line-height:1.5;">Drag ikon ⠿ di tab Preview untuk mengatur ulang posisi elemen. Atur "Lebar Elemen" di tiap kartu untuk membentuk grid dinamis (1/3, 1/2, 2/3, Full). Elemen "Kolom" bisa dipilih desainnya & ditambah tanpa batas.</p>
+            <p style="font-size:9px; color:var(--text-muted); line-height:1.5;">Drag ikon ⠿ di tab Preview untuk mengatur ulang posisi elemen. Atur "Lebar Elemen" di tiap kartu untuk membentuk grid dinamis (1/3, 1/2, 2/3, Full). Elemen "Kolom" bisa dipilih desainnya & ditambah tanpa batas. Hanya elemen kategori ANALISIS (Perbandingan, Statistik, Wawasan) yang bisa membuat variabel teks {{nama}} — elemen lain cuma bisa memakainya.</p>
 
             <div id="forms-wrapper"></div>
         </div>
@@ -801,9 +811,6 @@
             renderForms();
         }
 
-        /* ============================
-           1. RENDER LEFT EDITOR FORMS
-           ============================ */
         function renderForms() {
             const wrapper = document.getElementById('forms-wrapper');
             wrapper.innerHTML = '';
@@ -848,6 +855,7 @@
                             <div class="form-group"><label>Teks Kolom 1</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'c1Text', this.value)">${elem.c1Text || ''}</textarea></div>
                             <div class="form-group"><label>Judul Kolom 2</label><input type="text" class="form-control" value="${elem.c2Title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'c2Title', this.value)"></div>
                             <div class="form-group"><label>Teks Kolom 2</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'c2Text', this.value)">${elem.c2Text || ''}</textarea></div>
+                            <p style="font-size:8px; color:var(--text-muted);">Elemen "Kolom (Lama)" ini dipertahankan supaya deck lama tetap bisa dibuka. Untuk kolom baru, pakai tombol "+ Kolom" yang desain & jumlahnya lebih fleksibel.</p>
                         `;
                     } else if (elem.type === 'columns') {
                         const designOptions = [
@@ -872,6 +880,7 @@
                             <div class="form-group"><label>Desain Kolom</label>
                                 <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'design', this.value)">${designOptions}</select>
                             </div>
+                            <p style="font-size:8px; color:var(--text-muted);">Jumlah kolom bebas — tambah sebanyak yang dibutuhkan. Isi teks hanya bisa MEMAKAI variabel {{nama}} dari elemen Analisis, tidak bisa membuat variabel baru di sini.</p>
                             ${colRows}
                             <button class="btn" onclick="addColumnItem(${sIdx}, ${eIdx})">+ Tambah Kolom</button>
                         `;
@@ -945,8 +954,8 @@
                                     <span>METRIK ${mIdx + 1}</span>
                                     <button class="btn btn-danger" onclick="removeSocialMetric(${sIdx}, ${eIdx}, ${mIdx})">Hapus</button>
                                 </div>
-                                <div class="form-group"><label>Nama Metrik</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
-                                <div class="form-group"><label>Nama Variabel (opsional)</label><input type="text" class="form-control" value="${m.varName || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'varName', this.value)"></div>
+                                <div class="form-group"><label>Nama Metrik (cth: Tayangan Postingan, Pengikut, Penonton)</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
+                                <div class="form-group"><label>Nama Variabel (opsional) — dipakai di Teks/Kolom lain sbg {{nama}}</label><input type="text" class="form-control" value="${m.varName || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'varName', this.value)"></div>
                                 <div style="display:flex; gap:6px;">
                                     <div class="form-group" style="flex:1;"><label>Nilai</label><input type="text" class="form-control" value="${m.value || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'value', this.value)"></div>
                                     <div class="form-group" style="flex:1;"><label>Arah Perubahan</label>
@@ -958,20 +967,21 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:6px;">
-                                    <div class="form-group" style="flex:1;"><label>Perubahan Nilai</label><input type="text" class="form-control" placeholder="cth: +91" value="${m.deltaValue || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaValue', this.value)"></div>
-                                    <div class="form-group" style="flex:1;"><label>Perubahan Persen</label><input type="text" class="form-control" placeholder="cth: +13.6%" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
+                                    <div class="form-group" style="flex:1;"><label>Perubahan Nilai (opsional)</label><input type="text" class="form-control" placeholder="cth: +91 / -10,5 rb" value="${m.deltaValue || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaValue', this.value)"></div>
+                                    <div class="form-group" style="flex:1;"><label>Perubahan Persen (opsional)</label><input type="text" class="form-control" placeholder="cth: +13.6%" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
                                 </div>
                             </div>
                         `).join('');
 
                         fields = `
-                            <div class="form-group"><label>Judul Section</label><input type="text" class="form-control" value="${elem.sectionTitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'sectionTitle', this.value)"></div>
+                            <div class="form-group"><label>Judul Section (cth: Ikhtisar, Pengikut, Penonton)</label><input type="text" class="form-control" value="${elem.sectionTitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'sectionTitle', this.value)"></div>
                             <div style="display:flex; gap:6px;">
                                 <div class="form-group" style="flex:1;"><label>Periode Cepat</label>
                                     <select class="form-control" onchange="onSocialPresetChange(${sIdx}, ${eIdx}, this.value)">${presetOptions}</select>
                                 </div>
-                                <div class="form-group" style="flex:1;"><label>Teks Periode</label><input type="text" class="form-control" value="${elem.period || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'period', this.value)"></div>
+                                <div class="form-group" style="flex:1;"><label>Teks Periode (tampil di preview)</label><input type="text" class="form-control" value="${elem.period || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'period', this.value)"></div>
                             </div>
+                            <p style="font-size:8px; color:var(--text-muted); line-height:1.4;">Pilih Periode Cepat untuk isi teks otomatis (hari ini, bulan lalu, tahun lalu, dst) — atau pilih Kustom lalu ketik manual, misalnya rentang tanggal sendiri.</p>
                             ${metricRows}
                             <button class="btn" onclick="addSocialMetric(${sIdx}, ${eIdx})">+ Tambah Metrik</button>
                         `;
@@ -986,13 +996,13 @@
                                     <div class="form-group" style="flex:2;"><label>Label</label><input type="text" class="form-control" value="${it.label || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'label', this.value)"></div>
                                     <div class="form-group" style="flex:1;"><label>Persen (%)</label><input type="text" class="form-control" value="${it.percent || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'percent', this.value)"></div>
                                 </div>
-                                <div class="form-group"><label>Nama Variabel</label><input type="text" class="form-control" value="${it.varName || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'varName', this.value)"></div>
+                                <div class="form-group"><label>Nama Variabel (opsional) — dipakai di Teks/Kolom lain sbg {{nama}}</label><input type="text" class="form-control" value="${it.varName || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'varName', this.value)"></div>
                             </div>
                         `).join('');
 
                         fields = `
-                            <div class="form-group"><label>Judul</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
-                            <div class="form-group"><label>Kategori</label><input type="text" class="form-control" value="${elem.category || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'category', this.value)"></div>
+                            <div class="form-group"><label>Judul (cth: Wawasan Pengikut, Wawasan Penonton)</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>
+                            <div class="form-group"><label>Kategori (Gender / Usia / Lokasi)</label><input type="text" class="form-control" value="${elem.category || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'category', this.value)"></div>
                             ${itemRows}
                             <button class="btn" onclick="addBreakdownItem(${sIdx}, ${eIdx})">+ Tambah Baris</button>
                         `;
@@ -1044,7 +1054,7 @@
                             <button class="btn" onclick="addElem(${sIdx}, 'kpi')">+ KPI</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'chart')">+ Grafik</button>
                         </div>
-                        <label class="micro-label" style="margin-top:10px; display:block; color:var(--accent-gold);">+ TAMBAH ELEMEN ANALISIS:</label>
+                        <label class="micro-label" style="margin-top:10px; display:block; color:var(--accent-gold);">+ TAMBAH ELEMEN ANALISIS <span style="color:var(--text-muted); font-weight:500; text-transform:none; letter-spacing:0;">(satu-satunya yang bisa bikin variabel teks {{nama}})</span>:</label>
                         <div class="add-element-bar">
                             <button class="btn" onclick="addElem(${sIdx}, 'comparison')">+ Perbandingan</button>
                             <button class="btn" onclick="addElem(${sIdx}, 'social')">+ Statistik</button>
@@ -1060,9 +1070,6 @@
             renderPreview();
         }
 
-        /* ============================
-           2. RENDER LIVE PREVIEW
-           ============================ */
         function renderPreview() {
             const container = document.getElementById('deck-container');
             container.innerHTML = '';
@@ -1172,9 +1179,6 @@
             });
         }
 
-        /* ============================
-           CHART RENDERERS
-           ============================ */
         function renderChartElement(elem) {
             const labels = (elem.labels || '').split(',').map(s => s.trim()).filter(Boolean);
             const values = (elem.values || '').split(',').map(s => parseFloat(s.trim()) || 0);
@@ -1345,9 +1349,6 @@
             `;
         }
 
-        /* ============================
-           3. DRAG & DROP
-           ============================ */
         let dragSrc = null;
 
         function onDragStart(e, sIdx, eIdx) {
@@ -1377,9 +1378,6 @@
             renderForms();
         }
 
-        /* ============================
-           4. HELPER / CRUD FUNCTIONS
-           ============================ */
         function updateSlideFooter(sIdx, value) {
             slidesData[sIdx].footerLeft = value;
             renderPreview();
@@ -1466,67 +1464,77 @@
         }
 
         /* ============================
-           5. EXPORT ENGINE (VEKTOR NATIVE PDF)
+           5. EXPORT PDF (ISOLATED HIGH-DPI DESKTOP RENDER)
            ============================ */
-        function exportPDF() {
-            setMode('preview');
-            setTimeout(() => {
-                window.print();
-            }, 100);
-        }
+        async function exportPDF() {
+            // Kontainer khusus off-screen dengan ukuran fixed 850px desktop
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            tempContainer.style.width = '850px';
+            tempContainer.style.backgroundColor = '#050505';
+            tempContainer.className = 'pdf-export-mode';
 
-        function exportJSON() {
-            const payload = {
+            const originalDeck = document.getElementById('deck-container');
+            const clonedDeck = originalDeck.cloneNode(true);
+
+            clonedDeck.querySelectorAll('.drag-handle').forEach(el => el.remove());
+
+            tempContainer.appendChild(clonedDeck);
+            document.body.appendChild(tempContainer);
+
+            const options = {
+                margin: 0,
+                filename: `${BRAND_NAME.replace(/\s+/g, '_')}_Modular_Deck.pdf`,
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: { 
+                    scale: 3, // Render 300+ DPI agar teks & grafik sangat tajam
+                    useCORS: true, 
+                    backgroundColor: '#0A0B0A',
+                    windowWidth: 1280, // Kunci breakpoint CSS desktop walau dari HP
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'px', format: [850, 478.125], orientation: 'landscape', compress: true }
+            };
+
+            const payload = MALEVIN_PDF_SIGNATURE + encodeURIComponent(JSON.stringify({
                 brand: BRAND_NAME,
                 account: currentAccount,
                 slides: slidesData
-            };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `${BRAND_NAME.replace(/\s+/g, '_')}_Deck_Project.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            }));
+
+            try {
+                await html2pdf().set(options).from(clonedDeck).toPdf().get('pdf').then(function (pdf) {
+                    pdf.setProperties({
+                        title: `${BRAND_NAME} Modular Deck`,
+                        subject: 'Malevin Modular Deck Studio Export',
+                        creator: 'Malevin Modular Deck Studio',
+                        keywords: payload
+                    });
+                }).save();
+            } catch (err) {
+                console.error('Export error:', err);
+                alert('Gagal mengekspor PDF. Silakan coba lagi.');
+            } finally {
+                document.body.removeChild(tempContainer);
+            }
         }
 
-        /* ============================
-           6. IMPORT DECK (PROJECT / PDF)
-           ============================ */
         async function handleImportPDF(event) {
             const file = event.target.files[0];
             event.target.value = '';
             if (!file) return;
 
             try {
-                if (file.type === 'application/json' || file.name.endsWith('.json')) {
-                    const text = await file.text();
-                    const parsed = JSON.parse(text);
-                    if (parsed && Array.isArray(parsed.slides)) {
-                        slidesData = parsed.slides;
-                        if (parsed.brand) {
-                            BRAND_NAME = parsed.brand;
-                            document.getElementById('brandNameLabel').textContent = BRAND_NAME.toUpperCase();
-                        }
-                        if (parsed.account) {
-                            currentAccount = parsed.account;
-                            const sel = document.getElementById('accountSelect');
-                            if (sel) sel.value = currentAccount;
-                        }
-                        renderForms();
-                        setMode('edit');
-                        alert('Project deck berhasil diimpor!');
-                        return;
-                    }
-                }
-
                 const buffer = await file.arrayBuffer();
                 const { PDFDocument } = PDFLib;
                 const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true, updateMetadata: false });
                 const keywords = pdfDoc.getKeywords() || '';
 
                 if (!keywords.startsWith(MALEVIN_PDF_SIGNATURE)) {
-                    alert('File PDF/Project ini tidak memiliki data deck Malevin valid.');
+                    alert('PDF ini bukan hasil generate dari Malevin Modular Deck Studio, jadi tidak bisa diimpor untuk diedit ulang. Hanya PDF yang di-export dari aplikasi ini yang bisa dibuka kembali.');
                     return;
                 }
 
@@ -1552,13 +1560,10 @@
                 alert('Deck berhasil diimpor dari PDF. Silakan lanjutkan mengedit.');
             } catch (err) {
                 console.error(err);
-                alert('Gagal membaca file. Pastikan file yang dipilih adalah PDF hasil export Malevin atau file .json deck valid.');
+                alert('Gagal membaca PDF ini. Pastikan file yang dipilih memang hasil export dari Malevin Modular Deck Studio dan tidak rusak.');
             }
         }
 
-        /* ============================
-           7. MODE SWITCH — EDIT / PREVIEW
-           ============================ */
         function setMode(mode) {
             const editorPanel = document.getElementById('editorPanel');
             const previewPanel = document.getElementById('previewPanel');
@@ -1578,7 +1583,6 @@
             }
         }
 
-        // Initialize Engine
         document.getElementById('brandNameLabel').textContent = BRAND_NAME.toUpperCase();
         document.getElementById('accountSelect').innerHTML = ACCOUNTS.map(a =>
             `<option value="${a}" ${a === currentAccount ? 'selected' : ''}>${a}</option>`
