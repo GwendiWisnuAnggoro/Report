@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malevin — Advanced Deck Studio & Dynamic Variable Engine</title>
+    <title>Malevin — Deck Studio & Dynamic Analytics Engine</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,18 +21,39 @@
             --card-obsidian: #161816;
             --border-obsidian: #242624;
             --accent-gold: #C49A57;
+            --accent-gold-glow: rgba(196, 154, 87, 0.15);
             --text-white: #FEFEFE;
             --text-muted: #808280;
-            --success-green: #2ECC71;
-            --danger-red: #E74C3C;
+            --positive: #4CAF7A;
+            --negative: #E55353;
             --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body { background-color: var(--bg-obsidian); color: var(--text-white); font-family: var(--font-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
+        body { 
+            background-color: var(--bg-obsidian); 
+            color: var(--text-white); 
+            font-family: var(--font-main); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            -webkit-font-smoothing: antialiased; 
+        }
 
-        .topbar { background-color: var(--surface-dark); border-bottom: 1px solid var(--border-obsidian); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; flex-wrap: wrap; gap: 10px; }
+        .topbar { 
+            background-color: var(--surface-dark); 
+            border-bottom: 1px solid var(--border-obsidian); 
+            padding: 10px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 100; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+
         .brand-title { font-size: 14px; font-weight: 800; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; }
         .brand-badge { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 9px; padding: 2px 6px; border-radius: 2px; font-weight: 800; letter-spacing: 1px; }
         .topbar-actions { display: flex; gap: 10px; align-items: center; }
@@ -46,17 +67,15 @@
 
         /* EDITOR PANEL */
         .editor-panel { width: 100%; max-width: 680px; margin: 0 auto; background-color: var(--surface-dark); display: flex; flex-direction: column; overflow-y: auto; padding: 20px; gap: 16px; }
-        
-        .global-vars-section { background-color: rgba(196,154,87,0.05); border: 1px dashed var(--accent-gold); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-        
         .slide-accordion { background-color: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .slide-accordion-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; }
-        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .slide-accordion-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; flex-wrap: wrap; gap: 6px; }
         
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         .add-elem-btn { background-color: var(--surface-dark); color: var(--text-white); border: 1px solid var(--border-obsidian); font-size: 9px; padding: 6px 4px; border-radius: 4px; cursor: pointer; font-weight: 700; letter-spacing: 0.5px; text-align: center; }
         .add-elem-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .add-elem-btn.btn-ana { border-color: rgba(196, 154, 87, 0.4); color: var(--accent-gold); background: rgba(196, 154, 87, 0.05); }
 
-        .element-box { background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); border-left: 3px solid var(--accent-gold); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .element-box { background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); border-left: 3px solid var(--accent-gold); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
         .element-header { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; }
         
         .form-group { display: flex; flex-direction: column; gap: 4px; }
@@ -65,63 +84,82 @@
         .form-control:focus { outline: none; border-color: var(--accent-gold); }
         textarea.form-control { resize: vertical; min-height: 50px; line-height: 1.4; }
         .two-col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .three-col-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
 
         .btn { background-color: var(--card-obsidian); color: var(--text-white); border: 1px solid var(--border-obsidian); padding: 6px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
         .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; border: none; font-weight: 800; }
         .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
-        /* PREVIEW PANEL */
+        /* LIVE PREVIEW CANVAS */
         .preview-panel { flex: 1; background-color: #050505; overflow: auto; padding: 30px; display: flex; flex-direction: column; align-items: center; }
         #deck-container { display: flex; flex-direction: column; gap: 30px; width: 850px; margin: 0 auto; }
 
         .slide {
             width: 850px !important; min-height: 478px; height: auto; background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); padding: 28px 36px 20px 36px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; gap: 20px; flex-shrink: 0; overflow: hidden;
         }
+
         .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%); }
         
-        .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; gap: 20px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
+        .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; gap: 16px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
         .slide-body.has-cover { justify-content: center; align-items: flex-start; flex-direction: column; }
 
-        .draggable-element { position: relative; user-select: none; border: 1px dashed transparent; padding: 4px; border-radius: 4px; }
+        .draggable-element { position: relative; user-select: none; transition: transform 0.15s ease, border-color 0.15s ease; border: 1px dashed transparent; padding: 4px; border-radius: 4px; }
+        
+        /* SISTEM KOLOM & LEBAR GRID */
         .elem-width-full { width: 100%; }
-        .elem-width-half { width: calc(50% - 10px); }
-        .elem-width-third { width: calc(33.333% - 13.33px); }
+        .elem-width-half { width: calc(50% - 8px); }
+        .elem-width-third { width: calc(33.333% - 10.66px); }
+        .elem-width-twothird { width: calc(66.666% - 5.33px); }
 
-        /* ELEMEN KOMPONEN */
+        .draggable-element:hover { border-color: rgba(196, 154, 87, 0.4); background: rgba(196, 154, 87, 0.02); }
+
+        /* ELEMENT STYLING */
         .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
         .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
         .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
-        p.slide-text { color: #C0C2C0; font-size: 11px; line-height: 1.5; white-space: pre-line; }
+        
+        /* Golden Ratio Typography */
+        .t-hero { font-size: 42px; font-weight: 800; color: var(--text-white); text-transform: uppercase; line-height: 1.05; }
+        .t-judul { font-size: 26px; font-weight: 800; color: var(--text-white); text-transform: uppercase; line-height: 1.15; }
+        .t-subjudul { font-size: 16px; font-weight: 700; color: var(--accent-gold); line-height: 1.3; }
+        .t-paragraf { font-size: 11px; color: #C0C2C0; line-height: 1.5; white-space: pre-line; }
 
-        /* LIST DINAMIS */
-        .malevin-list { list-style: none; padding-left: 0; display: flex; flex-direction: column; gap: 6px; }
-        .malevin-list li { position: relative; padding-left: 16px; font-size: 11px; color: #C0C2C0; }
-        .malevin-list li::before { content: '■'; position: absolute; left: 0; top: 0; color: var(--accent-gold); font-size: 8px; }
+        .text-card-wrap { background-color: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
 
-        /* TABEL */
         .malevin-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; table-layout: fixed; }
         .malevin-table th { background-color: rgba(196, 154, 87, 0.12); color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--accent-gold); text-align: left; font-weight: 700; word-wrap: break-word; }
         .malevin-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-obsidian); color: #D1D1D1; word-wrap: break-word; }
 
-        /* SOSIAL MEDIA / INSIGHT GRID & TREND BADGE */
-        .social-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-        .social-card { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; display: flex; flex-direction: column; gap: 4px; }
-        .social-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .social-val { font-size: 16px; font-weight: 800; color: var(--text-white); }
-        
-        .trend-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-top: 4px; }
-        .trend-up { background: rgba(46, 204, 113, 0.15); color: var(--success-green); border: 1px solid rgba(46, 204, 113, 0.3); }
-        .trend-down { background: rgba(231, 76, 60, 15); color: var(--danger-red); border: 1px solid rgba(231, 76, 60, 0.3); }
+        .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+        .kpi-card { flex: 1; min-width: 80px; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
+        .kpi-value { font-size: 22px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; }
 
-        /* WAWASAN & IKHTISAR */
-        .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 10px; }
-        .wawasan-vars { display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px dashed rgba(196, 154, 87, 0.3); padding-bottom: 10px; }
-        .w-var-item { background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-obsidian); display: flex; flex-direction: column; flex: 1; min-width: 90px; }
-        .w-var-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .w-var-value { font-size: 12px; font-weight: 700; color: var(--text-white); margin-top: 2px; }
-        
+        /* MULTI-COLUMN CARDS */
+        .col-wrap { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+        .col-item { flex: 1; min-width: 100px; }
+        .col-card--accent { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 10px 12px; border-radius: 0 4px 4px 0; }
+        .col-card--plain { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px; border-radius: 4px; }
+        .col-card--minimal { border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; }
+        .col-card--numbered { position: relative; background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px 10px 36px; border-radius: 4px; }
+        .col-num-badge { position: absolute; left: 8px; top: 10px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #8A6831); color: #0A0B0A; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+        /* ANALYTICS & INSIGHT CARDS */
+        .var-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 9px; padding: 2px 6px; border-radius: 12px; white-space: nowrap; }
+        .var-up { color: var(--positive); background: rgba(76, 175, 122, 0.12); }
+        .var-down { color: var(--negative); background: rgba(229, 83, 83, 0.12); }
+        .var-flat { color: var(--text-muted); background: rgba(128, 130, 128, 0.12); }
+
+        .compare-box { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .compare-num { font-size: 20px; font-weight: 800; color: var(--text-white); }
+
+        .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; width: 100%; }
+        .social-card { background: rgba(22, 24, 22, 0.7); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 10px; }
+        .social-card-val { font-size: 16px; font-weight: 800; color: var(--text-white); margin: 3px 0; }
+
+        .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
+
+        .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
+
         .img-preview-box { max-width: 100%; max-height: 250px; object-fit: contain; display: block; }
         .slide-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-obsidian); padding-top: 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; width: 100%; }
         .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
@@ -130,38 +168,33 @@
 <body>
 
     <div class="topbar">
-        <div class="brand-title"><span>MALEVIN</span> <span class="brand-badge">STUDIO X</span></div>
+        <div class="brand-title">
+            <span id="brandLabel">MALEVIN</span> <span class="brand-badge">STUDIO DECK & ANALYTICS</span>
+        </div>
+        <select class="form-control" style="width: auto; padding: 4px 8px; font-size: 10px;" id="accountSelect" onchange="setAccount(this.value)">
+            <option value="Malevin Official">Malevin Official</option>
+            <option value="Malevin Haircare">Malevin Haircare</option>
+            <option value="Kawaitta Studio">Kawaitta Studio</option>
+        </select>
         <div class="mode-tabs">
             <button class="mode-tab-btn" id="tabEditBtn" onclick="setMode('edit')">Form Editor</button>
             <button class="mode-tab-btn" id="tabPreviewBtn" onclick="setMode('preview')">Canvas Preview</button>
         </div>
         <div class="topbar-actions">
-            <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handleMalevinPDFImport(event)">
+            <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDFImport(event)">
             <button class="btn" id="importPdfBtn" onclick="document.getElementById('pdfInput').click()">Import PDF (Edit Ulang)</button>
-            <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Download Deck (PDF)</button>
+            <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Export Deck (PDF)</button>
         </div>
     </div>
 
     <div class="app-container">
         <div class="editor-panel" id="editorPanel">
-            
-            <!-- GLOBAL REUSABLE VARIABLES ENGINE -->
-            <div class="global-vars-section">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:11px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">⚡ VARIABEL GLOBAL (REUSABLE KOP & ASSET)</span>
-                    <button class="btn btn-gold" onclick="addGlobalVar()">+ Variabel Baru</button>
-                </div>
-                <div style="font-size:9px; color:var(--text-muted);">Ketik kunci seperti <code style="color:var(--accent-gold)">{{brand_name}}</code> atau <code style="color:var(--accent-gold)">{{logo_utama}}</code> pada teks atau upload gambar sekali, lalu panggil di slide manapun secara dinamis!</div>
-                <div id="global-vars-container"></div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:12px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">SLIDES CONTROL</span>
                 <button class="btn btn-gold" onclick="addSlide()">+ Slide Baru</button>
             </div>
             <div id="forms-wrapper"></div>
         </div>
-
         <div class="preview-panel" id="previewPanel">
             <div id="deck-container"></div>
         </div>
@@ -169,63 +202,123 @@
 
     <script>
         const ELEM_LABELS = { 
-            cover: 'COVER', header: 'HEADER', text: 'TEKS & VARIABEL', list: 'POIN LIST (FLEKSIBEL)', 
-            table: 'TABEL DATA', social: 'SOSIAL / VIEW LIKES', wawasan: 'ANALISIS & IKHTISAR', image: 'GAMBAR', chart: 'GRAFIK' 
+            cover: 'COVER', header: 'HEADER', text: 'TEKS', columns: 'KOLOM DOKUMEN', table: 'TABEL', 
+            kpi: 'KPI METRIK', chart: 'GRAFIK', image: 'GAMBAR/LOGO', comparison: 'PERBANDINGAN insight', 
+            social: 'STATISTIK SOSIAL (IKHTISAR)', breakdown: 'WAWASAN PENONTON', wawasan: 'ANALISIS KUSTOM' 
         };
 
-        // State Global Aplikasi
-        let globalVars = [
-            { key: 'brand_name', type: 'text', val: 'KAWAITTA OFFICIAL' },
-            { key: 'current_month', type: 'text', val: 'Maret 2026' },
-            { key: 'prev_month', type: 'text', val: 'Februari 2026' }
-        ];
+        let currentAccount = 'Malevin Official';
 
         let slidesData = [
             {
-                id: 1, footerLeft: 'PREPARED BY MALEVIN CREATIVE TEAM',
+                id: 1, 
+                footerLeft: 'PREPARED BY MALEVIN CREATIVE TEAM',
                 elements: [
-                    { type: 'cover', width: 'full', brand: '{{brand_name}}', tag: 'Analytics Report', title: 'PERFORMA BULANAN {{current_month}}', subtitle: 'Perbandingan Insight & Growth vs {{prev_month}}', shapeStyle: 'sharp' }
+                    { type: 'cover', width: 'full', brand: 'MALEVIN', tag: 'Deck Studio', title: 'Q1 ANALYTICS DECK 2026', subtitle: 'Growth, Engagement & Performance Insights', shapeStyle: 'sharp' }
+                ]
+            },
+            {
+                id: 2,
+                footerLeft: 'Section 01 — Executive Summary',
+                elements: [
+                    { type: 'header', width: 'full', brand: 'MALEVIN', tag: 'IKHTISAR KINERJA', title: 'PERFORMA KONTEN BULANAN' },
+                    { 
+                        type: 'social', width: 'full', sectionTitle: 'IKHTISAR KINERJA SOSIAL', periodPreset: 'bulan-ini', period: '1 - 15 Sep 2026',
+                        metrics: [
+                            { label: 'Tayangan (Views)', value: '1,245,000', deltaPercent: '18.4%', dir: 'up', varName: 'views' },
+                            { label: 'Suka (Likes)', value: '84,200', deltaPercent: '12.1%', dir: 'up', varName: 'likes' },
+                            { label: 'Komentar', value: '4,150', deltaPercent: '5.2%', dir: 'down', varName: 'comments' },
+                            { label: 'Bagikan (Shares)', value: '12,800', deltaPercent: '24.5%', dir: 'up', varName: 'shares' }
+                        ]
+                    },
+                    { 
+                        type: 'text', width: 'full', style: 'paragraf', card: true,
+                        content: 'Total tayangan mencapai {{views}} berkat optimasi video pendek. Terjadi peningkatan bagikan (shares) sebesar {{shares}} yang mendorong viralitas produk.' 
+                    }
                 ]
             }
         ];
 
         let chartInstances = [];
 
-        // Fungsi Interpolasi Variabel Global ({{key}}) ke dalam Teks/Title
-        function parseVariables(text) {
-            if (!text) return '';
-            let parsed = text;
-            globalVars.forEach(v => {
-                if (v.type === 'text') {
-                    const regex = new RegExp(`\\{\\{${v.key}\\}\\}`, 'g');
-                    parsed = parsed.replace(regex, v.val || '');
-                }
-            });
-            return parsed;
+        function setAccount(val) {
+            currentAccount = val;
+            document.getElementById('brandLabel').innerText = val.toUpperCase();
+            renderPreview();
         }
 
-        // Render Panel Editor Form
-        function renderForms() {
-            // 1. Render Global Variables Form
-            const gVarContainer = document.getElementById('global-vars-container');
-            gVarContainer.innerHTML = '';
-            globalVars.forEach((gv, gIdx) => {
-                gVarContainer.innerHTML += `
-                    <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
-                        <input type="text" class="form-control" style="width:35%;" placeholder="Nama Key (contoh: logo_utama)" value="${gv.key}" oninput="updateGlobalVarKey(${gIdx}, this.value)">
-                        <select class="form-control" style="width:25%;" onchange="updateGlobalVarType(${gIdx}, this.value)">
-                            <option value="text" ${gv.type==='text'?'selected':''}>Teks / Angka</option>
-                            <option value="image" ${gv.type==='image'?'selected':''}>Gambar / Aset</option>
-                        </select>
-                        ${gv.type === 'image' ? 
-                            `<input type="file" class="form-control" accept="image/*" style="width:30%;" onchange="handleGlobalImageUpload(${gIdx}, this)">` : 
-                            `<input type="text" class="form-control" style="width:30%;" placeholder="Nilai teks..." value="${gv.val}" oninput="updateGlobalVarVal(${gIdx}, this.value)">`
-                        }
-                        <button class="btn btn-danger" onclick="deleteGlobalVar(${gIdx})">✕</button>
-                    </div>`;
+        /* =========================================================
+           GLOBAL VARIABLE ENGINE (TEXT, NUMBERS, STATS, IMAGES)
+           ========================================================= */
+        function computeGlobalVariables() {
+            const vars = {};
+            slidesData.forEach(slide => {
+                slide.elements.forEach(elem => {
+                    // Variabel dari Gambar/Logo
+                    if (elem.type === 'image' && elem.varName && elem.imgData) {
+                        vars[elem.varName] = { type: 'image', value: elem.imgData };
+                    }
+                    // Variabel dari Teks
+                    if (elem.type === 'text' && elem.varName && elem.content) {
+                        vars[elem.varName] = { type: 'text', value: elem.content };
+                    }
+                    // Variabel dari Comparison
+                    if (elem.type === 'comparison' && elem.varName) {
+                        const prev = parseFloat(elem.prevVal) || 0;
+                        const curr = parseFloat(elem.currVal) || 0;
+                        const diff = curr - prev;
+                        let pct = prev !== 0 ? Math.abs((diff / prev) * 100).toFixed(1) : (curr !== 0 ? '100' : '0');
+                        const dir = diff > 0 ? 'up' : (diff < 0 ? 'down' : 'flat');
+                        vars[elem.varName] = { type: 'stat', dir, pct: pct + '%', value: elem.currVal + (elem.unit || '') };
+                    }
+                    // Variabel dari Social Stats (View, Like, Comment, Share, etc.)
+                    if (elem.type === 'social' && elem.metrics) {
+                        elem.metrics.forEach(m => {
+                            if (m.varName) {
+                                vars[m.varName] = { type: 'stat', dir: m.dir || 'up', pct: m.deltaPercent || '', value: m.value || '' };
+                            }
+                        });
+                    }
+                    // Variabel dari Breakdown items
+                    if (elem.type === 'breakdown' && elem.items) {
+                        elem.items.forEach(it => {
+                            if (it.varName) {
+                                vars[it.varName] = { type: 'stat', dir: 'flat', pct: (it.percent || '0') + '%', value: (it.percent || '0') + '%' };
+                            }
+                        });
+                    }
+                    // Variabel dari Wawasan dinamik
+                    if (elem.type === 'wawasan' && elem.vars) {
+                        elem.vars.forEach(v => {
+                            if (v.k) vars[v.k] = { type: 'text', value: v.v || '' };
+                        });
+                    }
+                });
             });
+            return vars;
+        }
 
-            // 2. Render Slides Accordion
+        function renderVarsInText(str, vars) {
+            if (!str) return '';
+            return str.replace(/\{\{(\w+)\}\}/g, (match, varKey) => {
+                const item = vars[varKey];
+                if (!item) return match;
+                if (item.type === 'image') {
+                    return `<img src="${item.value}" style="max-height:40px; vertical-align:middle; display:inline-block; margin:2px;">`;
+                }
+                if (item.type === 'stat') {
+                    const arrow = item.dir === 'up' ? '▲' : (item.dir === 'down' ? '▼' : '—');
+                    const badgeClass = item.dir === 'up' ? 'var-up' : (item.dir === 'down' ? 'var-down' : 'var-flat');
+                    return `<span class="var-badge ${badgeClass}">${arrow} ${item.pct || item.value}</span>`;
+                }
+                return item.value;
+            });
+        }
+
+        /* =========================================================
+           FORM EDITOR RENDERER
+           ========================================================= */
+        function renderForms() {
             const wrapper = document.getElementById('forms-wrapper');
             wrapper.innerHTML = '';
 
@@ -236,68 +329,102 @@
 
                 slide.elements.forEach((elem, eIdx) => {
                     const widthVal = elem.width || 'full';
-                    let layoutSelector = `
-                        <div class="form-group"><label>Lebar Kolom</label>
+                    const layoutSelector = `
+                        <div class="form-group"><label>Lebar Elemen Grid</label>
                         <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'width', this.value)">
-                            <option value="full" ${widthVal === 'full' ? 'selected' : ''}>Penuh (100%)</option>
-                            <option value="half" ${widthVal === 'half' ? 'selected' : ''}>1/2 Kolom (Berdampingan)</option>
-                            <option value="third" ${widthVal === 'third' ? 'selected' : ''}>1/3 Kolom</option>
+                            <option value="full" ${widthVal === 'full' ? 'selected' : ''}>Full (100%)</option>
+                            <option value="half" ${widthVal === 'half' ? 'selected' : ''}>1/2 Kolom (50%)</option>
+                            <option value="third" ${widthVal === 'third' ? 'selected' : ''}>1/3 Kolom (33%)</option>
+                            <option value="twothird" ${widthVal === 'twothird' ? 'selected' : ''}>2/3 Kolom (66%)</option>
                         </select></div>`;
 
                     const styleShape = elem.shapeStyle || 'sharp';
-                    let shapeSelector = `<div class="form-group"><label>Style Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option></select></div>`;
+                    const shapeSelector = `<div class="form-group"><label>Style Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option></select></div>`;
                     
-                    let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / ID (Bisa pakai {{var}})</label><input type="text" class="form-control" value="${elem.brand || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>`;
+                    let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / ID</label><input type="text" class="form-control" value="${elem.brand || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'brand', this.value)"></div>`;
 
                     if (elem.type === 'cover' || elem.type === 'header') { 
                         fields += `<div class="form-group"><label>Tag</label><input type="text" class="form-control" value="${elem.tag || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'tag', this.value)"></div><div class="form-group"><label>Judul</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>`; 
                         if(elem.type==='cover') fields += `<div class="form-group"><label>Sub-judul</label><input type="text" class="form-control" value="${elem.subtitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'subtitle', this.value)"></div>`;
                     } 
                     else if (elem.type === 'text') { 
-                        fields += `<div class="form-group"><label>Isi Teks (Mendukung {{variabel}})</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`; 
+                        fields += `
+                        <div class="form-group"><label>Ukuran Teks</label>
+                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'style', this.value)">
+                                <option value="hero" ${elem.style === 'hero' ? 'selected' : ''}>Hero (Besar)</option>
+                                <option value="judul" ${elem.style === 'judul' ? 'selected' : ''}>Judul</option>
+                                <option value="subjudul" ${elem.style === 'subjudul' ? 'selected' : ''}>Sub Judul</option>
+                                <option value="paragraf" ${(!elem.style || elem.style === 'paragraf') ? 'selected' : ''}>Paragraf Regular</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Nama Variable Teks (Opsional - Bisa Di-copy {{nama}})</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Isi Teks (Dukung Variable {{varName}})</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>
+                        <div class="form-group"><label><input type="checkbox" ${elem.card ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'card', this.checked)"> Bungkus Dalam Kartu Obsidian</label></div>`; 
                     } 
                     else if (elem.type === 'image') { 
-                        fields += `<div class="form-group"><label>Atau Pilih Variabel Gambar</label><input type="text" class="form-control" placeholder="Contoh: logo_utama" value="${elem.varRef || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varRef', this.value)"></div>
-                                   <div class="form-group"><label>Upload Gambar Mandiri</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
+                        fields += `
+                        <div class="form-group"><label>Nama Variable Gambar (Opsional - Cukup Upload 1x lalu panggil {{nama}})</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="form-group"><label>Upload Gambar / Logo</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
                     } 
-                    else if (elem.type === 'list') {
-                        // FITUR LIST FLEKSIBEL: Bisa tambah & kurang tanpa batas di slide manapun
-                        fields += `<div class="form-group"><label>Poin-Poin List (Bisa Tambah/Hapus Bebas)</label>
-                            <div>${(elem.items || []).map((itemVal, iIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" value="${itemVal}" oninput="updateListItem(${sIdx}, ${eIdx}, ${iIdx}, this.value)"><button class="btn btn-danger" onclick="deleteListItem(${sIdx}, ${eIdx}, ${iIdx})">✕</button></div>`).join('')}</div>
-                            <button class="btn" style="margin-top:4px;" onclick="addListItem(${sIdx}, ${eIdx})">+ Tambah Poin List</button>
-                        </div>`;
+                    else if (elem.type === 'columns') {
+                        const designOpts = ['accent', 'plain', 'minimal', 'numbered'].map(d => `<option value="${d}" ${(elem.design || 'accent') === d ? 'selected' : ''}>${d.toUpperCase()}</option>`).join('');
+                        const colRows = (elem.cols || []).map((c, cIdx) => `
+                            <div class="element-box">
+                                <div class="element-header"><span>KOLOM ${cIdx + 1}</span><button class="btn btn-danger" onclick="removeColumnItem(${sIdx}, ${eIdx}, ${cIdx})">✕</button></div>
+                                <div class="form-group"><label>Judul Kolom</label><input type="text" class="form-control" value="${c.title || ''}" oninput="updateColumnItem(${sIdx}, ${eIdx}, ${cIdx}, 'title', this.value)"></div>
+                                <div class="form-group"><label>Isi Teks</label><textarea class="form-control" oninput="updateColumnItem(${sIdx}, ${eIdx}, ${cIdx}, 'text', this.value)">${c.text || ''}</textarea></div>
+                            </div>`).join('');
+                        fields += `<div class="form-group"><label>Desain Kartu Kolom</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'design', this.value)">${designOpts}</select></div>${colRows}<button class="btn" onclick="addColumnItem(${sIdx}, ${eIdx})">+ Tambah Kolom</button>`;
+                    }
+                    else if (elem.type === 'comparison') {
+                        fields += `
+                        <div class="form-group"><label>Label Metrik (cth: Total Penonton / Engagement)</label><input type="text" class="form-control" value="${elem.label || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'label', this.value)"></div>
+                        <div class="form-group"><label>Nama Variabel (Dipakai di Teks sbg {{nama}})</label><input type="text" class="form-control" value="${elem.varName || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'varName', this.value)"></div>
+                        <div class="two-col-form">
+                            <div class="form-group"><label>Data Periode Lalu</label><input type="text" class="form-control" value="${elem.prevVal || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'prevVal', this.value)"></div>
+                            <div class="form-group"><label>Data Periode Sekarang</label><input type="text" class="form-control" value="${elem.currVal || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'currVal', this.value)"></div>
+                        </div>
+                        <div class="form-group"><label>Satuan (misal: Views / % / IDR)</label><input type="text" class="form-control" value="${elem.unit || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'unit', this.value)"></div>`;
                     }
                     else if (elem.type === 'social') {
-                        // DATA ANALISIS VIEW, LIKE, SHARE, DLL DENGAN TREN KELOMPOK
-                        fields += `<div class="form-group"><label>Metrik Sosial / Insight</label>
-                            <div>${(elem.items || []).map((sc, scIdx) => `
-                                <div style="background:var(--bg-obsidian); border:1px solid var(--border-obsidian); padding:8px; border-radius:4px; margin-bottom:6px; display:flex; flex-direction:column; gap:4px;">
-                                    <div class="two-col-form">
-                                        <input type="text" class="form-control" placeholder="Label (Views/Likes/Shares)" value="${sc.lbl || ''}" oninput="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'lbl', this.value)">
-                                        <input type="text" class="form-control" placeholder="Nilai (Cth: 45.2K)" value="${sc.val || ''}" oninput="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'val', this.value)">
-                                    </div>
-                                    <div class="two-col-form">
-                                        <input type="text" class="form-control" placeholder="% Perubahan (Cth: +12.4%)" value="${sc.pct || ''}" oninput="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'pct', this.value)">
-                                        <select class="form-control" onchange="updateSocialItem(${sIdx}, ${eIdx}, ${scIdx}, 'trend', this.value)">
-                                            <option value="up" ${sc.trend==='up'?'selected':''}>Tren Naik (Hijau)</option>
-                                            <option value="down" ${sc.trend==='down'?'selected':''}>Tren Turun (Merah)</option>
+                        const mRows = (elem.metrics || []).map((m, mIdx) => `
+                            <div class="element-box">
+                                <div class="element-header"><span>METRIK ${mIdx + 1}</span><button class="btn btn-danger" onclick="removeSocialMetric(${sIdx}, ${eIdx}, ${mIdx})">✕</button></div>
+                                <div class="form-group"><label>Label Metrik (View, Like, Comment, Share, dll)</label><input type="text" class="form-control" value="${m.label || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'label', this.value)"></div>
+                                <div class="form-group"><label>Nama Variable</label><input type="text" class="form-control" value="${m.varName || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'varName', this.value)"></div>
+                                <div class="two-col-form">
+                                    <div class="form-group"><label>Nilai</label><input type="text" class="form-control" value="${m.value || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'value', this.value)"></div>
+                                    <div class="form-group"><label>Arah Tren</label>
+                                        <select class="form-control" onchange="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'dir', this.value)">
+                                            <option value="up" ${m.dir === 'up' ? 'selected' : ''}>Naik (Hijau ▲)</option>
+                                            <option value="down" ${m.dir === 'down' ? 'selected' : ''}>Turun (Merah ▼)</option>
+                                            <option value="flat" ${m.dir === 'flat' ? 'selected' : ''}>Tetap (—)</option>
                                         </select>
                                     </div>
-                                    <button class="btn btn-danger" style="align-self:flex-end;" onclick="deleteSocialItem(${sIdx}, ${eIdx}, ${scIdx})">Hapus Metrik</button>
-                                </div>`).join('')}
-                            </div>
-                            <button class="btn" style="margin-top:4px;" onclick="addSocialItem(${sIdx}, ${eIdx})">+ Tambah Metrik Insight</button>
-                        </div>`;
-                    }
-                    else if (elem.type === 'wawasan') {
-                        // ANALISIS DAN IKHTISAR DENGAN VARIABEL & PERBANDINGAN BULAN LALU
+                                </div>
+                                <div class="form-group"><label>Persentase Perubahan (misal: +18.4%)</label><input type="text" class="form-control" value="${m.deltaPercent || ''}" oninput="updateSocialMetric(${sIdx}, ${eIdx}, ${mIdx}, 'deltaPercent', this.value)"></div>
+                            </div>`).join('');
+
                         fields += `
-                        <div class="form-group"><label>Variabel Metrik Utama (Key-Value untuk Analisis)</label>
-                            <div>${(elem.vars || []).map((v, vIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nama Var" value="${v.k || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'k', this.value)"><input type="text" class="form-control" placeholder="Nilai / vs Bulan Lalu" value="${v.v || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'v', this.value)"><button class="btn btn-danger" onclick="deleteWawasanVar(${sIdx}, ${eIdx}, ${vIdx})">✕</button></div>`).join('')}</div>
-                            <button class="btn" onclick="addWawasanVar(${sIdx}, ${eIdx})">+ Tambah Variabel Metrik</button>
-                        </div>
-                        <div class="form-group"><label>Ikhtisar & Kesimpulan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`;
+                        <div class="form-group"><label>Judul Section Statistik</label><input type="text" class="form-control" value="${elem.sectionTitle || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'sectionTitle', this.value)"></div>
+                        <div class="form-group"><label>Periode Waktu</label><input type="text" class="form-control" value="${elem.period || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'period', this.value)"></div>
+                        ${mRows}<button class="btn" onclick="addSocialMetric(${sIdx}, ${eIdx})">+ Tambah Metrik Social</button>`;
                     }
+                    else if (elem.type === 'breakdown') {
+                        const bRows = (elem.items || []).map((it, iIdx) => `
+                            <div class="element-box">
+                                <div class="element-header"><span>ITEM ${iIdx + 1}</span><button class="btn btn-danger" onclick="removeBreakdownItem(${sIdx}, ${eIdx}, ${iIdx})">✕</button></div>
+                                <div class="two-col-form">
+                                    <div class="form-group"><label>Label</label><input type="text" class="form-control" value="${it.label || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'label', this.value)"></div>
+                                    <div class="form-group"><label>Persen (%)</label><input type="text" class="form-control" value="${it.percent || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'percent', this.value)"></div>
+                                </div>
+                                <div class="form-group"><label>Nama Variable</label><input type="text" class="form-control" value="${it.varName || ''}" oninput="updateBreakdownItem(${sIdx}, ${eIdx}, ${iIdx}, 'varName', this.value)"></div>
+                            </div>`).join('');
+                        fields += `<div class="form-group"><label>Judul Wawasan</label><input type="text" class="form-control" value="${elem.title || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'title', this.value)"></div>${bRows}<button class="btn" onclick="addBreakdownItem(${sIdx}, ${eIdx})">+ Tambah Baris Demografi</button>`;
+                    }
+                    else if (elem.type === 'kpi') {
+                        fields += `<div class="form-group"><label>Metrik KPI</label><div>${(elem.items || []).map((k, kIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nilai" value="${k.val || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'val', this.value)"><input type="text" class="form-control" placeholder="Label" value="${k.lbl || ''}" oninput="updateKpiItem(${sIdx}, ${eIdx}, ${kIdx}, 'lbl', this.value)"><button class="btn btn-danger" onclick="deleteKpiItem(${sIdx}, ${eIdx}, ${kIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addKpiItem(${sIdx}, ${eIdx})">+ Tambah Metrik</button></div>`;
+                    } 
                     else if (elem.type === 'chart') { 
                         fields += `<div class="form-group"><label>Tipe Grafik</label>
                             <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
@@ -309,46 +436,48 @@
                             <div class="form-group"><label>Label X (Pisahkan Koma)</label><input type="text" class="form-control" value="${elem.labels || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'labels', this.value)"></div>
                             <div class="form-group"><label>Data Y (Pisahkan Koma)</label><input type="text" class="form-control" value="${elem.data || ''}" oninput="updateElem(${sIdx}, ${eIdx}, 'data', this.value)"></div>`; 
                     }
+                    else if (elem.type === 'wawasan') {
+                        fields += `<div class="form-group"><label>Variabel Utama (Key Metrics)</label><div>${(elem.vars || []).map((v, vIdx) => `<div style="display:flex; gap:4px; margin-bottom:4px;"><input type="text" class="form-control" placeholder="Nama Var" value="${v.k || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'k', this.value)"><input type="text" class="form-control" placeholder="Nilai/Efek" value="${v.v || ''}" oninput="updateWawasanVar(${sIdx}, ${eIdx}, ${vIdx}, 'v', this.value)"><button class="btn btn-danger" onclick="deleteWawasanVar(${sIdx}, ${eIdx}, ${vIdx})">✕</button></div>`).join('')}</div><button class="btn" onclick="addWawasanVar(${sIdx}, ${eIdx})">+ Tambah Variabel</button></div>
+                        <div class="form-group"><label>Kesimpulan Analisis</label><textarea class="form-control" oninput="updateElem(${sIdx}, ${eIdx}, 'content', this.value)">${elem.content || ''}</textarea></div>`;
+                    }
 
-                    elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type]}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
+                    elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
                 });
 
                 card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
-                <div class="form-group"><label>Footer</label><input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)"></div>
+                <div class="form-group"><label>Footer Left</label><input type="text" class="form-control" value="${slide.footerLeft || ''}" oninput="updateSlideFooter(${sIdx}, this.value)"></div>
                 ${elementsHTML}
-                <div class="btn-grid">
+                <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN KONTEN & ANALISIS (TANPA LIMIT):</label>
+                <div class="btn-grid" style="margin-top:4px;">
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'cover')">+ COVER</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
-                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'list')">+ LIST</button>
-                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'social')">+ SOSIAL METRIK</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'columns')">+ KOLOM</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'chart')">+ GRAFIK</button>
-                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'wawasan')" style="grid-column: span 4;">+ ANALISIS & IKHTISAR</button>
-                </div>`;
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'social')">+ STATS SOSIAL</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'comparison')">+ PERBANDINGAN</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'breakdown')">+ DEMOGRAFI</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'wawasan')" style="grid-column: span 2;">+ ANALISIS DINAMIS</button>
+                </div></div>`;
                 wrapper.appendChild(card);
             });
             renderPreview();
         }
 
         function getRadiusCss(style) { return style === 'rounded' ? '6px' : '0px'; }
-        
-        // Handler Upload Gambar Mandiri atau Variabel Global
         function handleImageUpload(sIdx, eIdx, input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { slidesData[sIdx].elements[eIdx].imgData = e.target.result; renderPreview(); }; reader.readAsDataURL(input.files[0]); } }
-        function handleGlobalImageUpload(gIdx, input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { globalVars[gIdx].val = e.target.result; renderForms(); }; reader.readAsDataURL(input.files[0]); } }
 
-        // Manajemen Variabel Global
-        function addGlobalVar() { globalVars.push({ key: 'new_var', type: 'text', val: 'Nilai Baru' }); renderForms(); }
-        function updateGlobalVarKey(idx, val) { globalVars[idx].key = val.trim(); renderPreview(); }
-        function updateGlobalVarType(idx, val) { globalVars[idx].type = val; globalVars[idx].val = ''; renderForms(); }
-        function updateGlobalVarVal(idx, val) { globalVars[idx].val = val; renderPreview(); }
-        function deleteGlobalVar(idx) { globalVars.splice(idx, 1); renderForms(); }
-
-        // Render Canvas Preview
+        /* =========================================================
+           LIVE CANVAS PREVIEW RENDERER
+           ========================================================= */
         function renderPreview() {
             chartInstances.forEach(c => c.destroy()); chartInstances = [];
             const container = document.getElementById('deck-container'); container.innerHTML = '';
             let chartsToRender = [];
+
+            const globalVars = computeGlobalVariables();
 
             slidesData.forEach((slide, sIdx) => {
                 const slideEl = document.createElement('div'); slideEl.className = 'slide';
@@ -357,57 +486,92 @@
 
                 slide.elements.forEach((elem, eIdx) => {
                     const elemWrapper = document.createElement('div');
-                    const wClass = elem.width === 'half' ? 'elem-width-half' : (elem.width === 'third' ? 'elem-width-third' : 'elem-width-full');
+                    
+                    const wVal = elem.width || 'full';
+                    const wClass = wVal === 'half' ? 'elem-width-half' : (wVal === 'third' ? 'elem-width-third' : (wVal === 'twothird' ? 'elem-width-twothird' : 'elem-width-full'));
                     elemWrapper.className = `draggable-element ${wClass}`; 
 
                     const br = getRadiusCss(elem.shapeStyle);
-                    const parsedBrand = parseVariables(elem.brand);
-                    const pill = parsedBrand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${parsedBrand}</span>` : '';
+                    const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${elem.brand}</span>` : '';
                     let p = '';
 
-                    const parsedTitle = parseVariables(elem.title);
-                    const parsedSubtitle = parseVariables(elem.subtitle);
-                    const parsedContent = parseVariables(elem.content);
-
                     if (elem.type === 'cover') {
-                        p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : ''}</div><div class="elem-title" style="font-size:34px; margin: 10px 0;">${parsedTitle || ''}</div><p style="font-size:13px; color:var(--accent-gold);">${parsedSubtitle || ''}</p></div>`;
-                    } else if (elem.type === 'header') { 
-                        p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${elem.tag || ''}</span></div><div class="elem-title" style="margin-top:4px;">${parsedTitle || ''}</div></div>`;
-                    } else if (elem.type === 'text') { 
-                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<p class="slide-text">${parsedContent || ''}</p></div>`;
-                    } else if (elem.type === 'image') { 
-                        let imgSrc = elem.imgData;
-                        if (elem.varRef) {
-                            const foundVar = globalVars.find(v => v.key === elem.varRef && v.type === 'image');
-                            if (foundVar) imgSrc = foundVar.val;
-                        }
-                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${imgSrc ? `<img src="${imgSrc}" class="img-preview-box" style="border-radius: ${br}; width: 100%;">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center;">[ Aset Gambar Kosong / Variabel Belum Ada ]</div>'}</div>`;
-                    } else if (elem.type === 'list') {
-                        // Render List Fleksibel
-                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<ul class="malevin-list">${(elem.items || []).map(item => `<li>${parseVariables(item)}</li>`).join('')}</ul></div>`;
-                    } else if (elem.type === 'social') {
-                        // Render Grid Sosial Media / Views, Likes, Shares dengan Indikator Tren Naik/Turun
-                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${(elem.items || []).map(sc => {
-                            const isUp = sc.trend === 'up';
-                            const trendClass = isUp ? 'trend-up' : 'trend-down';
-                            const arrow = isUp ? '▲' : '▼';
-                            return `<div class="social-card" style="border-radius: ${br};">
-                                <span class="social-label">${sc.lbl || 'Metric'}</span>
-                                <span class="social-val">${sc.val || '0'}</span>
-                                ${sc.pct ? `<div class="trend-badge ${trendClass}">${arrow} ${sc.pct} vs bln lalu</div>` : ''}
+                        p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${elem.tag}</span>` : ''}</div><div class="elem-title" style="font-size:36px; margin: 10px 0;">${elem.title || ''}</div><p style="font-size:14px; color:var(--accent-gold);">${elem.subtitle || ''}</p></div>`;
+                    }
+                    else if (elem.type === 'header') {
+                        p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${elem.tag || ''}</span></div><div class="elem-title" style="margin-top:4px;">${elem.title || ''}</div></div>`;
+                    }
+                    else if (elem.type === 'text') {
+                        const parsedContent = renderVarsInText(elem.content || '', globalVars);
+                        const styleCls = elem.style === 'hero' ? 't-hero' : (elem.style === 'judul' ? 't-judul' : (elem.style === 'subjudul' ? 't-subjudul' : 't-paragraf'));
+                        const textHTML = `<div class="${styleCls}">${parsedContent}</div>`;
+                        p = elem.card ? `<div class="text-card-wrap" style="border-radius:${br};">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}${textHTML}</div>` : `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}${textHTML}</div>`;
+                    }
+                    else if (elem.type === 'image') {
+                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${br}; width: 100%;">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center;">[ Gambar / Logo Kosong ]</div>'}</div>`;
+                    }
+                    else if (elem.type === 'columns') {
+                        const design = elem.design || 'accent';
+                        const colHtml = (elem.cols || []).map((c, cIdx) => {
+                            const parsedT = renderVarsInText(c.text || '', globalVars);
+                            if (design === 'numbered') {
+                                return `<div class="col-item col-card--numbered" style="border-radius:${br};"><div class="col-num-badge">${cIdx + 1}</div><div class="elem-tag">${c.title || ''}</div><p class="t-paragraf">${parsedT}</p></div>`;
+                            }
+                            const cardCls = design === 'plain' ? 'col-card--plain' : (design === 'minimal' ? 'col-card--minimal' : 'col-card--accent');
+                            return `<div class="col-item ${cardCls}" style="border-radius:${br};"><div class="elem-tag">${c.title || ''}</div><p class="t-paragraf">${parsedT}</p></div>`;
+                        }).join('');
+                        p = `<div style="width:100%;">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="col-wrap">${colHtml}</div></div>`;
+                    }
+                    else if (elem.type === 'comparison') {
+                        const prev = parseFloat(elem.prevVal) || 0;
+                        const curr = parseFloat(elem.currVal) || 0;
+                        const diff = curr - prev;
+                        const pct = prev !== 0 ? Math.abs((diff / prev) * 100).toFixed(1) : (curr !== 0 ? '100' : '0');
+                        const dir = diff > 0 ? 'up' : (diff < 0 ? 'down' : 'flat');
+                        const arrow = dir === 'up' ? '▲' : (dir === 'down' ? '▼' : '—');
+                        const badgeCls = dir === 'up' ? 'var-up' : (dir === 'down' ? 'var-down' : 'var-flat');
+
+                        p = `<div class="compare-box" style="border-radius:${br};">
+                            <div><div class="elem-tag">${elem.label || 'PERBANDINGAN DATA'}</div><div class="compare-num">${elem.currVal || '0'} <span style="font-size:11px; color:var(--text-muted);">${elem.unit || ''}</span></div></div>
+                            <div style="text-align:right;"><span class="var-badge ${badgeCls}">${arrow} ${pct}%</span><div style="font-size:8px; color:var(--text-muted); margin-top:4px;">Sblm: ${elem.prevVal || '0'}</div></div>
+                        </div>`;
+                    }
+                    else if (elem.type === 'social') {
+                        const mCards = (elem.metrics || []).map(m => {
+                            const arrow = m.dir === 'up' ? '▲' : (m.dir === 'down' ? '▼' : '—');
+                            const badgeCls = m.dir === 'up' ? 'var-up' : (m.dir === 'down' ? 'var-down' : 'var-flat');
+                            return `<div class="social-card" style="border-radius:${br};">
+                                <div style="font-size:8px; color:var(--text-muted); font-weight:800; text-transform:uppercase;">${m.label || 'Metrik'}</div>
+                                <div class="social-card-val">${m.value || '0'}</div>
+                                ${m.deltaPercent ? `<span class="var-badge ${badgeCls}">${arrow} ${m.deltaPercent}</span>` : ''}
                             </div>`;
-                        }).join('')}</div></div>`;
-                    } else if (elem.type === 'wawasan') {
-                        // Render Analisis & Ikhtisar dengan Variabel Perbandingan
+                        }).join('');
+
+                        p = `<div style="width:100%;">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><span class="elem-tag">${elem.sectionTitle || 'ANALISIS SOSIAL'}</span><span style="font-size:8px; color:var(--accent-gold); font-weight:700;">${elem.period || ''}</span></div>
+                            <div class="social-grid">${mCards}</div>
+                        </div>`;
+                    }
+                    else if (elem.type === 'breakdown') {
+                        const bRows = (elem.items || []).map(it => `
+                            <div class="breakdown-row"><span>${it.label || ''}</span><span style="color:var(--accent-gold); font-weight:800;">${it.percent || 0}%</span></div>
+                        `).join('');
+                        p = `<div class="text-card-wrap" style="border-radius:${br};"><div class="elem-tag">${elem.title || 'WAWASAN DEMOGRAFI'}</div><div style="margin-top:6px;">${bRows}</div></div>`;
+                    }
+                    else if (elem.type === 'kpi') {
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${(elem.items || []).map(k => `<div class="kpi-card" style="border-radius: ${br};"><div class="kpi-value">${k.val || '0'}</div><div style="font-size: 8px; color: var(--text-muted); text-transform: uppercase;">${k.lbl || ''}</div></div>`).join('')}</div></div>`;
+                    }
+                    else if (elem.type === 'wawasan') {
                         let varsHTML = '';
                         if (elem.vars && elem.vars.length > 0) {
-                            varsHTML = `<div class="wawasan-vars">${elem.vars.map(v => `<div class="w-var-item"><span class="w-var-label">${v.k}</span><span class="w-var-value">${v.v}</span></div>`).join('')}</div>`;
+                            varsHTML = `<div style="display:flex; flex-wrap:wrap; gap:6px; border-bottom:1px dashed rgba(196,154,87,0.3); padding-bottom:6px;">${elem.vars.map(v => `<div style="background:rgba(0,0,0,0.5); padding:4px 8px; border-radius:4px; font-size:9px;"><span style="color:var(--text-muted);">${v.k}:</span> <strong style="color:var(--accent-gold);">${v.v}</strong></div>`).join('')}</div>`;
                         }
-                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><strong style="color:var(--accent-gold);">💡 IKHTISAR & ANALISIS:</strong>${varsHTML}<div>${parsedContent || 'Tidak ada kesimpulan.'}</div></div></div>`;
-                    } else if (elem.type === 'chart') {
+                        p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><strong style="color:var(--accent-gold);">💡 ANALISIS DATA:</strong>${varsHTML}<div>${elem.content || ''}</div></div></div>`;
+                    }
+                    else if (elem.type === 'chart') {
                         const chartId = `chart-${sIdx}-${eIdx}`;
                         p = `<div style="display:flex; flex-direction:column; height:100%;">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
-                            <div style="background:var(--card-obsidian); padding:10px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:220px; width:100%; display:flex; align-items:center; justify-content:center;">
+                            <div style="background:var(--card-obsidian); padding:10px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:200px; width:100%; display:flex; align-items:center; justify-content:center;">
                                 <canvas id="${chartId}"></canvas>
                             </div></div>`;
                         chartsToRender.push({ id: chartId, type: elem.chartType || 'bar', labels: elem.labels || 'A,B,C', data: elem.data || '10,20,30' });
@@ -417,30 +581,28 @@
                 });
 
                 slideEl.appendChild(slideBody);
-                slideEl.innerHTML += `<div class="slide-footer"><span>${parseVariables(slide.footerLeft) || ''}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
+                slideEl.innerHTML += `<div class="slide-footer"><span>${slide.footerLeft || ''}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
                 container.appendChild(slideEl);
             });
 
-            // Render ChartJS dengan Gradient Bar & Donut
+            // CHART GENERATOR
             setTimeout(() => {
                 chartsToRender.forEach(c => {
                     const canvas = document.getElementById(c.id);
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
-                        let bgColor = ['rgba(196, 154, 87, 0.7)', 'rgba(255, 255, 255, 0.2)', 'rgba(128, 130, 128, 0.5)', 'rgba(229, 83, 83, 0.6)'];
-                        
+                        let bgColor = ['rgba(196, 154, 87, 0.8)', 'rgba(255, 255, 255, 0.2)', 'rgba(128, 130, 128, 0.5)', 'rgba(229, 83, 83, 0.6)'];
                         if (c.type === 'bar') {
                             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.parentElement.clientHeight || 200);
-                            gradient.addColorStop(0, '#C49A57');   
-                            gradient.addColorStop(1, 'rgba(138, 104, 49, 0.1)'); 
+                            gradient.addColorStop(0, '#C49A57');
+                            gradient.addColorStop(1, 'rgba(138, 104, 49, 0.1)');
                             bgColor = gradient;
                         }
-
                         const newChart = new Chart(ctx, {
                             type: c.type,
                             data: {
                                 labels: c.labels.split(','),
-                                datasets: [{ label: 'Metric Data', data: c.data.split(',').map(Number), backgroundColor: bgColor, borderColor: '#C49A57', borderWidth: 1 }]
+                                datasets: [{ label: 'Data', data: c.data.split(',').map(Number), backgroundColor: bgColor, borderColor: '#C49A57', borderWidth: 1 }]
                             },
                             options: {
                                 responsive: true, maintainAspectRatio: false, color: '#C0C2C0',
@@ -457,72 +619,50 @@
             }, 50);
         }
 
-        // Action Update Form & Data State
+        /* =========================================================
+           FORM ACTIONS & DYNAMIC LIST MANAGEMENT
+           ========================================================= */
         function updateElem(sIdx, eIdx, k, v) { slidesData[sIdx].elements[eIdx][k] = v; renderPreview(); }
         function updateSlideFooter(sIdx, v) { slidesData[sIdx].footerLeft = v; renderPreview(); }
 
-        // Fungsi List Fleksibel (Tambah/Kurang Bebas di Slide Manapun)
-        function addListItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push('Poin baru...'); renderForms(); }
-        function updateListItem(sIdx, eIdx, iIdx, val) { slidesData[sIdx].elements[eIdx].items[iIdx] = val; renderPreview(); }
-        function deleteListItem(sIdx, eIdx, iIdx) { slidesData[sIdx].elements[eIdx].items.splice(iIdx, 1); renderForms(); }
+        function addColumnItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].cols) slidesData[sIdx].elements[eIdx].cols = []; slidesData[sIdx].elements[eIdx].cols.push({ title: 'Kolom Baru', text: 'Isi poin...' }); renderForms(); }
+        function updateColumnItem(sIdx, eIdx, cIdx, k, v) { slidesData[sIdx].elements[eIdx].cols[cIdx][k] = v; renderPreview(); }
+        function removeColumnItem(sIdx, eIdx, cIdx) { slidesData[sIdx].elements[eIdx].cols.splice(cIdx, 1); renderForms(); }
 
-        // Fungsi Sosial Insight Metrik
-        function addSocialItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ lbl: 'Views', val: '10K', pct: '+15.2%', trend: 'up' }); renderForms(); }
-        function updateSocialItem(sIdx, eIdx, scIdx, k, val) { slidesData[sIdx].elements[eIdx].items[scIdx][k] = val; renderPreview(); }
-        function deleteSocialItem(sIdx, eIdx, scIdx) { slidesData[sIdx].elements[eIdx].items.splice(scIdx, 1); renderForms(); }
+        function addSocialMetric(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].metrics) slidesData[sIdx].elements[eIdx].metrics = []; slidesData[sIdx].elements[eIdx].metrics.push({ label: 'Metrik Baru', value: '0', deltaPercent: '+0%', dir: 'up', varName: '' }); renderForms(); }
+        function updateSocialMetric(sIdx, eIdx, mIdx, k, v) { slidesData[sIdx].elements[eIdx].metrics[mIdx][k] = v; renderPreview(); }
+        function removeSocialMetric(sIdx, eIdx, mIdx) { slidesData[sIdx].elements[eIdx].metrics.splice(mIdx, 1); renderForms(); }
 
-        // Fungsi Wawasan & Variabel Analisis
-        function addWawasanVar(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].vars) slidesData[sIdx].elements[eIdx].vars = []; slidesData[sIdx].elements[eIdx].vars.push({ k: 'Growth', v: '+24% vs Bln Lalu' }); renderForms(); }
+        function addBreakdownItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ label: 'Kategori', percent: '50', varName: '' }); renderForms(); }
+        function updateBreakdownItem(sIdx, eIdx, iIdx, k, v) { slidesData[sIdx].elements[eIdx].items[iIdx][k] = v; renderPreview(); }
+        function removeBreakdownItem(sIdx, eIdx, iIdx) { slidesData[sIdx].elements[eIdx].items.splice(iIdx, 1); renderForms(); }
+
+        function addKpiItem(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].items) slidesData[sIdx].elements[eIdx].items = []; slidesData[sIdx].elements[eIdx].items.push({ val: '0', lbl: 'New' }); renderForms(); }
+        function updateKpiItem(sIdx, eIdx, kIdx, k, v) { slidesData[sIdx].elements[eIdx].items[kIdx][k] = v; renderPreview(); }
+        function deleteKpiItem(sIdx, eIdx, kIdx) { slidesData[sIdx].elements[eIdx].items.splice(kIdx, 1); renderForms(); }
+
+        function addWawasanVar(sIdx, eIdx) { if (!slidesData[sIdx].elements[eIdx].vars) slidesData[sIdx].elements[eIdx].vars = []; slidesData[sIdx].elements[eIdx].vars.push({ k: 'Kategori', v: 'Nilai' }); renderForms(); }
         function updateWawasanVar(sIdx, eIdx, vIdx, k, val) { slidesData[sIdx].elements[eIdx].vars[vIdx][k] = val; renderPreview(); }
         function deleteWawasanVar(sIdx, eIdx, vIdx) { slidesData[sIdx].elements[eIdx].vars.splice(vIdx, 1); renderForms(); }
 
         function addElementToSlide(sIdx, type) { 
-            const ne = { type, width: 'full', brand: '{{brand_name}}', shapeStyle: 'rounded' }; 
-            if (type === 'wawasan') { ne.vars = [{ k: 'Retensi', v: '88%' }]; ne.content = 'Kesimpulan performa secara keseluruhan...'; }
-            else if (type === 'list') { ne.items = ['Poin pertama', 'Poin kedua']; }
-            else if (type === 'social') { ne.items = [{ lbl: 'Total Views', val: '124.5K', pct: '+18.4%', trend: 'up' }, { lbl: 'Engagement', val: '8.2%', pct: '-2.1%', trend: 'down' }]; }
-            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'Jan,Feb,Mar'; ne.data = '40,65,90'; }
+            const ne = { type, width: 'full', brand: '', shapeStyle: 'rounded' }; 
+            if (type === 'columns') { ne.design = 'accent'; ne.cols = [{ title: 'Poin 1', text: 'Detail...' }, { title: 'Poin 2', text: 'Detail...' }]; }
+            else if (type === 'comparison') { ne.label = 'PERBANDINGAN DATA'; ne.prevVal = '1000'; ne.currVal = '1500'; ne.unit = 'Views'; ne.varName = 'perbandingan'; }
+            else if (type === 'social') { ne.sectionTitle = 'IKHTISAR KINERJA'; ne.period = 'Bulan Ini'; ne.metrics = [{ label: 'Tayangan (Views)', value: '100,000', deltaPercent: '10%', dir: 'up', varName: 'views' }]; }
+            else if (type === 'breakdown') { ne.title = 'WAWASAN PENONTON'; ne.items = [{ label: 'Perempuan', percent: '75', varName: 'female_pct' }]; }
+            else if (type === 'wawasan') { ne.vars = [{ k: 'Korelasi', v: 'Positif' }]; ne.content = 'Tulis wawasan...'; }
+            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; }
             slidesData[sIdx].elements.push(ne); renderForms(); 
         }
+
         function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); renderForms(); }
-        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'MALEVIN TEAM', elements: [{ type: 'header', width: 'full', title: 'SLIDE BARU' }] }); renderForms(); }
+        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: `${currentAccount.toUpperCase()} TEAM`, elements: [{ type: 'header', width: 'full', title: 'SLIDE BARU' }] }); renderForms(); }
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); renderForms(); } }
 
-        // PDF Import State Restoration (Membaca Metadata Tersembunyi)
-        async function handleMalevinPDFImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const btn = document.getElementById('importPdfBtn');
-            const ogText = btn.innerText;
-            btn.innerText = 'Memulihkan State...'; btn.disabled = true;
-
-            try {
-                const fileReader = new FileReader();
-                fileReader.onload = async function() {
-                    const typedarray = new Uint8Array(this.result);
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    const metadata = await pdf.getMetadata();
-
-                    if (metadata && metadata.info && metadata.info.Subject && metadata.info.Subject.startsWith('MALEVIN_STATE_V2:')) {
-                        const rawState = metadata.info.Subject.replace('MALEVIN_STATE_V2:', '');
-                        const parsed = JSON.parse(decodeURIComponent(rawState));
-                        slidesData = parsed.slides;
-                        if(parsed.globals) globalVars = parsed.globals;
-                        renderForms();
-                        alert("Berhasil! Seluruh data slide, list fleksibel, variabel global, dan grafik telah dipulihkan sepenuhnya.");
-                    } else {
-                        alert("Gagal Import: Pastikan file PDF ini di-export langsung dari studio aplikasi ini.");
-                    }
-                    btn.innerText = ogText; btn.disabled = false;
-                    event.target.value = ''; 
-                };
-                fileReader.readAsArrayBuffer(file);
-            } catch (error) {
-                console.error(error); alert("Terjadi kesalahan saat membaca PDF."); btn.innerText = ogText; btn.disabled = false;
-            }
-        }
-
-        // Export PDF dengan Menyimpan State JSON Lengkap di Metadata Subject
+        /* =========================================================
+           PDF EXPORT & IMPORT WITH STATE RESTORATION ENGINE
+           ========================================================= */
         async function downloadPDF() {
             const btn = document.getElementById('downloadBtn'); const ogText = btn.innerText; btn.innerText = 'Menyimpan...'; btn.disabled = true;
             setMode('preview'); await new Promise(r => setTimeout(r, 500)); 
@@ -559,19 +699,49 @@
                     pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                 }
 
-                // Injeksi State Lengkap ke Metadata PDF
-                const fullStatePayload = { slides: slidesData, globals: globalVars };
-                const stateData = encodeURIComponent(JSON.stringify(fullStatePayload));
+                const stateData = encodeURIComponent(JSON.stringify(slidesData));
                 pdf.setProperties({
-                    title: 'Malevin Deck Studio Pro Export',
-                    subject: 'MALEVIN_STATE_V2:' + stateData,
+                    title: 'Malevin Deck Export',
+                    subject: 'MALEVIN_STATE:' + stateData,
                     creator: 'Malevin Deck Studio'
                 });
 
-                pdf.save('Malevin_Interactive_Deck.pdf');
+                pdf.save(`${currentAccount.replace(/\s+/g, '_')}_Deck.pdf`);
             } catch (error) {
-                console.error(error); alert("Gagal melakukan export PDF.");
+                console.error(error); alert("Terjadi kesalahan saat meng-export PDF.");
             } finally { btn.innerText = ogText; btn.disabled = false; }
+        }
+
+        async function handlePDFImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('importPdfBtn');
+            const ogText = btn.innerText;
+            btn.innerText = 'Membaca Data Asli...'; btn.disabled = true;
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function() {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    const metadata = await pdf.getMetadata();
+
+                    if (metadata && metadata.info && metadata.info.Subject && metadata.info.Subject.startsWith('MALEVIN_STATE:')) {
+                        const rawState = metadata.info.Subject.replace('MALEVIN_STATE:', '');
+                        slidesData = JSON.parse(decodeURIComponent(rawState));
+                        renderForms();
+                        alert("Berhasil! Seluruh data slide, grafik, dan variabel telah dikembalikan.");
+                    } else {
+                        alert("Gagal Import: PDF ini bukan sumber dari aplikasi Malevin ini atau tidak memiliki data metadata state.");
+                    }
+                    btn.innerText = ogText; btn.disabled = false;
+                    event.target.value = ''; 
+                };
+                fileReader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error(error); alert("Kesalahan saat membaca PDF."); btn.innerText = ogText; btn.disabled = false;
+            }
         }
 
         function setMode(mode) {
