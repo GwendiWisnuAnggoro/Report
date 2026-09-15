@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deck Studio</title>
+    <title>MALEVIN</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,7 +20,7 @@
         --card-obsidian: #161816;
         --border-obsidian: #242624;
         --accent-gold: #C49A57;
-        --accent-gold-glow: rgba(196, 154, 87, 0.15);
+        --accent-gold-glow: rgba(196, 154, 87, 0.25);
         --text-white: #FEFEFE;
         --text-muted: #808280;
         --positive: #4CAF7A;
@@ -38,7 +38,7 @@
         display: flex; 
         flex-direction: column; 
         overflow-x: hidden; 
-        padding-bottom: 60px; /* Space for fixed bottom bar */
+        padding-bottom: 60px;
         -webkit-font-smoothing: antialiased; 
     }
 
@@ -120,8 +120,14 @@
     .var-pill-btn { background: rgba(196, 154, 87, 0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 9px; padding: 3px 8px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
     .var-pill-btn:hover { background: var(--accent-gold); color: #0A0B0A; }
 
-    /* FLOATING HIGHLIGHT VARIABLE TOOLTIP */
-    #highlightPopup { position: absolute; display: none; background: #C49A57; color: #0A0B0A; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px; cursor: pointer; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    /* FLOATING HIGHLIGHT VARIABLE & TREND TOOLTIP */
+    #highlightPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 4px; border-radius: 6px; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.6); flex-direction: row; gap: 4px; }
+    .hl-pop-btn { background: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+    .hl-pop-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .hl-pop-btn.btn-up { color: var(--positive); border-color: rgba(76, 175, 122, 0.4); }
+    .hl-pop-btn.btn-up:hover { background: rgba(76, 175, 122, 0.15); }
+    .hl-pop-btn.btn-down { color: var(--negative); border-color: rgba(229, 83, 83, 0.4); }
+    .hl-pop-btn.btn-down:hover { background: rgba(229, 83, 83, 0.15); }
 
     /* VARIABLE-AWARE INPUT (contenteditable) */
     .var-input { background-color: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); padding: 7px 9px; border-radius: 4px; font-size: 11px; font-family: inherit; width: 100%; min-height: 32px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; cursor: text; }
@@ -129,8 +135,7 @@
     .var-input.var-multiline { min-height: 60px; }
     .var-input:empty::before { content: attr(data-placeholder); color: var(--text-muted); pointer-events: none; }
 
-    /* Pill kuning bulat untuk variabel yang disisipkan */
-    .var-token { display: inline-block; background: #C49A57; color: #0A0B0A; font-weight: 800; font-size: 10px; padding: 1px 8px; border-radius: 10px; margin: 0 2px; cursor: default; -webkit-user-select: none; user-select: none; }
+    .var-token { display: inline-block; background: #C49A57; color: #0A0B0A; font-weight: 800; font-size: 10px; padding: 1px 8px; border-radius: 10px; margin: 0 2px; cursor: default; user-select: none; }
     .var-token.var-token-missing { background: transparent; border: 1px dashed var(--negative); color: var(--negative); border-radius: 10px; padding: 1px 7px; }
 
     /* AUTOCOMPLETE LIST */
@@ -149,76 +154,49 @@
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
     .modal-img-preview { max-width: 100%; max-height: 100px; border-radius: 4px; display: block; margin: 0 auto; }
 
-    /* LIVE PREVIEW CANVAS & DRAG AND DROP - CENTERED ALIGNMENT FIX */
-    .preview-panel { 
-        flex: 1; 
-        background-color: #050505; 
-        overflow-y: auto; 
-        overflow-x: hidden; 
-        padding: 30px 10px; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: flex-start;
-        width: 100%; 
-        box-sizing: border-box; 
-    }
+    /* LIVE PREVIEW CANVAS & DRAG AND DROP */
+    .preview-panel { flex: 1; background-color: #050505; overflow-y: auto; overflow-x: hidden; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; box-sizing: border-box; }
+    .preview-container { width: 100%; max-width: 850px; display: flex; justify-content: center; align-items: flex-start; }
+    #deck-container { display: flex; flex-direction: column; gap: 30px; width: 850px; margin: 0 auto; transition: transform 0.2s ease; transform-origin: top center; }
 
-    .preview-container {
-        width: 100%;
-        max-width: 850px;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-    }
-
-    #deck-container { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 30px; 
-        width: 850px; 
-        margin: 0 auto; 
-        transition: transform 0.2s ease; 
-        transform-origin: top center; 
-    }
-
-    /* PREVIEW RATIO SLIDE EXPLICIT DARI INDEX-2-1 */
-    .slide {
-        width: 850px !important; 
-        min-height: 478px; 
-        height: auto; 
-        background-color: var(--bg-obsidian); 
-        border: 1px solid var(--border-obsidian); 
-        padding: 28px 36px 20px 36px; 
-        position: relative; 
-        box-shadow: 0 15px 40px rgba(0,0,0,0.9); 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: space-between; 
-        box-sizing: border-box; 
-        gap: 20px; 
-        flex-shrink: 0; 
-        overflow: hidden;
-    }
-
+    .slide { width: 850px !important; min-height: 478px; height: auto; background-color: var(--bg-obsidian); border: 1px solid var(--border-obsidian); padding: 28px 36px 20px 36px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; gap: 20px; flex-shrink: 0; overflow: hidden; }
     .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%); }
     
-    /* SLIDE BODY LAYOUT EXACT INDEX-2-1 */
     .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; gap: 16px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
-    .slide-body.has-cover { justify-content: center; align-items: flex-start; flex-direction: column; }
+    .slide-body.has-cover { justify-content: center; align-items: flex-start; }
+    .draggable-element { box-sizing: border-box; flex: 0 0 auto; min-width: 0; }
+    .slide-body .elem-width-half { flex-basis: calc(50% - 8px); }
+    .slide-body .elem-width-third { flex-basis: calc(33.333% - 10.66px); }
+    .slide-body .elem-width-twothird { flex-basis: calc(66.666% - 5.33px); }
+    .slide-body .elem-width-full { flex-basis: 100%; }
 
-    /* DRAGGABLE ELEMENT IN PREVIEW */
-    .draggable-element { position: relative; user-select: none; transition: transform 0.15s ease, border-color 0.15s ease; border: 1px dashed transparent; padding: 4px; border-radius: 4px; cursor: grab; }
+    .slide-accordion { position: relative; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+    .slide-accordion.slide-dragging { opacity: .55; transform: scale(.995); }
+    .slide-accordion.slide-drop-before { border-top: 3px solid var(--accent-gold) !important; box-shadow: 0 -8px 18px var(--accent-gold-glow); }
+    .slide-accordion.slide-drop-after { border-bottom: 3px solid var(--accent-gold) !important; box-shadow: 0 8px 18px var(--accent-gold-glow); }
+
+    .draggable-element { position: relative; user-select: none; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; border: 1px dashed transparent; padding: 4px; border-radius: 4px; cursor: grab; }
     .draggable-element:active { cursor: grabbing; opacity: 0.75; }
     .draggable-element:hover { border-color: rgba(196, 154, 87, 0.4); background: rgba(196, 154, 87, 0.02); }
+    .slide-body.drag-over-empty {
+        outline: 1px dashed var(--accent-gold);
+        outline-offset: 3px;
+        background: rgba(196, 154, 87, 0.025);
+        box-shadow: inset 0 0 24px rgba(196, 154, 87, 0.05);
+    }
 
-    /* Quick Grid Selector on Preview Element Hover */
+
+    /* GLOW INDICATOR DRAG AND DROP (TOP/BOTTOM/LEFT/RIGHT) */
+    .draggable-element.drag-over-top { border-top: 3px solid var(--accent-gold) !important; box-shadow: 0 -8px 15px var(--accent-gold-glow); }
+    .draggable-element.drag-over-bottom { border-bottom: 3px solid var(--accent-gold) !important; box-shadow: 0 8px 15px var(--accent-gold-glow); }
+    .draggable-element.drag-over-left { border-left: 3px solid var(--accent-gold) !important; box-shadow: -8px 0 15px var(--accent-gold-glow); }
+    .draggable-element.drag-over-right { border-right: 3px solid var(--accent-gold) !important; box-shadow: 8px 0 15px var(--accent-gold-glow); }
+
     .elem-drag-bar { display: none; position: absolute; top: -12px; right: 6px; background: var(--card-obsidian); border: 1px solid var(--accent-gold); border-radius: 4px; padding: 2px 6px; font-size: 8px; font-weight: 800; color: var(--accent-gold); gap: 4px; z-index: 10; cursor: default; }
     .draggable-element:hover .elem-drag-bar { display: flex; }
     .grid-opt-btn { cursor: pointer; padding: 1px 4px; border-radius: 2px; }
     .grid-opt-btn:hover { background: var(--accent-gold); color: #0A0B0A; }
 
-    /* INDEX-2-1 EXACT GRID WIDTH RATIOS */
     .elem-width-full { width: 100%; }
     .elem-width-half { width: calc(50% - 8px); }
     .elem-width-third { width: calc(33.333% - 10.66px); }
@@ -235,9 +213,38 @@
 
     .text-card-wrap { background-color: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
 
-    .var-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 9px; padding: 2px 6px; border-radius: 12px; white-space: nowrap; }
-    .var-up { color: var(--positive); background: rgba(76, 175, 122, 0.12); }
-    .var-down { color: var(--negative); background: rgba(229, 83, 83, 0.12); }
+    /* KPI METRICS STYLES */
+    .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+    .kpi-card { flex: 1; min-width: 100px; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
+    .kpi-value { font-size: 20px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; margin-top: 4px; }
+
+    /* DOCUMENT COLUMNS STYLES */
+    .col-wrap { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+    .col-item { flex: 1; min-width: 120px; }
+    .col-card--accent { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 10px 12px; }
+    .col-card--plain { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px; }
+    .col-card--minimal { border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; }
+    .col-card--numbered { position: relative; background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px 10px 36px; }
+    .col-num-badge { position: absolute; left: 8px; top: 10px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #8A6831); color: #0A0B0A; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+    /* SOCIAL MEDIA STYLES */
+    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; width: 100%; }
+    .social-card { background: rgba(22, 24, 22, 0.7); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 10px; }
+    .social-card-val { font-size: 14px; font-weight: 800; color: var(--text-white); margin: 3px 0; word-break: break-all; }
+
+    /* AUDIENCE BREAKDOWN & INSIGHTS */
+    .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
+    .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
+
+    /* TREND BADGES (UP / DOWN HIGHLIGHT) */
+    .var-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 9px; padding: 2px 6px; border-radius: 12px; white-space: nowrap; cursor: pointer; user-select: none; }
+    .var-up { color: var(--positive); background: rgba(76, 175, 122, 0.15); border: 1px solid rgba(76, 175, 122, 0.3); }
+    .var-up:hover { background: rgba(76, 175, 122, 0.3); }
+    .var-down { color: var(--negative); background: rgba(229, 83, 83, 0.15); border: 1px solid rgba(229, 83, 83, 0.3); }
+    .var-down:hover { background: rgba(229, 83, 83, 0.3); }
+
+    /* INTERACTIVE TREND BADGE ACTION POPUP */
+    #badgeActionPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 6px; border-radius: 6px; z-index: 10002; box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: none; flex-direction: column; gap: 4px; }
 
     .compare-box { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
     .compare-num { font-size: 20px; font-weight: 800; color: var(--text-white); }
@@ -246,11 +253,10 @@
     .slide-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-obsidian); padding-top: 8px; font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; width: 100%; }
     .slide-num { font-size: 11px; font-weight: 800; color: var(--accent-gold); }
 
-    /* MEDIA QUERIES & MOBILE ADAPTATION WITH SCALING WRAPPER */
     @media (max-width: 768px) {
         body { height: auto !important; overflow-y: auto !important; }
         .app-container { height: auto !important; overflow: visible !important; }
-        .editor-panel { max-height: none !important; overflow-y: visible !important; padding: 12px !important; padding-bottom: 80px !important; }
+        .editor-panel { max-height: none !important; overflow-y: visible !important; padding: 12px !important; padding-bottom: 150px !important; }
         .btn-grid { grid-template-columns: repeat(2, 1fr); }
         .preview-panel { padding: 15px 5px !important; }
     }
@@ -258,10 +264,24 @@
 </head>
 <body>
 
-    <div id="highlightPopup" onclick="createVariableFromHighlight()">+ Jadikan Variabel</div>
+    <!-- TOOLTIP POPUP PADA BLOCK TEKS EDITOR -->
+    <div id="highlightPopup">
+        <button class="hl-pop-btn" onclick="createVariableFromHighlight()">+ Variabel</button>
+        <button class="hl-pop-btn btn-up" onclick="applyHighlightTrend('up')">▲ Kenaikan</button>
+        <button class="hl-pop-btn btn-down" onclick="applyHighlightTrend('down')">▼ Penurunan</button>
+    </div>
+
+    <!-- POPUP KLIK BADGE TREND PADA PREVIEW CANVAS -->
+    <div id="badgeActionPopup">
+        <span style="font-size:8px; font-weight:800; color:var(--accent-gold); text-transform:uppercase; margin-bottom:2px;">Opsi Highlight</span>
+        <button class="hl-pop-btn" onclick="switchTrendBadgeType()">⇆ Ganti (Naik/Turun)</button>
+        <button class="hl-pop-btn" onclick="removeTrendBadgeUIOnly()">✕ Hapus Highlight Saja</button>
+        <button class="hl-pop-btn btn-down" onclick="removeTrendBadgeCompletely()">🗑 Hapus Total</button>
+    </div>
+
     <div id="varAutocomplete"></div>
 
-    <!-- MODAL VARIABEL DENGAN ICON KAMERA CLEAN SVG -->
+    <!-- MODAL VARIABEL -->
     <div class="modal-overlay" id="varModalOverlay">
         <div class="modal-box">
             <div class="modal-title" id="varModalTitle">Variabel Baru</div>
@@ -292,10 +312,10 @@
         </div>
     </div>
 
-    <!-- HEADER ATAS (SCROLLABLE) -->
+    <!-- HEADER ATAS -->
     <div class="topbar">
         <div class="brand-title">
-            <span>DECK STUDIO</span>
+            <span>MALEVIN</span>
         </div>
         <div class="topbar-actions">
             <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDFImport(event)">
@@ -313,7 +333,7 @@
                     <button class="btn btn-gold" onclick="openVarModal(null)" style="padding: 3px 8px; font-size:8px;">+ Variabel Baru</button>
                 </div>
                 <div style="font-size:9px; color:var(--text-muted); line-height:1.4;">
-                    <strong>Petunjuk:</strong> (1) Ketik <code>{</code> atau <code>{{</code> di kolom input mana saja untuk autocomplete. (2) Atau blok teks lalu klik "+ Jadikan Variabel". (3) Variabel otomatis jadi pil kapsul kuning & disimpan di LocalStorage.
+                    <strong>Petunjuk:</strong> (1) Ketik <code>{</code> atau <code>{{</code> di kolom input mana saja untuk autocomplete. (2) Blok teks untuk opsi Variabel / Highlight Kenaikan [up:teks] / Penurunan [down:teks]. (3) Variabel otomatis jadi pil kapsul kuning & disimpan di LocalStorage.
                 </div>
                 <div class="global-var-list" id="globalVarListUI"></div>
             </div>
@@ -347,37 +367,40 @@
         const ELEM_LABELS = { 
             cover: 'COVER', header: 'HEADER', text: 'TEKS', columns: 'KOLOM DOKUMEN', table: 'TABEL', 
             kpi: 'KPI METRIK', chart: 'GRAFIK ANALISIS', image: 'GAMBAR/LOGO', comparison: 'PERBANDINGAN (NAIK/TURUN / BOOLEAN)', 
-            social: 'STATISTIK SOSIAL & LINK SOSMED', breakdown: 'WAWASAN PENONTON', wawasan: 'ANALISIS KUSTOM' 
+            social: 'STATISTIK SOSIAL & LINK SOSMED', breakdown: 'WAWASAN PENONTON', wawasan: 'CATATAN' 
         };
 
         let customVariables = [];
         let slidesData = [
             {
                 id: 1,
-                footerLeft: 'DECK STUDIO',
+                footerLeft: 'MALEVIN',
                 elements: [
                     { type: 'header', width: 'full', tag: 'PRESENTASI', title: 'Judul Slide Utama', shapeStyle: 'rounded' },
-                    { type: 'text', width: 'full', style: 'paragraf', content: 'Ketik {{ di kolom mana saja untuk memanggil variabel, atau blok teks lalu klik "+ Jadikan Variabel". Proyek tersimpan otomatis di LocalStorage.', card: false, shapeStyle: 'rounded' }
+                    { type: 'text', width: 'full', style: 'paragraf', content: 'Ketik {{ di kolom mana saja untuk memanggil variabel, atau blok teks lalu klik opsi yang ada. Cobalah kenaikan [up:100%] atau penurunan [down:15%].', card: false, shapeStyle: 'rounded' }
                 ]
             }
         ];
 
         let chartInstances = [];
         let draggedElemInfo = null;
+        let dragHoverInfo = null;
+        let draggedSlideInfo = null;
+        let slideDropTarget = null;
+        let activeBadgeTarget = null;
 
         const VAR_TYPE_LABELS = { text: 'Teks', number: 'Angka', calculation: 'Rumus / Kalkulasi', image: 'Gambar' };
 
         function sanitizeVarName(raw) { return (raw || '').trim().replace(/[^a-zA-Z0-9_]/g, ''); }
         function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-        /* SCALING ENGINE SUPAYA SLIDE TIDAK TERPOTONG / TIDAK KENA SCROLL DI HP */
         function autoScaleDeckContainer() {
             const container = document.getElementById('deck-container');
             const panel = document.getElementById('previewPanel');
             if (!container || !panel) return;
 
-            const panelWidth = panel.clientWidth - 20; // Margin pembatas
-            const targetWidth = 850; // Lebar standar 1:1 index-2-1
+            const panelWidth = panel.clientWidth - 20;
+            const targetWidth = 850;
 
             if (panelWidth < targetWidth) {
                 const scale = panelWidth / targetWidth;
@@ -391,7 +414,6 @@
 
         window.addEventListener('resize', autoScaleDeckContainer);
 
-        /* LOCAL STORAGE ENGINE */
         function saveToLocalStorage() {
             try {
                 localStorage.setItem(STORAGE_KEY_SLIDES, JSON.stringify(slidesData));
@@ -412,7 +434,6 @@
             }
         }
 
-        /* MODAL VARIABEL CONTROL */
         let varModalEditIndex = null;
         let varModalImageData = null;
         let varModalPendingInsert = null;
@@ -554,7 +575,6 @@
             `).join('');
         }
 
-        /* CONTENTEDITABLE VAR-INPUT CONTROL */
         function varTextToHtml(str) {
             if (!str) return '';
             const escaped = escapeHtml(str);
@@ -605,10 +625,10 @@
             } else if (vtype === 'slide') {
                 const key = el.getAttribute('data-key');
                 slidesData[sIdx][key] = raw;
-            } else if (vtype === 'metric' || vtype === 'social') {
+            } else if (vtype === 'metric' || vtype === 'social' || vtype === 'col') {
                 const eIdx = parseInt(el.getAttribute('data-eidx'), 10);
                 const [arrIdx, field] = el.getAttribute('data-mkey').split('.');
-                const arrKey = vtype === 'metric' ? 'metrics' : 'socialLinks';
+                const arrKey = vtype === 'metric' ? 'metrics' : (vtype === 'social' ? 'socialLinks' : 'cols');
                 slidesData[sIdx].elements[eIdx][arrKey][parseInt(arrIdx, 10)][field] = raw;
             }
             saveToLocalStorage();
@@ -639,33 +659,93 @@
             }
         }
 
-        /* HIGHLIGHT TEXT TO VARIABLE */
         let activeVarTarget = null;
-        function handleFieldSelectionEvent(e) {
+
+        function initSelectionListeners() {
+            document.addEventListener('selectionchange', () => {
+                clearTimeout(window.selectionTimeout);
+                window.selectionTimeout = setTimeout(handleFieldSelectionEvent, 100);
+            });
+
+            document.addEventListener('touchend', () => {
+                setTimeout(handleFieldSelectionEvent, 50);
+            });
+
+            document.addEventListener('pointerdown', (e) => {
+                const popup = document.getElementById('highlightPopup');
+                const isInput = e.target.classList && e.target.classList.contains('var-input');
+                const isInsidePopup = popup && popup.contains(e.target);
+
+                if (!isInput && !isInsidePopup) {
+                    popup.style.display = 'none';
+                }
+            });
+        }
+
+        function handleFieldSelectionEvent() {
             const popup = document.getElementById('highlightPopup');
             const el = document.activeElement;
+            
             const isVarInput = el && el.classList && el.classList.contains('var-input');
-            if (!isVarInput) { activeVarTarget = null; popup.style.display = 'none'; return; }
+            if (!isVarInput) { 
+                if (popup) popup.style.display = 'none'; 
+                return; 
+            }
 
             const sel = window.getSelection();
-            if (!sel || sel.rangeCount === 0 || sel.isCollapsed || !el.contains(sel.anchorNode)) {
-                activeVarTarget = null; popup.style.display = 'none'; return;
+            if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+                if (popup) popup.style.display = 'none'; 
+                return;
             }
-            const text = sel.toString();
-            if (!text.trim()) { activeVarTarget = null; popup.style.display = 'none'; return; }
 
-            activeVarTarget = { el, range: sel.getRangeAt(0).cloneRange(), text };
-            const rect = sel.getRangeAt(0).getBoundingClientRect();
-            popup.style.left = `${rect.left + window.scrollX}px`;
-            popup.style.top = `${rect.top + window.scrollY - 32}px`;
-            popup.style.display = 'block';
+            const range = sel.getRangeAt(0);
+
+            const isStartInside = el.contains(range.startContainer);
+            const isEndInside = el.contains(range.endContainer);
+
+            if (!isStartInside || !isEndInside) {
+                if (popup) popup.style.display = 'none'; 
+                return;
+            }
+
+            const text = sel.toString();
+            if (!text.trim()) { 
+                if (popup) popup.style.display = 'none'; 
+                return; 
+            }
+
+            activeVarTarget = { el, range: range.cloneRange(), text };
+            
+            const rect = range.getBoundingClientRect();
+            const popupHeight = popup.offsetHeight || 38;
+            const popupWidth = popup.offsetWidth || 120;
+            const margin = 12;
+
+            let top = rect.bottom + window.scrollY + margin; 
+            let left = rect.left + window.scrollX;
+
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            if (spaceBelow < popupHeight + margin && spaceAbove > spaceBelow) {
+                top = rect.top + window.scrollY - popupHeight - 60; 
+            }
+
+            const maxLeft = window.innerWidth - popupWidth - margin;
+            left = Math.max(margin, Math.min(left, maxLeft));
+
+            popup.style.left = `${left}px`;
+            popup.style.top = `${top}px`;
+            popup.style.display = 'flex';
         }
+
+        document.addEventListener('DOMContentLoaded', initSelectionListeners);
 
         document.getElementById('editorPanel').addEventListener('mouseup', handleFieldSelectionEvent);
         document.getElementById('editorPanel').addEventListener('keyup', handleFieldSelectionEvent);
         document.addEventListener('mousedown', function (e) {
             const popup = document.getElementById('highlightPopup');
-            if (popup.style.display === 'block' && !popup.contains(e.target)) popup.style.display = 'none';
+            if (popup.style.display === 'flex' && !popup.contains(e.target)) popup.style.display = 'none';
         });
 
         function createVariableFromHighlight() {
@@ -673,7 +753,22 @@
             const { el, range, text } = activeVarTarget;
             document.getElementById('highlightPopup').style.display = 'none';
             varModalPendingInsert = { el, range };
-            openVarModal(null, `var${Date.now().toString().slice(-4)}`, text);
+            openVarModal(null, sanitizeVarName(text) || `var${Date.now().toString().slice(-4)}`, text);
+        }
+
+        function applyHighlightTrend(type) {
+            if (!activeVarTarget) return;
+            const { el, range, text } = activeVarTarget;
+            document.getElementById('highlightPopup').style.display = 'none';
+
+            el.focus();
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            const tag = `[${type}:${text}]`;
+            document.execCommand('insertText', false, tag);
+            applyVarInputChange(el);
         }
 
         function insertVarTokenIntoField(el, name, range) {
@@ -704,7 +799,6 @@
             applyVarInputChange(el);
         }
 
-        /* AUTOCOMPLETE SYSTEM FOR {{ */
         let acActiveEl = null, acItems = [], acIndex = -1;
 
         function closeAutocomplete() {
@@ -742,10 +836,12 @@
             }
 
             const sel = window.getSelection();
-            const rect = sel.getRangeAt(0).getBoundingClientRect();
-            box.style.left = `${rect.left + window.scrollX}px`;
-            box.style.top = `${rect.bottom + window.scrollY + 4}px`;
-            box.style.display = 'block';
+            if (sel && sel.rangeCount > 0) {
+                const rect = sel.getRangeAt(0).getBoundingClientRect();
+                box.style.left = `${rect.left + window.scrollX}px`;
+                box.style.top = `${rect.bottom + window.scrollY + 4}px`;
+                box.style.display = 'block';
+            }
         }
 
         function pickAutocomplete(i) {
@@ -758,8 +854,6 @@
             const range = document.createRange();
             range.setStart(ctx.node, ctx.matchStart);
             range.setEnd(ctx.node, ctx.matchEnd);
-            const sel = window.getSelection();
-            sel.removeAllRanges(); sel.addRange(range);
 
             insertVarTokenIntoField(el, acItems[i].name, range);
         }
@@ -775,11 +869,28 @@
         document.getElementById('editorPanel').addEventListener('keydown', function (e) {
             const el = e.target;
             if (!el.classList || !el.classList.contains('var-input')) return;
-            const acOpen = document.getElementById('varAutocomplete').style.display === 'block';
+            const box = document.getElementById('varAutocomplete');
+            const acOpen = box.style.display === 'block';
             if (acOpen) {
-                if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = Math.min(acIndex + 1, acItems.length - 1); refreshAcHighlight(); return; }
-                if (e.key === 'ArrowUp') { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); refreshAcHighlight(); return; }
-                if (e.key === 'Enter' || e.key === 'Tab') { if (acIndex >= 0 && acItems[acIndex]) { e.preventDefault(); pickAutocomplete(acIndex); return; } }
+                if (e.key === 'ArrowDown') { 
+                    e.preventDefault(); 
+                    acIndex = Math.min(acIndex + 1, acItems.length - 1); 
+                    refreshAcHighlight(); 
+                    return; 
+                }
+                if (e.key === 'ArrowUp') { 
+                    e.preventDefault(); 
+                    acIndex = Math.max(acIndex - 1, 0); 
+                    refreshAcHighlight(); 
+                    return; 
+                }
+                if (e.key === 'Enter' || e.key === 'Tab') { 
+                    if (acIndex >= 0 && acItems[acIndex]) { 
+                        e.preventDefault(); 
+                        pickAutocomplete(acIndex); 
+                        return; 
+                    } 
+                }
                 if (e.key === 'Escape') { closeAutocomplete(); return; }
             }
             if (e.key === 'Enter' && !el.classList.contains('var-multiline')) { e.preventDefault(); }
@@ -792,9 +903,10 @@
         document.addEventListener('mousedown', function (e) {
             const box = document.getElementById('varAutocomplete');
             if (box.style.display === 'block' && !box.contains(e.target)) closeAutocomplete();
+            const badgePop = document.getElementById('badgeActionPopup');
+            if (badgePop.style.display === 'flex' && !badgePop.contains(e.target)) badgePop.style.display = 'none';
         });
 
-        /* COMPUTED VARIABLES RESOLUTION */
         function computeGlobalVariables() {
             const vars = {};
             customVariables.forEach(v => {
@@ -819,9 +931,9 @@
             });
         }
 
-        function renderVarsInText(str, vars) {
+        function renderVarsInText(str, vars, sIdx, eIdx, fieldKey, subType, subIdx) {
             if (!str) return '';
-            return String(str).replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, varKey) => {
+            let parsed = String(str).replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, varKey) => {
                 const keyLower = varKey.toLowerCase();
                 const matchedKey = Object.keys(vars).find(k => k.toLowerCase() === keyLower);
                 if (!matchedKey) return `<span style="color:var(--negative); font-size:9px; border:1px dashed var(--negative); padding:0 3px;">{{${varKey}}}?</span>`;
@@ -829,9 +941,126 @@
                 if (item.type === 'image') return `<img src="${item.value}" style="max-height:30px; vertical-align:middle; display:inline-block;">`;
                 return item.value;
             });
+
+            /* PARSER TREND HIGHLIGHT NAIK & TURUN KUSTOM */
+            parsed = parsed.replace(/\[(up|down):([^\]]+)\]/g, (match, dir, val) => {
+                const cls = dir === 'up' ? 'var-up' : 'var-down';
+                const arrow = dir === 'up' ? '▲' : '▼';
+                const metaAttrs = `data-sidx="${sIdx}" data-eidx="${eIdx}" data-field="${fieldKey}" data-dir="${dir}" data-val="${escapeHtml(val)}" ${subType ? `data-subtype="${subType}" data-subidx="${subIdx}"` : ''}`;
+                return `<span class="var-badge ${cls}" onclick="openTrendBadgeUI(event, this)" ${metaAttrs}>${arrow} ${val}</span>`;
+            });
+
+            return parsed;
         }
 
-        /* RENDER FORM EDITOR */
+        /* POPUP EVENT KLIK UNTUK TREND BADGE */
+        function openTrendBadgeUI(e, el) {
+            e.stopPropagation();
+            activeBadgeTarget = {
+                el,
+                sIdx: parseInt(el.getAttribute('data-sidx'), 10),
+                eIdx: parseInt(el.getAttribute('data-eidx'), 10),
+                field: el.getAttribute('data-field'),
+                dir: el.getAttribute('data-dir'),
+                val: el.getAttribute('data-val'),
+                subType: el.getAttribute('data-subtype'),
+                subIdx: el.getAttribute('data-subidx')
+            };
+
+            const rect = el.getBoundingClientRect();
+            const pop = document.getElementById('badgeActionPopup');
+            pop.style.left = `${rect.left + window.scrollX}px`;
+            pop.style.top = `${rect.bottom + window.scrollY + 6}px`;
+            pop.style.display = 'flex';
+        }
+
+        function getTargetStringValue(target) {
+            const { sIdx, eIdx, field, subType, subIdx } = target;
+            if (subType) {
+                const arrKey = subType === 'metric' ? 'metrics' : (subType === 'social' ? 'socialLinks' : 'cols');
+                return slidesData[sIdx].elements[eIdx][arrKey][parseInt(subIdx, 10)][field] || '';
+            } else {
+                return slidesData[sIdx].elements[eIdx][field] || '';
+            }
+        }
+
+        function setTargetStringValue(target, newStr) {
+            const { sIdx, eIdx, field, subType, subIdx } = target;
+            if (subType) {
+                const arrKey = subType === 'metric' ? 'metrics' : (subType === 'social' ? 'socialLinks' : 'cols');
+                slidesData[sIdx].elements[eIdx][arrKey][parseInt(subIdx, 10)][field] = newStr;
+            } else {
+                slidesData[sIdx].elements[eIdx][field] = newStr;
+            }
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        function switchTrendBadgeType() {
+            if (!activeBadgeTarget) return;
+            document.getElementById('badgeActionPopup').style.display = 'none';
+            const { dir, val } = activeBadgeTarget;
+            const oldPattern = `[${dir}:${val}]`;
+            const newDir = dir === 'up' ? 'down' : 'up';
+            const newPattern = `[${newDir}:${val}]`;
+
+            let text = getTargetStringValue(activeBadgeTarget);
+            text = text.replace(oldPattern, newPattern);
+            setTargetStringValue(activeBadgeTarget, text);
+        }
+
+        function removeTrendBadgeUIOnly() {
+            if (!activeBadgeTarget) return;
+            document.getElementById('badgeActionPopup').style.display = 'none';
+            const { dir, val } = activeBadgeTarget;
+            const oldPattern = `[${dir}:${val}]`;
+
+            let text = getTargetStringValue(activeBadgeTarget);
+            text = text.replace(oldPattern, val);
+            setTargetStringValue(activeBadgeTarget, text);
+        }
+
+        function removeTrendBadgeCompletely() {
+            if (!activeBadgeTarget) return;
+            document.getElementById('badgeActionPopup').style.display = 'none';
+            const { dir, val } = activeBadgeTarget;
+            const oldPattern = `[${dir}:${val}]`;
+
+            let text = getTargetStringValue(activeBadgeTarget);
+            text = text.replace(oldPattern, '');
+            setTargetStringValue(activeBadgeTarget, text);
+        }
+
+        /* HELPER SUB-ITEMS ACTIONS */
+        function addKpiMetric(sIdx, eIdx) {
+            if (!slidesData[sIdx].elements[eIdx].metrics) slidesData[sIdx].elements[eIdx].metrics = [];
+            slidesData[sIdx].elements[eIdx].metrics.push({ label: 'METRIK BARU', value: '0' });
+            saveToLocalStorage(); renderForms();
+        }
+        function removeKpiMetric(sIdx, eIdx, mIdx) {
+            slidesData[sIdx].elements[eIdx].metrics.splice(mIdx, 1);
+            saveToLocalStorage(); renderForms();
+        }
+        function addColItem(sIdx, eIdx) {
+            if (!slidesData[sIdx].elements[eIdx].cols) slidesData[sIdx].elements[eIdx].cols = [];
+            slidesData[sIdx].elements[eIdx].cols.push({ title: 'Judul Kolom', content: 'Keterangan isi...' });
+            saveToLocalStorage(); renderForms();
+        }
+        function removeColItem(sIdx, eIdx, cIdx) {
+            slidesData[sIdx].elements[eIdx].cols.splice(cIdx, 1);
+            saveToLocalStorage(); renderForms();
+        }
+        function addSocialLink(sIdx, eIdx) {
+            if (!slidesData[sIdx].elements[eIdx].socialLinks) slidesData[sIdx].elements[eIdx].socialLinks = [];
+            slidesData[sIdx].elements[eIdx].socialLinks.push({ platform: 'Sosmed', handle: '@user', stat: '0' });
+            saveToLocalStorage(); renderForms();
+        }
+        function removeSocialLink(sIdx, eIdx, lIdx) {
+            slidesData[sIdx].elements[eIdx].socialLinks.splice(lIdx, 1);
+            saveToLocalStorage(); renderForms();
+        }
+
+        /* RENDER FORM EDITOR COMPLETE */
         function renderForms() {
             renderCustomVarsUI();
             const wrapper = document.getElementById('forms-wrapper');
@@ -840,6 +1069,12 @@
             slidesData.forEach((slide, sIdx) => {
                 const card = document.createElement('div');
                 card.className = 'slide-accordion';
+                card.setAttribute('draggable', 'true');
+                card.dataset.slideIndex = sIdx;
+                card.setAttribute('ondragstart', `onSlideDragStart(event, ${sIdx})`);
+                card.setAttribute('ondragover', 'onSlideDragOver(event)');
+                card.setAttribute('ondragleave', 'onSlideDragLeave(event)');
+                card.setAttribute('ondrop', `onSlideDrop(event, ${sIdx})`);
                 let elementsHTML = '';
 
                 slide.elements.forEach((elem, eIdx) => {
@@ -875,6 +1110,82 @@
                         <div class="form-group"><label>Isi Teks</label>${varInputHTML('elem', sIdx, eIdx, 'content', elem.content, '', true)}</div>
                         <div class="form-group"><label><input type="checkbox" ${elem.card ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'card', this.checked)"> Bungkus Dalam Kartu Obsidian</label></div>`; 
                     } 
+                    else if (elem.type === 'columns') {
+                        const cols = elem.cols || [];
+                        let colItemsHTML = cols.map((c, cIdx) => `
+                            <div style="border:1px solid var(--border-obsidian); padding:8px; border-radius:4px; margin-top:4px; display:flex; flex-direction:column; gap:6px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:9px; font-weight:800; color:var(--accent-gold);">KOLOM ${cIdx + 1}</span>
+                                    <button class="btn btn-danger" onclick="removeColItem(${sIdx}, ${eIdx}, ${cIdx})">Hapus Kolom</button>
+                                </div>
+                                <div class="form-group"><label>Judul Kolom</label>${varInputHTML('col', sIdx, eIdx, `${cIdx}.title`, c.title, '', false)}</div>
+                                <div class="form-group"><label>Isi Teks Kolom</label>${varInputHTML('col', sIdx, eIdx, `${cIdx}.content`, c.content, '', true)}</div>
+                            </div>
+                        `).join('');
+                        fields += `
+                        <div class="form-group"><label>Gaya Tampilan Kolom</label>
+                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'colStyle', this.value)">
+                                <option value="accent" ${(elem.colStyle || 'accent') === 'accent' ? 'selected' : ''}>Aksen Kiri Emas</option>
+                                <option value="plain" ${elem.colStyle === 'plain' ? 'selected' : ''}>Kotak Kartu Biasa</option>
+                                <option value="minimal" ${elem.colStyle === 'minimal' ? 'selected' : ''}>Minimalis Bawah</option>
+                                <option value="numbered" ${elem.colStyle === 'numbered' ? 'selected' : ''}>Nomor Urut Pin</option>
+                            </select>
+                        </div>
+                        ${colItemsHTML}
+                        <button class="btn btn-gold" style="margin-top:6px; font-size:9px;" onclick="addColItem(${sIdx}, ${eIdx})">+ Tambah Item Kolom</button>`;
+                    }
+                    else if (elem.type === 'kpi') {
+                        const metrics = elem.metrics || [];
+                        let metricItemsHTML = metrics.map((m, mIdx) => `
+                            <div style="border:1px solid var(--border-obsidian); padding:8px; border-radius:4px; margin-top:4px; display:flex; flex-direction:column; gap:6px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:9px; font-weight:800; color:var(--accent-gold);">METRIK ${mIdx + 1}</span>
+                                    <button class="btn btn-danger" onclick="removeKpiMetric(${sIdx}, ${eIdx}, ${mIdx})">Hapus</button>
+                                </div>
+                                <div class="two-col-form">
+                                    <div class="form-group"><label>Label Metrik</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.label`, m.label, '', false)}</div>
+                                    <div class="form-group"><label>Nilai Utama</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.value`, m.value, '', false)}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                        fields += `
+                        ${metricItemsHTML}
+                        <button class="btn btn-gold" style="margin-top:6px; font-size:9px;" onclick="addKpiMetric(${sIdx}, ${eIdx})">+ Tambah Item KPI</button>`;
+                    }
+                    else if (elem.type === 'table') {
+                        fields += `
+                        <div class="form-group"><label>Header Kolom (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'headers', elem.headers, 'Metrik, Nilai, Status', false)}</div>
+                        <div class="form-group"><label>Baris Data Tabel (Satu Baris Per-Baris, Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'rowsData', elem.rowsData, 'Reach, 150K, Normal\nEngagement, 4.8%, Naik', true)}</div>`;
+                    }
+                    else if (elem.type === 'social') {
+                        const links = elem.socialLinks || [];
+                        let socialItemsHTML = links.map((l, lIdx) => `
+                            <div style="border:1px solid var(--border-obsidian); padding:8px; border-radius:4px; margin-top:4px; display:flex; flex-direction:column; gap:6px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:9px; font-weight:800; color:var(--accent-gold);">AKUN / STAT SOSMED ${lIdx + 1}</span>
+                                    <button class="btn btn-danger" onclick="removeSocialLink(${sIdx}, ${eIdx}, ${lIdx})">Hapus</button>
+                                </div>
+                                <div class="form-group"><label>Nama Platform</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.platform`, l.platform, 'Instagram / TikTok', false)}</div>
+                                <div class="two-col-form">
+                                    <div class="form-group"><label>Username / Link</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.handle`, l.handle, '@username', false)}</div>
+                                    <div class="form-group"><label>Stat / Metrik</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.stat`, l.stat, '50K Followers', false)}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                        fields += `
+                        ${socialItemsHTML}
+                        <button class="btn btn-gold" style="margin-top:6px; font-size:9px;" onclick="addSocialLink(${sIdx}, ${eIdx})">+ Tambah Link Sosmed</button>`;
+                    }
+                    else if (elem.type === 'breakdown') {
+                        fields += `
+                        <div class="form-group"><label>Judul Wawasan Penonton</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, 'WAWASAN PENONTON', false)}</div>
+                        <div class="form-group"><label>Data Rincian (Satu Per-Baris, Format: Label, Nilai)</label>${varInputHTML('elem', sIdx, eIdx, 'rowsData', elem.rowsData, 'Pria, 65%\nWanita, 35%', true)}</div>`;
+                    }
+                    else if (elem.type === 'wawasan') {
+                        fields += `
+                        <div class="form-group"><label>Judul Analisis</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, 'CATATAN', false)}</div>
+                        <div class="form-group"><label>Rekomendasi / Insight</label>${varInputHTML('elem', sIdx, eIdx, 'content', elem.content, 'Tuliskan poin hasil analisis di sini...', true)}</div>`;
+                    }
                     else if (elem.type === 'image') { 
                         fields += `<div class="form-group"><label>Upload Gambar / Logo Elemen</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
                     } 
@@ -908,22 +1219,39 @@
                     }
                     else if (elem.type === 'chart') { 
                         fields += `
-                            <div class="form-group"><label>Judul Grafik</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>
-                            <div class="form-group"><label>Tipe Grafik</label>
-                                <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
-                                    <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar Chart</option>
-                                    <option value="line" ${elem.chartType === 'line' ? 'selected' : ''}>Line Chart</option>
-                                    <option value="pie" ${elem.chartType === 'pie' ? 'selected' : ''}>Pie Diagram</option>
-                                </select>
+                            <div class="form-group"><label>Judul Utama Grafik (Bawah/Atas Canvas)</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>
+                            <div class="form-group"><label>Sub-Judul / Keterangan Singkat</label>${varInputHTML('elem', sIdx, eIdx, 'subtitle', elem.subtitle, '', false)}</div>
+                            <div class="two-col-form">
+                                <div class="form-group"><label>Tipe Grafik</label>
+                                    <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
+                                        <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar (Gradient Block & Opacity Contras)</option>
+                                        <option value="line" ${elem.chartType === 'line' ? 'selected' : ''}>Line Chart</option>
+                                        <option value="pie" ${elem.chartType === 'pie' ? 'selected' : ''}>Pie Diagram</option>
+                                        <option value="doughnut" ${elem.chartType === 'doughnut' ? 'selected' : ''}>Doughnut Diagram</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>Opsi Indikator Grafik</label>
+                                    <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'badgeType', this.value)">
+                                        <option value="trend" ${(elem.badgeType || 'trend') === 'trend' ? 'selected' : ''}>Tren Kenaikan/Penurunan (%)</option>
+                                        <option value="compare" ${elem.badgeType === 'compare' ? 'selected' : ''}>Perbandingan Pertumbuhan</option>
+                                        <option value="percentage" ${elem.badgeType === 'percentage' ? 'selected' : ''}>Persentase Capaian (%)</option>
+                                        <option value="target" ${elem.badgeType === 'target' ? 'selected' : ''}>Indikator Target</option>
+                                        <option value="up" ${elem.badgeType === 'up' ? 'selected' : ''}>Status Kenaikan Positive</option>
+                                        <option value="down" ${elem.badgeType === 'down' ? 'selected' : ''}>Status Penurunan Negative</option>
+                                        <option value="point" ${elem.badgeType === 'point' ? 'selected' : ''}>Perubahan Poin / Selisih</option>
+                                        <option value="avg" ${elem.badgeType === 'avg' ? 'selected' : ''}>Rata-Rata Berjalan</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group"><label>Label X (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'labels', elem.labels, '', false)}</div>
-                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '', false)}</div>`; 
+                            <div class="form-group"><label>Label X (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'labels', elem.labels, 'Jan, Feb, Mar', false)}</div>
+                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>
+                            <div class="form-group"><label>Header / Sub-Informasi Bawah Grafik</label>${varInputHTML('elem', sIdx, eIdx, 'subtitle', elem.subtitle, 'Rincian performa analisis bulanan...', false)}</div>`; 
                     }
 
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
                 });
 
-                card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
+                card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold); cursor:grab;">☷ SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
                 <div class="form-group"><label>Footer Left</label>${varInputHTML('slide', sIdx, null, 'footerLeft', slide.footerLeft, '', false)}</div>
                 ${elementsHTML}
                 <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN BARU:</label>
@@ -932,8 +1260,14 @@
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'columns')">+ KOLOM DOKUMEN</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI METRIK</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL DATA</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'social')">+ SOSIAL MEDIA</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'breakdown')">+ WAWASAN AUDIENS</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'wawasan')">+ CATATAN</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'chart')">+ GRAFIK</button>
-                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'comparison')" style="grid-column: span 3;">+ PERBANDINGAN TREN / BOOLEAN</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'comparison')">+ PERBANDINGAN TREN / BOOL</button>
                 </div></div>`;
                 wrapper.appendChild(card);
             });
@@ -953,45 +1287,207 @@
             } 
         }
 
-        /* DRAG AND DROP IN CANVAS PREVIEW */
+        /* DRAG AND DROP IN CANVAS PREVIEW WITH GLOW & DIRECTIONAL LAYOUT (TOP/BOTTOM/LEFT/RIGHT) */
+        /* DRAG & DROP: ATAS/BAWAH + KIRI/KANAN + RUANG KOSONG */
+        function clearDragIndicators() {
+            document.querySelectorAll('.draggable-element').forEach(el => {
+                el.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            });
+            document.querySelectorAll('.slide-body').forEach(el => el.classList.remove('drag-over-empty'));
+        }
+
         function onElemDragStart(e, sIdx, eIdx) {
-            draggedElemInfo = { sIdx, eIdx };
-            e.dataTransfer.setData('text/plain', JSON.stringify({ sIdx, eIdx }));
-            e.target.style.opacity = '0.5';
+            draggedElemInfo = { kind: 'element', sIdx, eIdx };
+            dragHoverInfo = null;
+            try {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', JSON.stringify({ sIdx, eIdx }));
+            } catch (_) {}
+            e.currentTarget.style.opacity = '0.5';
         }
 
         function onElemDragEnd(e) {
-            e.target.style.opacity = '1';
+            e.currentTarget.style.opacity = '1';
+            clearDragIndicators();
+            draggedElemInfo = null;
+        }
+
+        function getDropSide(e, rect) {
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            // Prioritaskan sisi horizontal. Garis kiri/kanan sekarang benar-benar
+            // menjadi target drop, bukan hanya indikator visual.
+            const horizontalZone = Math.max(55, Math.min(w * 0.38, 120));
+            if (x <= horizontalZone) return 'left';
+            if (x >= w - horizontalZone) return 'right';
+            const verticalZone = Math.max(35, Math.min(h * 0.32, 90));
+            if (y <= verticalZone) return 'top';
+            if (y >= h - verticalZone) return 'bottom';
+            return x < w / 2 ? 'left' : 'right';
         }
 
         function onElemDragOver(e) {
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
+            e.stopPropagation();
+            if (!draggedElemInfo || draggedElemInfo.kind === 'slide') return;
+            try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+
+            const targetEl = e.currentTarget;
+            const targetSIdx = Number(targetEl.closest('.slide-body')?.dataset.slideIndex);
+            const targetEIdx = Number(targetEl.dataset.elemIndex);
+            const rect = targetEl.getBoundingClientRect();
+            const side = getDropSide(e, rect);
+
+            dragHoverInfo = { sIdx: targetSIdx, eIdx: targetEIdx, side };
+            targetEl.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            targetEl.classList.add('drag-over-' + side);
         }
 
-        function onElemDrop(e, targetSIdx, targetEIdx, targetWidth) {
+        function onElemDragLeave(e) {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            }
+        }
+
+        function onSlideBodyDragOver(e) {
+            if (!draggedElemInfo) return;
+            if (e.target.closest('.draggable-element')) return;
+
+            e.preventDefault();
+            try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+            e.currentTarget.classList.add('drag-over-empty');
+        }
+
+        function onSlideBodyDragLeave(e) {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('drag-over-empty');
+            }
+        }
+
+        function getElementIndexFromPoint(slideBody, clientX, clientY, excludeIndex) {
+            const items = [...slideBody.querySelectorAll(':scope > .draggable-element')]
+                .filter(el => !el.classList.contains('drag-placeholder'));
+
+            let best = { index: -1, before: false, distance: Infinity };
+
+            items.forEach((el, domIndex) => {
+                const dataIndex = Number(el.dataset.elemIndex);
+                if (dataIndex === excludeIndex) return;
+
+                const r = el.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                const d = Math.hypot(clientX - cx, clientY - cy);
+                if (d < best.distance) {
+                    best = {
+                        index: dataIndex,
+                        before: clientX < cx || (Math.abs(clientX - cx) < r.width * 0.25 && clientY < cy),
+                        distance: d
+                    };
+                }
+            });
+            return best;
+        }
+
+        function setAdaptiveSideWidths(elements, movedIndex, targetIndex, side) {
+            const moved = elements[movedIndex];
+            const target = elements[targetIndex];
+            if (!moved || !target) return;
+
+            /* Kalau ruang baris kosong memungkinkan, dua elemen berbagi baris.
+               Jika target sudah punya kolom, ukuran mengikuti kolom tersebut. */
+            const targetWidth = target.width || 'full';
+            if (targetWidth === 'third') {
+                moved.width = 'third';
+            } else if (targetWidth === 'twothird') {
+                moved.width = 'third';
+                target.width = 'twothird';
+            } else {
+                moved.width = 'half';
+                target.width = 'half';
+            }
+        }
+
+        function onSlideBodyDrop(e, targetSIdx) {
+            if (!draggedElemInfo || draggedElemInfo.sIdx !== targetSIdx) return;
+            if (e.target.closest('.draggable-element')) return;
+
             e.preventDefault();
             e.stopPropagation();
-            if (!draggedElemInfo) return;
+
+            const slideBody = e.currentTarget;
+            slideBody.classList.remove('drag-over-empty');
 
             const srcSIdx = draggedElemInfo.sIdx;
             const srcEIdx = draggedElemInfo.eIdx;
-
-            if (srcSIdx !== targetSIdx) return;
-
             const elements = slidesData[targetSIdx].elements;
+            if (!elements[srcEIdx]) return;
+
+            const point = getElementIndexFromPoint(slideBody, e.clientX, e.clientY, srcEIdx);
             const [moved] = elements.splice(srcEIdx, 1);
 
-            if (targetWidth) {
-                moved.width = targetWidth;
+            let insertIdx = elements.length;
+            if (point.index >= 0) {
+                insertIdx = elements.findIndex((_, i) => i === point.index);
+                if (insertIdx < 0) insertIdx = elements.length;
             }
 
-            let insertIdx = targetEIdx;
-            if (srcEIdx < targetEIdx) insertIdx = targetEIdx;
+            if (point.index >= 0) {
+                if (point.before) {
+                    insertIdx = Math.max(0, point.index);
+                } else {
+                    insertIdx = Math.min(elements.length, point.index + 1);
+                }
+            }
 
             elements.splice(insertIdx, 0, moved);
             draggedElemInfo = null;
+            clearDragIndicators();
+            saveToLocalStorage();
+            renderForms();
+        }
 
+        function onElemDrop(e, targetSIdx, targetEIdx) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!draggedElemInfo || draggedElemInfo.kind === 'slide') return;
+
+            const srcSIdx = draggedElemInfo.sIdx;
+            const srcEIdx = draggedElemInfo.eIdx;
+            if (srcSIdx !== targetSIdx) { draggedElemInfo = null; dragHoverInfo = null; clearDragIndicators(); return; }
+
+            const elements = slidesData[targetSIdx].elements;
+            if (!elements[srcEIdx] || !elements[targetEIdx] || srcEIdx === targetEIdx) {
+                draggedElemInfo = null; dragHoverInfo = null; clearDragIndicators(); return;
+            }
+
+            // Gunakan posisi yang terakhir terlihat saat dragover. Ini menghindari
+            // browser mengubah target menjadi area bawah saat mouse dilepas.
+            const targetEl = e.currentTarget;
+            const rect = targetEl.getBoundingClientRect();
+            const side = (dragHoverInfo && dragHoverInfo.sIdx === targetSIdx && dragHoverInfo.eIdx === targetEIdx)
+                ? dragHoverInfo.side : getDropSide(e, rect);
+
+            const moved = elements[srcEIdx];
+            const targetRef = elements[targetEIdx];
+
+            if (side === 'left' || side === 'right') {
+                // Side-by-side: selalu paksa dua item masuk satu baris.
+                setAdaptiveSideWidths(elements, srcEIdx, targetEIdx, side);
+            }
+
+            elements.splice(srcEIdx, 1);
+            const targetIndex = elements.indexOf(targetRef);
+            let insertIndex = targetIndex < 0 ? elements.length : targetIndex;
+            if (side === 'right' || side === 'bottom') insertIndex++;
+            insertIndex = Math.max(0, Math.min(insertIndex, elements.length));
+            elements.splice(insertIndex, 0, moved);
+
+            draggedElemInfo = null;
+            dragHoverInfo = null;
+            clearDragIndicators();
             saveToLocalStorage();
             renderForms();
         }
@@ -1002,7 +1498,79 @@
             renderForms();
         }
 
-        /* RENDER PREVIEW CANVAS DENGAN PATTERN/RASIO PERSIS INDEX-2-1 */
+        /* HELPER KALKULASI BADGE INDIKATOR GRAFIK SAMA PERSIS DENGAN INDEX (7) */
+        function computeChartBadge(type, dataArr) {
+            if (!dataArr || dataArr.length === 0 || dataArr.some(isNaN)) {
+                return { badgeClass: 'var-up', badgeIcon: '▲', badgeText: '0%' };
+            }
+
+            const first = dataArr[0];
+            const last = dataArr[dataArr.length - 1];
+            const prev = dataArr.length > 1 ? dataArr[dataArr.length - 2] : first;
+
+            let badgeClass = 'var-up';
+            let badgeIcon = '▲';
+            let badgeText = '';
+
+            switch (type) {
+                case 'compare':
+                    const compDiff = last - prev;
+                    const compPct = prev !== 0 ? Math.abs((compDiff / prev) * 100).toFixed(1) : '0';
+                    badgeClass = compDiff >= 0 ? 'var-up' : 'var-down';
+                    badgeIcon = compDiff >= 0 ? '▲' : '▼';
+                    badgeText = `${compDiff >= 0 ? '+' : '-'}${compPct}% vs Sblm`;
+                    break;
+                case 'percentage':
+                    const maxVal = Math.max(...dataArr, 1);
+                    const pctOfMax = ((last / maxVal) * 100).toFixed(0);
+                    badgeClass = 'var-up';
+                    badgeIcon = '⌖';
+                    badgeText = `${pctOfMax}% Capaian`;
+                    break;
+                case 'target':
+                    const targetVal = Math.max(...dataArr);
+                    const isMet = last >= targetVal;
+                    badgeClass = isMet ? 'var-up' : 'var-down';
+                    badgeIcon = isMet ? '✓' : '✕';
+                    badgeText = isMet ? 'Target Tercapai' : 'Di Bawah Target';
+                    break;
+                case 'up':
+                    badgeClass = 'var-up';
+                    badgeIcon = '▲';
+                    badgeText = `+${last} Kenaikan`;
+                    break;
+                case 'down':
+                    badgeClass = 'var-down';
+                    badgeIcon = '▼';
+                    badgeText = `-${last} Penurunan`;
+                    break;
+                case 'point':
+                    const diffPt = last - first;
+                    badgeClass = diffPt >= 0 ? 'var-up' : 'var-down';
+                    badgeIcon = diffPt >= 0 ? '▲' : '▼';
+                    badgeText = `${diffPt >= 0 ? '+' : ''}${diffPt} Poin`;
+                    break;
+                case 'avg':
+                    const sum = dataArr.reduce((a, b) => a + b, 0);
+                    const avg = (sum / dataArr.length).toFixed(1);
+                    badgeClass = 'var-up';
+                    badgeIcon = '⌀';
+                    badgeText = `Rata-rata: ${avg}`;
+                    break;
+                case 'trend':
+                default:
+                    const trendDiff = last - first;
+                    const trendPct = first !== 0 ? Math.abs((trendDiff / first) * 100).toFixed(1) : '0';
+                    badgeClass = trendDiff >= 0 ? 'var-up' : 'var-down';
+                    badgeIcon = trendDiff >= 0 ? '▲' : '▼';
+                    badgeText = `${trendPct}%`;
+                    break;
+            }
+
+            return { badgeClass, badgeIcon, badgeText };
+        }
+
+        /* RENDER PREVIEW CANVAS */
         function renderPreview() {
             chartInstances.forEach(c => c.destroy()); chartInstances = [];
             const container = document.getElementById('deck-container'); container.innerHTML = '';
@@ -1014,6 +1582,10 @@
                 const slideEl = document.createElement('div'); slideEl.className = 'slide';
                 const slideBody = document.createElement('div');
                 slideBody.className = `slide-body ${slide.elements.some(e => e.type === 'cover') ? 'has-cover' : ''}`;
+                slideBody.dataset.slideIndex = sIdx;
+                slideBody.setAttribute('ondragover', 'onSlideBodyDragOver(event)');
+                slideBody.setAttribute('ondragleave', 'onSlideBodyDragLeave(event)');
+                slideBody.setAttribute('ondrop', `onSlideBodyDrop(event, ${sIdx})`);
 
                 slide.elements.forEach((elem, eIdx) => {
                     const elemWrapper = document.createElement('div');
@@ -1021,10 +1593,12 @@
                     const wClass = wVal === 'half' ? 'elem-width-half' : (wVal === 'third' ? 'elem-width-third' : (wVal === 'twothird' ? 'elem-width-twothird' : 'elem-width-full'));
                     
                     elemWrapper.className = `draggable-element ${wClass}`;
+                    elemWrapper.dataset.elemIndex = eIdx;
                     elemWrapper.setAttribute('draggable', 'true');
                     elemWrapper.setAttribute('ondragstart', `onElemDragStart(event, ${sIdx}, ${eIdx})`);
                     elemWrapper.setAttribute('ondragend', `onElemDragEnd(event)`);
                     elemWrapper.setAttribute('ondragover', `onElemDragOver(event)`);
+                    elemWrapper.setAttribute('ondragleave', `onElemDragLeave(event)`);
                     elemWrapper.setAttribute('ondrop', `onElemDrop(event, ${sIdx}, ${eIdx})`);
 
                     const dragBar = `<div class="elem-drag-bar">
@@ -1036,37 +1610,130 @@
                     </div>`;
 
                     const br = getRadiusCss(elem.shapeStyle);
-                    const parsedBrand = renderVarsInText(elem.brand || '', globalVars);
+                    const parsedBrand = renderVarsInText(elem.brand || '', globalVars, sIdx, eIdx, 'brand');
                     const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${parsedBrand}</span>` : '';
                     let p = '';
 
                     if (elem.type === 'cover') {
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars);
-                        const parsedTag = renderVarsInText(elem.tag || '', globalVars);
-                        const parsedSub = renderVarsInText(elem.subtitle || '', globalVars);
+                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
+                        const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
+                        const parsedSub = renderVarsInText(elem.subtitle || '', globalVars, sIdx, eIdx, 'subtitle');
                         p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}</div><div class="elem-title" style="font-size:36px; margin: 10px 0;">${parsedTitle}</div><p style="font-size:14px; color:var(--accent-gold);">${parsedSub}</p></div>`;
                     }
                     else if (elem.type === 'header') {
-                        const parsedTitle = renderVarsInText(elem.title || '', globalVars);
-                        const parsedTag = renderVarsInText(elem.tag || '', globalVars);
+                        const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
+                        const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
                         p = `<div style="border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px;"><div style="display:flex; gap:6px;">${pill}<span class="elem-tag">${parsedTag}</span></div><div class="elem-title" style="margin-top:4px;">${parsedTitle}</div></div>`;
                     }
                     else if (elem.type === 'text') {
-                        const parsedContent = renderVarsInText(elem.content || '', globalVars);
+                        const parsedContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
                         const styleCls = elem.style === 'hero' ? 't-hero' : (elem.style === 'judul' ? 't-judul' : (elem.style === 'subjudul' ? 't-subjudul' : 't-paragraf'));
                         const textHTML = `<div class="${styleCls}">${parsedContent}</div>`;
                         p = elem.card ? `<div class="text-card-wrap" style="border-radius:${br};">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}${textHTML}</div>` : `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}${textHTML}</div>`;
+                    }
+                    else if (elem.type === 'columns') {
+                        const cols = elem.cols || [];
+                        const style = elem.colStyle || 'accent';
+                        const cardsHTML = cols.map((col, cIdx) => {
+                            const pTitle = renderVarsInText(col.title || '', globalVars, sIdx, eIdx, 'title', 'col', cIdx);
+                            const pContent = renderVarsInText(col.content || '', globalVars, sIdx, eIdx, 'content', 'col', cIdx);
+                            let cardCls = 'col-card--accent';
+                            if (style === 'plain') cardCls = 'col-card--plain';
+                            else if (style === 'minimal') cardCls = 'col-card--minimal';
+                            else if (style === 'numbered') cardCls = 'col-card--numbered';
+
+                            const numBadge = style === 'numbered' ? `<div class="col-num-badge">${cIdx + 1}</div>` : '';
+
+                            return `<div class="col-item">
+                                <div class="${cardCls}" style="border-radius:${br};">
+                                    ${numBadge}
+                                    ${pTitle ? `<div style="font-weight:800; font-size:12px; color:var(--accent-gold); margin-bottom:4px;">${pTitle}</div>` : ''}
+                                    <div class="t-paragraf">${pContent}</div>
+                                </div>
+                            </div>`;
+                        }).join('');
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="col-wrap">${cardsHTML}</div></div>`;
+                    }
+                    else if (elem.type === 'kpi') {
+                        const metrics = elem.metrics || [];
+                        const cardsHTML = metrics.map((m, mIdx) => {
+                            const pLabel = renderVarsInText(m.label || '', globalVars, sIdx, eIdx, 'label', 'metric', mIdx);
+                            const pVal = renderVarsInText(m.value || '', globalVars, sIdx, eIdx, 'value', 'metric', mIdx);
+                            return `<div class="kpi-card" style="border-radius:${br};">
+                                <div class="elem-tag">${pLabel}</div>
+                                <div class="kpi-value">${pVal}</div>
+                            </div>`;
+                        }).join('');
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${cardsHTML}</div></div>`;
+                    }
+                    else if (elem.type === 'table') {
+                        const headers = (resolveVarPlain(elem.headers || '', globalVars) || '').split(',').map(h => h.trim()).filter(Boolean);
+                        const rowsRaw = (resolveVarPlain(elem.rowsData || '', globalVars) || '').split('\n').filter(Boolean);
+                        
+                        const thHTML = headers.map(h => `<th style="padding:8px; border-bottom:1px solid var(--border-obsidian); color:var(--accent-gold); font-size:10px; text-transform:uppercase; text-align:left;">${renderVarsInText(h, globalVars, sIdx, eIdx, 'headers')}</th>`).join('');
+                        const trHTML = rowsRaw.map(r => {
+                            const cells = r.split(',').map(c => c.trim());
+                            const tdHTML = cells.map(c => `<td style="padding:8px; border-bottom:1px dashed var(--border-obsidian); font-size:11px; color:#C0C2C0;">${renderVarsInText(c, globalVars, sIdx, eIdx, 'rowsData')}</td>`).join('');
+                            return `<tr>${tdHTML}</tr>`;
+                        }).join('');
+
+                        p = `<div style="width:100%; overflow-x:auto;">
+                            ${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
+                            <table style="width:100%; border-collapse:collapse; background:rgba(22,24,22,0.6); border:1px solid var(--border-obsidian); border-radius:${br}; overflow:hidden;">
+                                ${headers.length ? `<thead><tr style="background:var(--surface-dark);">${thHTML}</tr></thead>` : ''}
+                                <tbody>${trHTML}</tbody>
+                            </table>
+                        </div>`;
+                    }
+                    else if (elem.type === 'social') {
+                        const links = elem.socialLinks || [];
+                        const cardsHTML = links.map((l, lIdx) => {
+                            const pPlat = renderVarsInText(l.platform || 'Sosmed', globalVars, sIdx, eIdx, 'platform', 'social', lIdx);
+                            const pHandle = renderVarsInText(l.handle || '', globalVars, sIdx, eIdx, 'handle', 'social', lIdx);
+                            const pStat = renderVarsInText(l.stat || '', globalVars, sIdx, eIdx, 'stat', 'social', lIdx);
+                            return `<div class="social-card" style="border-radius:${br};">
+                                <div class="elem-tag">${pPlat}</div>
+                                <div class="social-card-val">${pHandle}</div>
+                                ${pStat ? `<div style="font-size:10px; color:var(--accent-gold); font-weight:700;">${pStat}</div>` : ''}
+                            </div>`;
+                        }).join('');
+                        p = `<div>${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${cardsHTML}</div></div>`;
+                    }
+                    else if (elem.type === 'breakdown') {
+                        const pTitle = renderVarsInText(elem.title || 'WAWASAN PENONTON', globalVars, sIdx, eIdx, 'title');
+                        const rowsRaw = (resolveVarPlain(elem.rowsData || '', globalVars) || '').split('\n').filter(Boolean);
+                        const rowsHTML = rowsRaw.map(r => {
+                            const parts = r.split(',');
+                            const label = parts[0] ? parts[0].trim() : '';
+                            const val = parts[1] ? parts[1].trim() : '';
+                            return `<div class="breakdown-row"><span>${renderVarsInText(label, globalVars, sIdx, eIdx, 'rowsData')}</span><strong style="color:var(--accent-gold);">${renderVarsInText(val, globalVars, sIdx, eIdx, 'rowsData')}</strong></div>`;
+                        }).join('');
+
+                        p = `<div style="background:rgba(22,24,22,0.8); border:1px solid var(--border-obsidian); padding:12px; border-radius:${br}; width:100%;">
+                            ${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}
+                            <div class="elem-tag" style="margin-bottom:8px;">${pTitle}</div>
+                            <div>${rowsHTML}</div>
+                        </div>`;
+                    }
+                    else if (elem.type === 'wawasan') {
+                        const pTitle = renderVarsInText(elem.title || 'CATATAN', globalVars, sIdx, eIdx, 'title');
+                        const pContent = renderVarsInText(elem.content || '', globalVars, sIdx, eIdx, 'content');
+                        p = `<div class="wawasan-box" style="border-radius:${br};">
+                            ${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}
+                            <div style="font-weight:800; color:var(--accent-gold); font-size:12px; letter-spacing:1px; text-transform:uppercase;">${pTitle}</div>
+                            <div style="line-height:1.5; white-space:pre-line;">${pContent}</div>
+                        </div>`;
                     }
                     else if (elem.type === 'image') {
                         p = `<div>${pill ? `<div style="margin-bottom:4px;">${pill}</div>` : ''}${elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius: ${br}; width: 100%;">` : '<div style="border: 1px dashed var(--border-obsidian); padding: 20px; text-align: center;">[ Gambar / Logo Kosong ]</div>'}</div>`;
                     }
                     else if (elem.type === 'comparison') {
-                        const parsedLabel = renderVarsInText(elem.label || '', globalVars);
+                        const parsedLabel = renderVarsInText(elem.label || '', globalVars, sIdx, eIdx, 'label');
                         if (elem.compareMode === 'boolean') {
                             const isTrue = elem.boolVal === 'true';
                             const badgeCls = isTrue ? 'var-up' : 'var-down';
                             const icon = isTrue ? '✓' : '✕';
-                            const parsedBoolText = renderVarsInText(elem.boolText || '', globalVars);
+                            const parsedBoolText = renderVarsInText(elem.boolText || '', globalVars, sIdx, eIdx, 'boolText');
                             p = `<div class="compare-box" style="border-radius:${br};">
                                 <div><div class="elem-tag">${elem.label ? parsedLabel : 'STATUS BOOLEAN'}</div><div class="compare-num">${elem.boolText ? parsedBoolText : (isTrue ? 'Aktif' : 'Non-Aktif')}</div></div>
                                 <div style="text-align:right;"><span class="var-badge ${badgeCls}">${icon} ${isTrue ? 'TRUE' : 'FALSE'}</span></div>
@@ -1090,20 +1757,34 @@
                     }
                     else if (elem.type === 'chart') {
                         const chartId = `chart-${sIdx}-${eIdx}`;
-                        p = `<div style="display:flex; flex-direction:column; height:100%; width:100%;"><div style="background:var(--card-obsidian); padding:12px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:200px; width:100%;">
-                            <div style="position:relative; width:100%; height:160px;"><canvas id="${chartId}"></canvas></div>
-                        </div></div>`;
                         const labelsResolved = resolveVarPlain(elem.labels || '', globalVars) || 'A,B,C';
                         const dataResolved = resolveVarPlain(elem.data || '', globalVars) || '10,20,30';
+                        const nums = dataResolved.split(',').map(v => parseFloat(v.trim())).filter(v => !Number.isNaN(v));
+                        const { badgeClass, badgeIcon, badgeText } = computeChartBadge(elem.badgeType || 'trend', nums);
+
+                        p = `<div style="display:flex; flex-direction:column; height:100%; width:100%;">
+                            <div style="background:rgba(22, 24, 22, 0.8); padding:14px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:220px; width:100%; display:flex; flex-direction:column; gap:10px;">
+                                ${pill ? `<div>${pill}</div>` : ''}
+                                <div style="position:relative; width:100%; flex:1; min-height:160px;">
+                                    <canvas id="${chartId}"></canvas>
+                                </div>
+                                ${(elem.title || elem.subtitle) ? `
+                                    <div style="text-align:center; width:100%; border-top:1px dashed var(--border-obsidian); padding-top:6px; margin-top:2px;">
+                                        ${elem.title ? `<div style="font-size:11px; font-weight:800; color:var(--text-white); letter-spacing:0.5px; text-transform:uppercase;">${renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title')}</div>` : ''}
+                                        ${elem.subtitle ? `<div style="font-size:9px; color:var(--accent-gold); font-weight:600; margin-top:1px;">${renderVarsInText(elem.subtitle || '', globalVars, sIdx, eIdx, 'subtitle')}</div>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>`;
+
                         chartsToRender.push({ id: chartId, type: elem.chartType || 'bar', labels: labelsResolved, data: dataResolved });
                     }
-
                     elemWrapper.innerHTML = dragBar + p; 
                     slideBody.appendChild(elemWrapper);
                 });
 
                 slideEl.appendChild(slideBody);
-                const parsedFooter = renderVarsInText(slide.footerLeft || '', globalVars);
+                const parsedFooter = renderVarsInText(slide.footerLeft || '', globalVars, sIdx, null, 'footerLeft');
                 slideEl.innerHTML += `<div class="slide-footer"><span>${parsedFooter}</span><span class="slide-num">${sIdx + 1 < 10 ? '0' + (sIdx + 1) : sIdx + 1}</span></div>`;
                 container.appendChild(slideEl);
             });
@@ -1113,15 +1794,134 @@
                     const canvas = document.getElementById(c.id);
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
-                        const dataNums = c.data.split(',').map(Number);
-                        const newChart = new Chart(ctx, {
+                        const dataNums = c.data.split(',').map(v => parseFloat(v.trim())).filter(v => !Number.isNaN(v));
+                        const labelsArr = c.labels.split(',').map(l => l.trim());
+                        const maxVal = Math.max(...dataNums, 0);
+
+                        /* PALET + OPACITY PERSIS SISTEM INDEX (7) */
+                        const bgColors = dataNums.map(v => {
+                            if (maxVal === 0) return 'rgba(196, 154, 87, 0.5)';
+                            const ratio = v / maxVal;
+                            const opacity = Math.max(0.35, ratio).toFixed(2);
+                            return `rgba(196, 154, 87, ${opacity})`;
+                        });
+
+                        const borderColors = dataNums.map(v => v === maxVal ? '#FFFFFF' : '#C49A57');
+                        const borderWidths = dataNums.map(v => v === maxVal ? 2 : 1);
+
+                        const centerLabelPlugin = {
+                            id: `malevinCenterLabels-${c.id}`,
+                            afterDatasetsDraw(chart) {
+                                const { ctx } = chart;
+                                chart.data.datasets.forEach((dataset, datasetIdx) => {
+                                    const meta = chart.getDatasetMeta(datasetIdx);
+                                    meta.data.forEach((element, index) => {
+                                        const val = dataset.data[index];
+                                        if (val === undefined || val === null || Number.isNaN(Number(val))) return;
+
+                                        let text = Number(val).toLocaleString('id-ID');
+                                        if (['pie', 'doughnut'].includes(chart.config.type)) {
+                                            const total = dataset.data.reduce((a, b) => Number(a) + Number(b), 0);
+                                            const pct = total > 0 ? ((Number(val) / total) * 100).toFixed(1) + '%' : '0%';
+                                            text = `${val} (${pct})`;
+                                        }
+
+                                        const pos = element.tooltipPosition();
+                                        ctx.save();
+                                        ctx.font = 'bold 9px var(--font-main, sans-serif)';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+
+                                        const textWidth = ctx.measureText(text).width;
+                                        const boxW = textWidth + 10;
+                                        const boxH = 15;
+
+                                        ctx.fillStyle = 'rgba(10, 11, 10, 0.85)';
+                                        ctx.strokeStyle = '#C49A57';
+                                        ctx.lineWidth = 1;
+
+                                        if (ctx.roundRect) {
+                                            ctx.beginPath();
+                                            ctx.roundRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH, 3);
+                                            ctx.fill();
+                                            ctx.stroke();
+                                        } else {
+                                            ctx.fillRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH);
+                                            ctx.strokeRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH);
+                                        }
+
+                                        ctx.fillStyle = '#FEFEFE';
+                                        ctx.fillText(text, pos.x, pos.y);
+                                        ctx.restore();
+                                    });
+                                });
+                            }
+                        };
+
+                        const isCircular = ['pie', 'doughnut'].includes(c.type);
+                        const chartConfig = {
                             type: c.type,
                             data: {
-                                labels: c.labels.split(','),
-                                datasets: [{ label: 'Data', data: dataNums, backgroundColor: '#C49A57', borderColor: '#FEFEFE', borderWidth: 1 }]
+                                labels: labelsArr,
+                                datasets: [{
+                                    label: 'Data',
+                                    data: dataNums,
+                                    backgroundColor: bgColors,
+                                    borderColor: isCircular ? '#0A0B0A' : borderColors,
+                                    borderWidth: isCircular ? 1 : borderWidths,
+                                    fill: c.type === 'line',
+                                    tension: 0.35,
+                                    pointBackgroundColor: '#FEFEFE',
+                                    pointBorderColor: '#C49A57',
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6
+                                }]
                             },
-                            options: { responsive: true, maintainAspectRatio: false, color: '#C0C2C0', plugins: { legend: { display: false } } }
-                        });
+                            plugins: [centerLabelPlugin],
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                color: '#C0C2C0',
+                                plugins: {
+                                    legend: {
+                                        display: isCircular,
+                                        position: 'right',
+                                        labels: {
+                                            color: '#C0C2C0',
+                                            font: { size: 9, family: "'Helvetica Neue', Arial, sans-serif" },
+                                            boxWidth: 10,
+                                            padding: 8
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: '#161816',
+                                        titleColor: '#C49A57',
+                                        bodyColor: '#FEFEFE',
+                                        borderColor: '#242624',
+                                        borderWidth: 1,
+                                        padding: 8,
+                                        cornerRadius: 4,
+                                        displayColors: false
+                                    }
+                                }
+                            }
+                        };
+
+                        if (!isCircular) {
+                            chartConfig.options.scales = {
+                                x: {
+                                    grid: { color: 'rgba(36, 38, 36, 0.6)', drawBorder: false },
+                                    ticks: { color: '#808280', font: { size: 9 } }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(36, 38, 36, 0.6)', drawBorder: false },
+                                    ticks: { color: '#808280', font: { size: 9 } }
+                                }
+                            };
+                        }
+
+                        const newChart = new Chart(ctx, chartConfig);
                         chartInstances.push(newChart);
                     }
                 });
@@ -1135,12 +1935,68 @@
         function addElementToSlide(sIdx, type) { 
             const ne = { type, width: 'full', brand: '', shapeStyle: 'rounded' }; 
             if (type === 'comparison') { ne.label = 'PERBANDINGAN'; ne.compareMode = 'trend'; ne.prevVal = '100'; ne.currVal = '200'; }
-            else if (type === 'chart') { ne.chartType = 'bar'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; ne.title = 'GRAFIK ANALISIS'; }
+            else if (type === 'chart') { ne.chartType = 'bar'; ne.badgeType = 'trend'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; ne.title = 'GRAFIK ANALISIS'; ne.subtitle = 'Informasi statistik terperinci.'; }
+            else if (type === 'columns') { ne.colStyle = 'accent'; ne.cols = [{ title: 'Poin 1', content: 'Deskripsi poin pertama' }, { title: 'Poin 2', content: 'Deskripsi poin kedua' }]; }
+            else if (type === 'kpi') { ne.metrics = [{ label: 'TOTAL REACH', value: '150,000' }, { label: 'ENGAGEMENT', value: '4.8%' }]; }
+            else if (type === 'table') { ne.headers = 'Metrik, Nilai, Status'; ne.rowsData = 'Reach, 150K, Normal\nEngagement, 4.8%, Naik'; }
+            else if (type === 'social') { ne.socialLinks = [{ platform: 'Instagram', handle: '@username', stat: '50K' }, { platform: 'TikTok', handle: '@username', stat: '120K' }]; }
+            else if (type === 'breakdown') { ne.title = 'WAWASAN PENONTON'; ne.rowsData = 'Pria, 65%\nWanita, 35%'; }
+            else if (type === 'wawasan') { ne.title = 'CATATAN'; ne.content = 'Tuliskan poin hasil analisis atau rekomendasi di sini.'; }
+            
             slidesData[sIdx].elements.push(ne); saveToLocalStorage(); renderForms(); 
         }
 
+        function onSlideDragStart(e, sIdx) {
+            // Jangan anggap drag dari kontrol/elemen di dalam card sebagai drag slide.
+            if (e.target.closest('button, input, select, textarea, .element-box')) {
+                e.preventDefault();
+                return;
+            }
+            draggedSlideInfo = { sIdx };
+            try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'slide:' + sIdx); } catch (_) {}
+            e.currentTarget.classList.add('slide-dragging');
+        }
+
+        function onSlideDragOver(e) {
+            if (!draggedSlideInfo) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const before = e.clientY < rect.top + rect.height / 2;
+            card.classList.remove('slide-drop-before', 'slide-drop-after');
+            card.classList.add(before ? 'slide-drop-before' : 'slide-drop-after');
+            slideDropTarget = { sIdx: Number(card.dataset.slideIndex), before };
+            try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+        }
+
+        function onSlideDragLeave(e) {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('slide-drop-before', 'slide-drop-after');
+            }
+        }
+
+        function onSlideDrop(e, targetSIdx) {
+            if (!draggedSlideInfo) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const from = draggedSlideInfo.sIdx;
+            const target = slideDropTarget && slideDropTarget.sIdx === targetSIdx ? slideDropTarget : { sIdx: targetSIdx, before: true };
+            if (from !== targetSIdx) {
+                const moved = slidesData.splice(from, 1)[0];
+                let insertAt = target.before ? targetSIdx : targetSIdx + 1;
+                if (from < insertAt) insertAt--;
+                slidesData.splice(Math.max(0, Math.min(insertAt, slidesData.length)), 0, moved);
+                saveToLocalStorage();
+                renderForms();
+            }
+            draggedSlideInfo = null;
+            slideDropTarget = null;
+            document.querySelectorAll('.slide-drop-before,.slide-drop-after,.slide-dragging').forEach(el => el.classList.remove('slide-drop-before','slide-drop-after','slide-dragging'));
+        }
+
         function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); saveToLocalStorage(); renderForms(); }
-        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'DECK STUDIO', elements: [{ type: 'header', width: 'full', title: 'SLIDE BARU' }] }); saveToLocalStorage(); renderForms(); }
+        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'MALEVIN', elements: [{ type: 'header', width: 'full', title: 'SLIDE BARU' }] }); saveToLocalStorage(); renderForms(); }
         function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); saveToLocalStorage(); renderForms(); } }
 
         /* EXPORT PDF ENGINE */
@@ -1196,13 +2052,12 @@
         function setMode(mode) {
             const ep = document.getElementById('editorPanel'), pp = document.getElementById('previewPanel'), te = document.getElementById('tabEditBtn'), tp = document.getElementById('tabPreviewBtn');
             if (mode === 'preview') { ep.style.display = 'none'; pp.style.display = 'flex'; te.classList.remove('active'); tp.classList.add('active'); autoScaleDeckContainer(); } 
-            else { ep.style.display = 'flex'; pp.style.display = 'none'; tp.classList.remove('active'); te.classList.add('active'); }
+            else { ep.style.display = 'flex'; pp.style.display = 'none'; tp.classList.remove('active'); te.classList.active; }
         }
 
         /* INITIALIZATION */
         loadFromLocalStorage();
-        renderForms(); 
-        setMode('edit');
+        renderForms();
     </script>
 </body>
 </html>
