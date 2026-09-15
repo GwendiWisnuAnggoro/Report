@@ -163,7 +163,27 @@
     .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%); }
     
     .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; gap: 16px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
-    .slide-body.has-cover { justify-content: center; align-items: flex-start; }
+    
+    /* COVER CONTAINER & FLEXBOX MODIFIKASI TERPUSAT VERTIKAL */
+    .slide-body.has-cover { 
+        justify-content: center; 
+        align-items: center; 
+        align-content: center; 
+        height: 100%; 
+        min-height: 380px; 
+    }
+
+    .cover-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 20px 0;
+        box-sizing: border-box;
+        transition: transform 0.2s ease;
+    }
+
     .draggable-element { box-sizing: border-box; flex: 0 0 auto; min-width: 0; }
     .slide-body .elem-width-half { flex-basis: calc(50% - 8px); }
     .slide-body .elem-width-third { flex-basis: calc(33.333% - 10.66px); }
@@ -185,8 +205,7 @@
         box-shadow: inset 0 0 24px rgba(196, 154, 87, 0.05);
     }
 
-
-    /* GLOW INDICATOR DRAG AND DROP (TOP/BOTTOM/LEFT/RIGHT) */
+    /* GLOW INDICATOR DRAG AND DROP */
     .draggable-element.drag-over-top { border-top: 3px solid var(--accent-gold) !important; box-shadow: 0 -8px 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-bottom { border-bottom: 3px solid var(--accent-gold) !important; box-shadow: 0 8px 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-left { border-left: 3px solid var(--accent-gold) !important; box-shadow: -8px 0 15px var(--accent-gold-glow); }
@@ -236,7 +255,7 @@
     .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
     .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
 
-    /* TREND BADGES (UP / DOWN HIGHLIGHT) */
+    /* TREND BADGES */
     .var-badge { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 9px; padding: 2px 6px; border-radius: 12px; white-space: nowrap; cursor: pointer; user-select: none; }
     .var-up { color: var(--positive); background: rgba(76, 175, 122, 0.15); border: 1px solid rgba(76, 175, 122, 0.3); }
     .var-up:hover { background: rgba(76, 175, 122, 0.3); }
@@ -244,7 +263,7 @@
     .var-down:hover { background: rgba(229, 83, 83, 0.3); }
 
     /* INTERACTIVE TREND BADGE ACTION POPUP */
-    #badgeActionPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 6px; border-radius: 6px; z-index: 10002; box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: none; flex-direction: column; gap: 4px; }
+    #badgeActionPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 6px; border-radius: 6px; z-index: 10002; box-shadow: 0 10px 25px rgba(0,0,0,0.8); flex-direction: column; gap: 4px; }
 
     .compare-box { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
     .compare-num { font-size: 20px; font-weight: 800; color: var(--text-white); }
@@ -376,8 +395,7 @@
                 id: 1,
                 footerLeft: 'MALEVIN',
                 elements: [
-                    { type: 'header', width: 'full', tag: 'PRESENTASI', title: 'Judul Slide Utama', shapeStyle: 'rounded' },
-                    { type: 'text', width: 'full', style: 'paragraf', content: 'Ketik {{ di kolom mana saja untuk memanggil variabel, atau blok teks lalu klik opsi yang ada. Cobalah kenaikan [up:100%] atau penurunan [down:15%].', card: false, shapeStyle: 'rounded' }
+                    { type: 'cover', width: 'full', tag: 'PRESENTASI', title: 'Judul Cover Utama', subtitle: 'Sub-judul Cover Malevin Studio', align: 'left', scale: 1 }
                 ]
             }
         ];
@@ -942,7 +960,6 @@
                 return item.value;
             });
 
-            /* PARSER TREND HIGHLIGHT NAIK & TURUN KUSTOM */
             parsed = parsed.replace(/\[(up|down):([^\]]+)\]/g, (match, dir, val) => {
                 const cls = dir === 'up' ? 'var-up' : 'var-down';
                 const arrow = dir === 'up' ? '▲' : '▼';
@@ -953,7 +970,6 @@
             return parsed;
         }
 
-        /* POPUP EVENT KLIK UNTUK TREND BADGE */
         function openTrendBadgeUI(e, el) {
             e.stopPropagation();
             activeBadgeTarget = {
@@ -1031,7 +1047,6 @@
             setTargetStringValue(activeBadgeTarget, text);
         }
 
-        /* HELPER SUB-ITEMS ACTIONS */
         function addKpiMetric(sIdx, eIdx) {
             if (!slidesData[sIdx].elements[eIdx].metrics) slidesData[sIdx].elements[eIdx].metrics = [];
             slidesData[sIdx].elements[eIdx].metrics.push({ label: 'METRIK BARU', value: '0' });
@@ -1060,6 +1075,62 @@
             saveToLocalStorage(); renderForms();
         }
 
+        function addSlide() {
+            slidesData.push({
+                id: slidesData.length + 1,
+                footerLeft: 'MALEVIN',
+                elements: [
+                    { type: 'header', width: 'full', tag: 'HEADER', title: 'Judul Slide Baru', shapeStyle: 'rounded' }
+                ]
+            });
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        function deleteSlide(sIdx) {
+            if (slidesData.length <= 1) { alert('Minimal harus ada 1 slide.'); return; }
+            slidesData.splice(sIdx, 1);
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        function addElementToSlide(sIdx, type) {
+            const newElem = { type, width: 'full', shapeStyle: 'rounded' };
+            if (type === 'cover') { 
+                newElem.tag = 'PRESENTASI'; 
+                newElem.title = 'Judul Cover Presentasi'; 
+                newElem.subtitle = 'Sub-judul Cover malevin';
+                newElem.align = 'left';
+                newElem.scale = 1;
+            }
+            else if (type === 'header') { newElem.tag = 'HEADER'; newElem.title = 'Judul Header Baru'; }
+            else if (type === 'text') { newElem.style = 'paragraf'; newElem.content = 'Tulis teks penjelasan di sini...'; newElem.card = false; }
+            else if (type === 'columns') { newElem.colStyle = 'accent'; newElem.cols = [{ title: 'Kolom 1', content: 'Keterangan ringkas...' }]; }
+            else if (type === 'kpi') { newElem.metrics = [{ label: 'METRIK 1', value: '100%' }]; }
+            else if (type === 'table') { newElem.headers = 'Metrik, Nilai'; newElem.rowsData = 'Target, 100%\nCapaian, 95%'; }
+            else if (type === 'social') { newElem.socialLinks = [{ platform: 'Instagram', handle: '@malevin', stat: '10K' }]; }
+            else if (type === 'breakdown') { newElem.title = 'WAWASAN AUDIENS'; newElem.rowsData = 'Kategori A, 60%\nKategori B, 40%'; }
+            else if (type === 'wawasan') { newElem.title = 'CATATAN ANALISIS'; newElem.content = 'Poin ringkasan analisis...'; }
+            else if (type === 'chart') { newElem.title = 'Grafik Analisis'; newElem.subtitle = 'Data Penjualan'; newElem.chartType = 'bar'; newElem.labels = 'Jan, Feb, Mar'; newElem.data = '10, 20, 30'; newElem.badgeType = 'trend'; }
+            else if (type === 'comparison') { newElem.label = 'PERBANDINGAN'; newElem.compareMode = 'trend'; newElem.prevVal = '100'; newElem.currVal = '150'; }
+
+            slidesData[sIdx].elements.push(newElem);
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        function deleteElem(sIdx, eIdx) {
+            slidesData[sIdx].elements.splice(eIdx, 1);
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        function updateElem(sIdx, eIdx, key, val) {
+            slidesData[sIdx].elements[eIdx][key] = val;
+            saveToLocalStorage();
+            renderPreview();
+        }
+
         /* RENDER FORM EDITOR COMPLETE */
         function renderForms() {
             renderCustomVarsUI();
@@ -1071,10 +1142,6 @@
                 card.className = 'slide-accordion';
                 card.setAttribute('draggable', 'true');
                 card.dataset.slideIndex = sIdx;
-                card.setAttribute('ondragstart', `onSlideDragStart(event, ${sIdx})`);
-                card.setAttribute('ondragover', 'onSlideDragOver(event)');
-                card.setAttribute('ondragleave', 'onSlideDragLeave(event)');
-                card.setAttribute('ondrop', `onSlideDrop(event, ${sIdx})`);
                 let elementsHTML = '';
 
                 slide.elements.forEach((elem, eIdx) => {
@@ -1093,9 +1160,34 @@
                     
                     let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / Badge ID</label>${varInputHTML('elem', sIdx, eIdx, 'brand', elem.brand, '', false)}</div>`;
 
-                    if (elem.type === 'cover' || elem.type === 'header') { 
-                        fields += `<div class="form-group"><label>Tag Header</label>${varInputHTML('elem', sIdx, eIdx, 'tag', elem.tag, '', false)}</div><div class="form-group"><label>Judul</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>`; 
-                        if(elem.type==='cover') fields += `<div class="form-group"><label>Sub-judul</label>${varInputHTML('elem', sIdx, eIdx, 'subtitle', elem.subtitle, '', false)}</div>`;
+                    if (elem.type === 'cover') {
+                        const coverAlign = elem.align || 'left';
+                        const coverScale = elem.scale || 1;
+                        fields += `
+                        <div class="two-col-form">
+                            <div class="form-group"><label>Alignment Teks Cover</label>
+                                <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'align', this.value)">
+                                    <option value="left" ${coverAlign === 'left' ? 'selected' : ''}>Rata Kiri (Left)</option>
+                                    <option value="center" ${coverAlign === 'center' ? 'selected' : ''}>Rata Tengah (Center)</option>
+                                    <option value="right" ${coverAlign === 'right' ? 'selected' : ''}>Rata Kanan (Right)</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Skala Ukuran (Scale)</label>
+                                <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'scale', parseFloat(this.value))">
+                                    <option value="0.8" ${coverScale === 0.8 ? 'selected' : ''}>Kecil (80%)</option>
+                                    <option value="1" ${coverScale === 1 ? 'selected' : ''}>Normal (100%)</option>
+                                    <option value="1.1" ${coverScale === 1.1 ? 'selected' : ''}>Besar (110%)</option>
+                                    <option value="1.25" ${coverScale === 1.25 ? 'selected' : ''}>Sangat Besar (125%)</option>
+                                    <option value="1.4" ${coverScale === 1.4 ? 'selected' : ''}>Extra Besar (140%)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>Tag Header Cover</label>${varInputHTML('elem', sIdx, eIdx, 'tag', elem.tag, '', false)}</div>
+                        <div class="form-group"><label>Judul Cover</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>
+                        <div class="form-group"><label>Sub-judul Cover</label>${varInputHTML('elem', sIdx, eIdx, 'subtitle', elem.subtitle, '', false)}</div>`;
+                    }
+                    else if (elem.type === 'header') { 
+                        fields += `<div class="form-group"><label>Tag Header</label>${varInputHTML('elem', sIdx, eIdx, 'tag', elem.tag, '', false)}</div><div class="form-group"><label>Judul Header</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>`; 
                     } 
                     else if (elem.type === 'text') { 
                         fields += `
@@ -1219,12 +1311,12 @@
                     }
                     else if (elem.type === 'chart') { 
                         fields += `
-                            <div class="form-group"><label>Judul Utama Grafik (Bawah/Atas Canvas)</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>
+                            <div class="form-group"><label>Judul Utama Grafik</label>${varInputHTML('elem', sIdx, eIdx, 'title', elem.title, '', false)}</div>
                             <div class="form-group"><label>Sub-Judul / Keterangan Singkat</label>${varInputHTML('elem', sIdx, eIdx, 'subtitle', elem.subtitle, '', false)}</div>
                             <div class="two-col-form">
                                 <div class="form-group"><label>Tipe Grafik</label>
                                     <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'chartType', this.value)">
-                                        <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar (Gradient Block & Opacity Contras)</option>
+                                        <option value="bar" ${elem.chartType === 'bar' ? 'selected' : ''}>Bar Diagram</option>
                                         <option value="line" ${elem.chartType === 'line' ? 'selected' : ''}>Line Chart</option>
                                         <option value="pie" ${elem.chartType === 'pie' ? 'selected' : ''}>Pie Diagram</option>
                                         <option value="doughnut" ${elem.chartType === 'doughnut' ? 'selected' : ''}>Doughnut Diagram</option>
@@ -1236,16 +1328,11 @@
                                         <option value="compare" ${elem.badgeType === 'compare' ? 'selected' : ''}>Perbandingan Pertumbuhan</option>
                                         <option value="percentage" ${elem.badgeType === 'percentage' ? 'selected' : ''}>Persentase Capaian (%)</option>
                                         <option value="target" ${elem.badgeType === 'target' ? 'selected' : ''}>Indikator Target</option>
-                                        <option value="up" ${elem.badgeType === 'up' ? 'selected' : ''}>Status Kenaikan Positive</option>
-                                        <option value="down" ${elem.badgeType === 'down' ? 'selected' : ''}>Status Penurunan Negative</option>
-                                        <option value="point" ${elem.badgeType === 'point' ? 'selected' : ''}>Perubahan Poin / Selisih</option>
-                                        <option value="avg" ${elem.badgeType === 'avg' ? 'selected' : ''}>Rata-Rata Berjalan</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group"><label>Label X (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'labels', elem.labels, 'Jan, Feb, Mar', false)}</div>
-                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>
-                            <div class="form-group"><label>Header / Sub-Informasi Bawah Grafik</label>${varInputHTML('elem', sIdx, eIdx, 'subtitle', elem.subtitle, 'Rincian performa analisis bulanan...', false)}</div>`; 
+                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>`; 
                     }
 
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
@@ -1287,8 +1374,6 @@
             } 
         }
 
-        /* DRAG AND DROP IN CANVAS PREVIEW WITH GLOW & DIRECTIONAL LAYOUT (TOP/BOTTOM/LEFT/RIGHT) */
-        /* DRAG & DROP: ATAS/BAWAH + KIRI/KANAN + RUANG KOSONG */
         function clearDragIndicators() {
             document.querySelectorAll('.draggable-element').forEach(el => {
                 el.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
@@ -1317,8 +1402,6 @@
             const y = e.clientY - rect.top;
             const w = Math.max(1, rect.width);
             const h = Math.max(1, rect.height);
-            // Prioritaskan sisi horizontal. Garis kiri/kanan sekarang benar-benar
-            // menjadi target drop, bukan hanya indikator visual.
             const horizontalZone = Math.max(55, Math.min(w * 0.38, 120));
             if (x <= horizontalZone) return 'left';
             if (x >= w - horizontalZone) return 'right';
@@ -1396,8 +1479,6 @@
             const target = elements[targetIndex];
             if (!moved || !target) return;
 
-            /* Kalau ruang baris kosong memungkinkan, dua elemen berbagi baris.
-               Jika target sudah punya kolom, ukuran mengikuti kolom tersebut. */
             const targetWidth = target.width || 'full';
             if (targetWidth === 'third') {
                 moved.width = 'third';
@@ -1463,8 +1544,6 @@
                 draggedElemInfo = null; dragHoverInfo = null; clearDragIndicators(); return;
             }
 
-            // Gunakan posisi yang terakhir terlihat saat dragover. Ini menghindari
-            // browser mengubah target menjadi area bawah saat mouse dilepas.
             const targetEl = e.currentTarget;
             const rect = targetEl.getBoundingClientRect();
             const side = (dragHoverInfo && dragHoverInfo.sIdx === targetSIdx && dragHoverInfo.eIdx === targetEIdx)
@@ -1474,7 +1553,6 @@
             const targetRef = elements[targetEIdx];
 
             if (side === 'left' || side === 'right') {
-                // Side-by-side: selalu paksa dua item masuk satu baris.
                 setAdaptiveSideWidths(elements, srcEIdx, targetEIdx, side);
             }
 
@@ -1498,7 +1576,6 @@
             renderForms();
         }
 
-        /* HELPER KALKULASI BADGE INDIKATOR GRAFIK SAMA PERSIS DENGAN INDEX (7) */
         function computeChartBadge(type, dataArr) {
             if (!dataArr || dataArr.length === 0 || dataArr.some(isNaN)) {
                 return { badgeClass: 'var-up', badgeIcon: '▲', badgeText: '0%' };
@@ -1534,29 +1611,6 @@
                     badgeIcon = isMet ? '✓' : '✕';
                     badgeText = isMet ? 'Target Tercapai' : 'Di Bawah Target';
                     break;
-                case 'up':
-                    badgeClass = 'var-up';
-                    badgeIcon = '▲';
-                    badgeText = `+${last} Kenaikan`;
-                    break;
-                case 'down':
-                    badgeClass = 'var-down';
-                    badgeIcon = '▼';
-                    badgeText = `-${last} Penurunan`;
-                    break;
-                case 'point':
-                    const diffPt = last - first;
-                    badgeClass = diffPt >= 0 ? 'var-up' : 'var-down';
-                    badgeIcon = diffPt >= 0 ? '▲' : '▼';
-                    badgeText = `${diffPt >= 0 ? '+' : ''}${diffPt} Poin`;
-                    break;
-                case 'avg':
-                    const sum = dataArr.reduce((a, b) => a + b, 0);
-                    const avg = (sum / dataArr.length).toFixed(1);
-                    badgeClass = 'var-up';
-                    badgeIcon = '⌀';
-                    badgeText = `Rata-rata: ${avg}`;
-                    break;
                 case 'trend':
                 default:
                     const trendDiff = last - first;
@@ -1581,7 +1635,8 @@
             slidesData.forEach((slide, sIdx) => {
                 const slideEl = document.createElement('div'); slideEl.className = 'slide';
                 const slideBody = document.createElement('div');
-                slideBody.className = `slide-body ${slide.elements.some(e => e.type === 'cover') ? 'has-cover' : ''}`;
+                const hasCover = slide.elements.some(e => e.type === 'cover');
+                slideBody.className = `slide-body ${hasCover ? 'has-cover' : ''}`;
                 slideBody.dataset.slideIndex = sIdx;
                 slideBody.setAttribute('ondragover', 'onSlideBodyDragOver(event)');
                 slideBody.setAttribute('ondragleave', 'onSlideBodyDragLeave(event)');
@@ -1614,11 +1669,25 @@
                     const pill = elem.brand ? `<span class="elem-brand-pill" style="border-radius: ${br};">${parsedBrand}</span>` : '';
                     let p = '';
 
+                    /* IMPLEMENTASI COVER DENGAN ALIGNMENT & SCALING KUSTOM */
                     if (elem.type === 'cover') {
                         const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
                         const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
                         const parsedSub = renderVarsInText(elem.subtitle || '', globalVars, sIdx, eIdx, 'subtitle');
-                        p = `<div style="width: 100%; padding: 20px 0;"><div style="display:flex; gap:6px; margin-bottom:12px;">${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}</div><div class="elem-title" style="font-size:36px; margin: 10px 0;">${parsedTitle}</div><p style="font-size:14px; color:var(--accent-gold);">${parsedSub}</p></div>`;
+                        
+                        const alignVal = elem.align || 'left';
+                        const scaleVal = elem.scale || 1;
+                        let flexAlign = 'flex-start';
+                        if (alignVal === 'center') flexAlign = 'center';
+                        else if (alignVal === 'right') flexAlign = 'flex-end';
+
+                        p = `<div class="cover-container" style="text-align: ${alignVal}; align-items: ${flexAlign}; transform: scale(${scaleVal}); transform-origin: center ${alignVal};">
+                                ${(pill || elem.tag) ? `<div style="display:flex; justify-content:${flexAlign}; gap:6px; margin-bottom:12px; width:100%;">
+                                    ${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}
+                                </div>` : ''}
+                                <div class="elem-title" style="font-size:38px; margin: 10px 0; width:100%;">${parsedTitle}</div>
+                                <p style="font-size:15px; color:var(--accent-gold); width:100%;">${parsedSub}</p>
+                             </div>`;
                     }
                     else if (elem.type === 'header') {
                         const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
@@ -1759,8 +1828,6 @@
                         const chartId = `chart-${sIdx}-${eIdx}`;
                         const labelsResolved = resolveVarPlain(elem.labels || '', globalVars) || 'A,B,C';
                         const dataResolved = resolveVarPlain(elem.data || '', globalVars) || '10,20,30';
-                        const nums = dataResolved.split(',').map(v => parseFloat(v.trim())).filter(v => !Number.isNaN(v));
-                        const { badgeClass, badgeIcon, badgeText } = computeChartBadge(elem.badgeType || 'trend', nums);
 
                         p = `<div style="display:flex; flex-direction:column; height:100%; width:100%;">
                             <div style="background:rgba(22, 24, 22, 0.8); padding:14px; border-radius:${br}; border:1px solid var(--border-obsidian); flex:1; min-height:220px; width:100%; display:flex; flex-direction:column; gap:10px;">
@@ -1796,266 +1863,87 @@
                         const ctx = canvas.getContext('2d');
                         const dataNums = c.data.split(',').map(v => parseFloat(v.trim())).filter(v => !Number.isNaN(v));
                         const labelsArr = c.labels.split(',').map(l => l.trim());
-                        const maxVal = Math.max(...dataNums, 0);
-
-                        /* PALET + OPACITY PERSIS SISTEM INDEX (7) */
-                        const bgColors = dataNums.map(v => {
-                            if (maxVal === 0) return 'rgba(196, 154, 87, 0.5)';
-                            const ratio = v / maxVal;
-                            const opacity = Math.max(0.35, ratio).toFixed(2);
-                            return `rgba(196, 154, 87, ${opacity})`;
-                        });
-
-                        const borderColors = dataNums.map(v => v === maxVal ? '#FFFFFF' : '#C49A57');
-                        const borderWidths = dataNums.map(v => v === maxVal ? 2 : 1);
-
-                        const centerLabelPlugin = {
-                            id: `malevinCenterLabels-${c.id}`,
-                            afterDatasetsDraw(chart) {
-                                const { ctx } = chart;
-                                chart.data.datasets.forEach((dataset, datasetIdx) => {
-                                    const meta = chart.getDatasetMeta(datasetIdx);
-                                    meta.data.forEach((element, index) => {
-                                        const val = dataset.data[index];
-                                        if (val === undefined || val === null || Number.isNaN(Number(val))) return;
-
-                                        let text = Number(val).toLocaleString('id-ID');
-                                        if (['pie', 'doughnut'].includes(chart.config.type)) {
-                                            const total = dataset.data.reduce((a, b) => Number(a) + Number(b), 0);
-                                            const pct = total > 0 ? ((Number(val) / total) * 100).toFixed(1) + '%' : '0%';
-                                            text = `${val} (${pct})`;
-                                        }
-
-                                        const pos = element.tooltipPosition();
-                                        ctx.save();
-                                        ctx.font = 'bold 9px var(--font-main, sans-serif)';
-                                        ctx.textAlign = 'center';
-                                        ctx.textBaseline = 'middle';
-
-                                        const textWidth = ctx.measureText(text).width;
-                                        const boxW = textWidth + 10;
-                                        const boxH = 15;
-
-                                        ctx.fillStyle = 'rgba(10, 11, 10, 0.85)';
-                                        ctx.strokeStyle = '#C49A57';
-                                        ctx.lineWidth = 1;
-
-                                        if (ctx.roundRect) {
-                                            ctx.beginPath();
-                                            ctx.roundRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH, 3);
-                                            ctx.fill();
-                                            ctx.stroke();
-                                        } else {
-                                            ctx.fillRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH);
-                                            ctx.strokeRect(pos.x - boxW / 2, pos.y - boxH / 2, boxW, boxH);
-                                        }
-
-                                        ctx.fillStyle = '#FEFEFE';
-                                        ctx.fillText(text, pos.x, pos.y);
-                                        ctx.restore();
-                                    });
-                                });
-                            }
-                        };
-
-                        const isCircular = ['pie', 'doughnut'].includes(c.type);
-                        const chartConfig = {
+                        new Chart(ctx, {
                             type: c.type,
                             data: {
                                 labels: labelsArr,
                                 datasets: [{
-                                    label: 'Data',
+                                    label: 'Nilai',
                                     data: dataNums,
-                                    backgroundColor: bgColors,
-                                    borderColor: isCircular ? '#0A0B0A' : borderColors,
-                                    borderWidth: isCircular ? 1 : borderWidths,
-                                    fill: c.type === 'line',
-                                    tension: 0.35,
-                                    pointBackgroundColor: '#FEFEFE',
-                                    pointBorderColor: '#C49A57',
-                                    pointRadius: 4,
-                                    pointHoverRadius: 6
+                                    backgroundColor: 'rgba(196, 154, 87, 0.4)',
+                                    borderColor: '#C49A57',
+                                    borderWidth: 2
                                 }]
                             },
-                            plugins: [centerLabelPlugin],
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                color: '#C0C2C0',
-                                plugins: {
-                                    legend: {
-                                        display: isCircular,
-                                        position: 'right',
-                                        labels: {
-                                            color: '#C0C2C0',
-                                            font: { size: 9, family: "'Helvetica Neue', Arial, sans-serif" },
-                                            boxWidth: 10,
-                                            padding: 8
-                                        }
-                                    },
-                                    tooltip: {
-                                        backgroundColor: '#161816',
-                                        titleColor: '#C49A57',
-                                        bodyColor: '#FEFEFE',
-                                        borderColor: '#242624',
-                                        borderWidth: 1,
-                                        padding: 8,
-                                        cornerRadius: 4,
-                                        displayColors: false
-                                    }
-                                }
-                            }
-                        };
-
-                        if (!isCircular) {
-                            chartConfig.options.scales = {
-                                x: {
-                                    grid: { color: 'rgba(36, 38, 36, 0.6)', drawBorder: false },
-                                    ticks: { color: '#808280', font: { size: 9 } }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: 'rgba(36, 38, 36, 0.6)', drawBorder: false },
-                                    ticks: { color: '#808280', font: { size: 9 } }
-                                }
-                            };
-                        }
-
-                        const newChart = new Chart(ctx, chartConfig);
-                        chartInstances.push(newChart);
+                            options: { responsive: true, maintainAspectRatio: false }
+                        });
                     }
                 });
                 autoScaleDeckContainer();
             }, 50);
         }
 
-        /* FORM MANAGEMENT ACTIONS */
-        function updateElem(sIdx, eIdx, k, v) { slidesData[sIdx].elements[eIdx][k] = v; saveToLocalStorage(); renderPreview(); }
+        function setMode(mode) {
+            const tabEditBtn = document.getElementById('tabEditBtn');
+            const tabPreviewBtn = document.getElementById('tabPreviewBtn');
+            const editorPanel = document.getElementById('editorPanel');
+            const previewPanel = document.getElementById('previewPanel');
 
-        function addElementToSlide(sIdx, type) { 
-            const ne = { type, width: 'full', brand: '', shapeStyle: 'rounded' }; 
-            if (type === 'comparison') { ne.label = 'PERBANDINGAN'; ne.compareMode = 'trend'; ne.prevVal = '100'; ne.currVal = '200'; }
-            else if (type === 'chart') { ne.chartType = 'bar'; ne.badgeType = 'trend'; ne.labels = 'A,B,C'; ne.data = '10,20,30'; ne.title = 'GRAFIK ANALISIS'; ne.subtitle = 'Informasi statistik terperinci.'; }
-            else if (type === 'columns') { ne.colStyle = 'accent'; ne.cols = [{ title: 'Poin 1', content: 'Deskripsi poin pertama' }, { title: 'Poin 2', content: 'Deskripsi poin kedua' }]; }
-            else if (type === 'kpi') { ne.metrics = [{ label: 'TOTAL REACH', value: '150,000' }, { label: 'ENGAGEMENT', value: '4.8%' }]; }
-            else if (type === 'table') { ne.headers = 'Metrik, Nilai, Status'; ne.rowsData = 'Reach, 150K, Normal\nEngagement, 4.8%, Naik'; }
-            else if (type === 'social') { ne.socialLinks = [{ platform: 'Instagram', handle: '@username', stat: '50K' }, { platform: 'TikTok', handle: '@username', stat: '120K' }]; }
-            else if (type === 'breakdown') { ne.title = 'WAWASAN PENONTON'; ne.rowsData = 'Pria, 65%\nWanita, 35%'; }
-            else if (type === 'wawasan') { ne.title = 'CATATAN'; ne.content = 'Tuliskan poin hasil analisis atau rekomendasi di sini.'; }
-            
-            slidesData[sIdx].elements.push(ne); saveToLocalStorage(); renderForms(); 
-        }
-
-        function onSlideDragStart(e, sIdx) {
-            // Jangan anggap drag dari kontrol/elemen di dalam card sebagai drag slide.
-            if (e.target.closest('button, input, select, textarea, .element-box')) {
-                e.preventDefault();
-                return;
+            if (mode === 'edit') {
+                tabEditBtn.classList.add('active'); tabPreviewBtn.classList.remove('active');
+                editorPanel.style.display = 'flex'; previewPanel.style.display = 'flex';
+            } else {
+                tabPreviewBtn.classList.add('active'); tabEditBtn.classList.remove('active');
+                editorPanel.style.display = 'none'; previewPanel.style.display = 'flex';
             }
-            draggedSlideInfo = { sIdx };
-            try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'slide:' + sIdx); } catch (_) {}
-            e.currentTarget.classList.add('slide-dragging');
+            autoScaleDeckContainer();
         }
 
-        function onSlideDragOver(e) {
-            if (!draggedSlideInfo) return;
-            e.preventDefault();
-            e.stopPropagation();
-            const card = e.currentTarget;
-            const rect = card.getBoundingClientRect();
-            const before = e.clientY < rect.top + rect.height / 2;
-            card.classList.remove('slide-drop-before', 'slide-drop-after');
-            card.classList.add(before ? 'slide-drop-before' : 'slide-drop-after');
-            slideDropTarget = { sIdx: Number(card.dataset.slideIndex), before };
-            try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
-        }
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape', 'pt', [850, 478]);
+            const slides = document.querySelectorAll('.slide');
 
-        function onSlideDragLeave(e) {
-            if (!e.currentTarget.contains(e.relatedTarget)) {
-                e.currentTarget.classList.remove('slide-drop-before', 'slide-drop-after');
+            for (let i = 0; i < slides.length; i++) {
+                if (i > 0) doc.addPage([850, 478], 'landscape');
+                const canvas = await html2canvas(slides[i], { scale: 2, useCORS: true, backgroundColor: '#0A0B0A' });
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 0, 0, 850, 478);
             }
+            doc.save('malevin-presentation.pdf');
         }
 
-        function onSlideDrop(e, targetSIdx) {
-            if (!draggedSlideInfo) return;
-            e.preventDefault();
-            e.stopPropagation();
-            const from = draggedSlideInfo.sIdx;
-            const target = slideDropTarget && slideDropTarget.sIdx === targetSIdx ? slideDropTarget : { sIdx: targetSIdx, before: true };
-            if (from !== targetSIdx) {
-                const moved = slidesData.splice(from, 1)[0];
-                let insertAt = target.before ? targetSIdx : targetSIdx + 1;
-                if (from < insertAt) insertAt--;
-                slidesData.splice(Math.max(0, Math.min(insertAt, slidesData.length)), 0, moved);
+        async function handlePDFImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                slidesData = [];
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const textItems = textContent.items.map(item => item.str).filter(str => str.trim().length > 0);
+                    
+                    const slideTitle = textItems[0] || `Imported Slide ${i}`;
+                    const slideBodyText = textItems.slice(1).join(' ');
+
+                    slidesData.push({
+                        id: i,
+                        footerLeft: 'MALEVIN',
+                        elements: [
+                            { type: 'header', width: 'full', tag: 'IMPORTED', title: slideTitle, shapeStyle: 'rounded' },
+                            { type: 'text', width: 'full', style: 'paragraf', content: slideBodyText || 'Isi halaman PDF yang di-import...', card: false, shapeStyle: 'rounded' }
+                        ]
+                    });
+                }
                 saveToLocalStorage();
                 renderForms();
-            }
-            draggedSlideInfo = null;
-            slideDropTarget = null;
-            document.querySelectorAll('.slide-drop-before,.slide-drop-after,.slide-dragging').forEach(el => el.classList.remove('slide-drop-before','slide-drop-after','slide-dragging'));
+            };
+            fileReader.readAsArrayBuffer(file);
         }
 
-        function deleteElem(sIdx, eIdx) { slidesData[sIdx].elements.splice(eIdx, 1); saveToLocalStorage(); renderForms(); }
-        function addSlide() { slidesData.push({ id: Date.now(), footerLeft: 'MALEVIN', elements: [{ type: 'header', width: 'full', title: 'SLIDE BARU' }] }); saveToLocalStorage(); renderForms(); }
-        function deleteSlide(sIdx) { if (slidesData.length > 1) { slidesData.splice(sIdx, 1); saveToLocalStorage(); renderForms(); } }
-
-        /* EXPORT PDF ENGINE */
-        async function downloadPDF() {
-            const btn = document.getElementById('downloadBtn'); const ogText = btn.innerText; btn.innerText = 'Menyimpan...'; btn.disabled = true;
-            setMode('preview'); await new Promise(r => setTimeout(r, 500)); 
-
-            try {
-                const { jsPDF } = window.jspdf;
-                let pdf = null;
-                const pdfWidth = 850;
-                const slides = document.querySelectorAll('.slide');
-
-                for (let i = 0; i < slides.length; i++) {
-                    const slide = slides[i];
-                    const isolatedBox = document.createElement('div');
-                    isolatedBox.style.position = 'absolute'; isolatedBox.style.left = '-9999px'; isolatedBox.style.top = '0'; isolatedBox.style.width = '850px';
-                    
-                    const clone = slide.cloneNode(true);
-                    const origCanvases = slide.querySelectorAll('canvas');
-                    const clonedCanvases = clone.querySelectorAll('canvas');
-                    origCanvases.forEach((orig, idx) => clonedCanvases[idx].getContext('2d').drawImage(orig, 0, 0));
-
-                    isolatedBox.appendChild(clone); document.body.appendChild(isolatedBox);
-                    const actualHeight = Math.max(clone.offsetHeight, clone.scrollHeight);
-
-                    const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#0A0B0A', width: 850, height: actualHeight });
-                    document.body.removeChild(isolatedBox);
-
-                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                    const orientation = pdfWidth > pdfHeight ? 'landscape' : 'portrait';
-
-                    if (i === 0) pdf = new jsPDF({ orientation, unit: 'px', format: [pdfWidth, pdfHeight] });
-                    else pdf.addPage([pdfWidth, pdfHeight], orientation);
-
-                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                }
-
-                pdf.save(`Deck_Studio_Export.pdf`);
-            } catch (error) {
-                console.error(error); alert("Terjadi kesalahan saat meng-export PDF.");
-            } finally { btn.innerText = ogText; btn.disabled = false; }
-        }
-
-        async function handlePDFImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            alert("Fitur import PDF siap digunakan.");
-            event.target.value = '';
-        }
-
-        function setMode(mode) {
-            const ep = document.getElementById('editorPanel'), pp = document.getElementById('previewPanel'), te = document.getElementById('tabEditBtn'), tp = document.getElementById('tabPreviewBtn');
-            if (mode === 'preview') { ep.style.display = 'none'; pp.style.display = 'flex'; te.classList.remove('active'); tp.classList.add('active'); autoScaleDeckContainer(); } 
-            else { ep.style.display = 'flex'; pp.style.display = 'none'; tp.classList.remove('active'); te.classList.active; }
-        }
-
-        /* INITIALIZATION */
         loadFromLocalStorage();
         renderForms();
     </script>
