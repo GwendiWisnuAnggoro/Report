@@ -7,22 +7,18 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
 <style>
     :root {
-        --bg-obsidian: #0A0B0A;
-        --surface-dark: #121312;
-        --card-obsidian: #161816;
-        --border-obsidian: #242624;
+        --bg-obsidian: #0B0C0B;
+        --surface-dark: #111211;
+        --card-obsidian: #0F100F;
+        --border-obsidian: #2B2C2B;
         --accent-gold: #C49A57;
         --accent-gold-glow: rgba(196, 154, 87, 0.25);
         --text-white: #FEFEFE;
-        --text-muted: #808280;
+        --text-muted: #A3A3A3;
         --positive: #4CAF7A;
         --negative: #E55353;
         --font-main: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
@@ -91,7 +87,7 @@
 
     .mode-tabs { display: flex; gap: 6px; background: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 4px; }
     .mode-tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 18px; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px; cursor: pointer; transition: all 0.2s ease; }
-    .mode-tab-btn.active { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; }
+    .mode-tab-btn.active { background: linear-gradient(135deg, #C49A57 0%, #E0CC75 100%); color: #111211; }
     .mode-tab-btn:not(.active):hover { color: var(--accent-gold); }
 
     .app-container { display: flex; flex: 1; min-height: 0; overflow: hidden; width: 100%; }
@@ -129,7 +125,7 @@
 
     .btn { background-color: var(--card-obsidian); color: var(--text-white); border: 1px solid var(--border-obsidian); padding: 6px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
-    .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #A37E43 100%); color: #0A0B0A; border: none; font-weight: 800; }
+    .btn-gold { background: linear-gradient(135deg, #C49A57 0%, #E0CC75 100%); color: #111211; border: none; font-weight: 800; }
     .btn-danger { background-color: transparent; color: #E55353; border: 1px solid rgba(229, 83, 83, 0.3); padding: 3px 8px; font-size: 9px; }
 
     /* GLOBAL VARIABLE WIDGET UI */
@@ -139,7 +135,7 @@
     .global-var-list::-webkit-scrollbar-thumb { background: var(--border-obsidian); border-radius: 2px; }
 
     .var-pill-btn { background: rgba(196, 154, 87, 0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 9px; padding: 3px 8px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
-    .var-pill-btn:hover { background: var(--accent-gold); color: #0A0B0A; }
+    .var-pill-btn:hover { background: var(--accent-gold); color: #111211; }
 
     /* FLOATING HIGHLIGHT VARIABLE & TREND TOOLTIP */
     #highlightPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 4px; border-radius: 6px; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.6); flex-direction: row; gap: 4px; }
@@ -156,7 +152,7 @@
     .var-input.var-multiline { min-height: 60px; }
     .var-input:empty::before { content: attr(data-placeholder); color: var(--text-muted); pointer-events: none; }
 
-    .var-token { display: inline-block; background: #C49A57; color: #0A0B0A; font-weight: 800; font-size: 10px; padding: 1px 8px; border-radius: 10px; margin: 0 2px; cursor: default; user-select: none; }
+    .var-token { display: inline-block; background: #C49A57; color: #111211; font-weight: 800; font-size: 10px; padding: 1px 8px; border-radius: 10px; margin: 0 2px; cursor: default; user-select: none; }
     .var-token.var-token-missing { background: transparent; border: 1px dashed var(--negative); color: var(--negative); border-radius: 10px; padding: 1px 7px; }
 
     /* AUTOCOMPLETE LIST */
@@ -176,7 +172,7 @@
     .modal-img-preview { max-width: 100%; max-height: 100px; border-radius: 4px; display: block; margin: 0 auto; }
 
     /* LIVE PREVIEW CANVAS & DRAG AND DROP */
-    .preview-panel { flex: 1; background-color: #050505; overflow-y: auto; overflow-x: hidden; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; box-sizing: border-box; }
+    .preview-panel { flex: 1; background-color: #0B0C0B; overflow-y: auto; overflow-x: hidden; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; box-sizing: border-box; }
     .preview-container { width: 100%; max-width: 850px; display: flex; justify-content: center; align-items: flex-start; }
     #deck-container { display: flex; flex-direction: column; gap: 30px; width: 850px; margin: 0 auto; transition: transform 0.2s ease; transform-origin: top center; }
 
@@ -232,9 +228,9 @@
     .elem-drag-bar { display: none; position: absolute; top: -12px; right: 6px; background: var(--card-obsidian); border: 1px solid var(--accent-gold); border-radius: 4px; padding: 2px 6px; font-size: 8px; font-weight: 800; color: var(--accent-gold); gap: 4px; z-index: 10; cursor: default; }
     .draggable-element:hover .elem-drag-bar { display: flex; }
     .grid-opt-btn { cursor: pointer; padding: 1px 4px; border-radius: 2px; }
-    .grid-opt-btn:hover { background: var(--accent-gold); color: #0A0B0A; }
+    .grid-opt-btn:hover { background: var(--accent-gold); color: #111211; }
 
-    .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #8A6831 100%); color: #0A0B0A; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
+    .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #E0CC75 100%); color: #111211; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
     .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
     .elem-title { font-size: 20px; font-weight: 800; color: var(--text-white); text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
     
@@ -243,22 +239,22 @@
     .t-subjudul { font-size: 16px; font-weight: 700; color: var(--accent-gold); line-height: 1.3; }
     .t-paragraf { font-size: 11px; color: #C0C2C0; line-height: 1.5; white-space: pre-line; }
 
-    .text-card-wrap { background-color: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
+    .text-card-wrap { background-color: rgba(15, 16, 15, 0.72); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
 
     .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
-    .kpi-card { flex: 1; min-width: 100px; background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
+    .kpi-card { flex: 1; min-width: 100px; background: rgba(15, 16, 15, 0.82); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
     .kpi-value { font-size: 20px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; margin-top: 4px; }
 
     .col-wrap { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
     .col-item { flex: 1; min-width: 120px; }
-    .col-card--accent { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 10px 12px; }
-    .col-card--plain { background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px; }
+    .col-card--accent { background: rgba(15, 16, 15, 0.72); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 10px 12px; }
+    .col-card--plain { background: rgba(15, 16, 15, 0.72); border: 1px solid var(--border-obsidian); padding: 10px 12px; }
     .col-card--minimal { border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; }
-    .col-card--numbered { position: relative; background: rgba(22, 24, 22, 0.6); border: 1px solid var(--border-obsidian); padding: 10px 12px 10px 36px; }
-    .col-num-badge { position: absolute; left: 8px; top: 10px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #8A6831); color: #0A0B0A; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .col-card--numbered { position: relative; background: rgba(15, 16, 15, 0.72); border: 1px solid var(--border-obsidian); padding: 10px 12px 10px 36px; }
+    .col-num-badge { position: absolute; left: 8px; top: 10px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #E0CC75); color: #111211; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
     .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; width: 100%; }
-    .social-card { background: rgba(22, 24, 22, 0.7); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 10px; }
+    .social-card { background: rgba(15, 16, 15, 0.78); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 10px; }
     .social-card-val { font-size: 14px; font-weight: 800; color: var(--text-white); margin: 3px 0; word-break: break-all; }
 
     .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
@@ -272,7 +268,7 @@
 
     #badgeActionPopup { position: absolute; display: none; background: var(--card-obsidian); border: 1px solid var(--accent-gold); padding: 6px; border-radius: 6px; z-index: 10002; box-shadow: 0 10px 25px rgba(0,0,0,0.8); flex-direction: column; gap: 4px; }
 
-    .compare-box { background: rgba(22, 24, 22, 0.8); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .compare-box { background: rgba(15, 16, 15, 0.82); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
     .compare-num { font-size: 20px; font-weight: 800; color: var(--text-white); }
 
     .img-preview-box { max-width: 100%; max-height: 250px; object-fit: contain; display: block; }
@@ -287,13 +283,6 @@
     body.exporting-pdf .bottom-nav-bar,
     body.exporting-pdf .topbar {
         display: none !important;
-    }
-
-    body.exporting-pdf .draggable-element {
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
     }
 
     body.exporting-pdf .slide {
@@ -333,6 +322,164 @@
         .two-col-form { grid-template-columns: 1fr !important; }
         .preview-panel { padding: 15px 5px !important; width: 100% !important; }
     }
+
+    /* MALEVIN 2.0 UX/UI ENHANCEMENTS */
+    :root { --brand-black:#111211; --brand-charcoal:#171817; --brand-grey:#3A3B3A; --brand-gold:#C49A57; --brand-gold-hi:#E0CC75; --brand-green:#171817; --brand-green-hi:#2B2C2B; --brand-white:#FEFEFE; --grad-dark:linear-gradient(135deg,#0B0C0B,#1B1C1B); --grad-light:linear-gradient(135deg,#FEFEFE,#E7E5DF); --grad-gold:linear-gradient(135deg,#C49A57,#E0CC75); --grad-green:linear-gradient(135deg,#C49A57,#E0CC75); }
+    .slide-accordion { margin-bottom:18px; padding:18px; border-color:#2B2C2B; background:#0F100F; box-shadow:0 10px 30px rgba(0,0,0,.38); }
+    .editor-panel, .topbar, .bottom-nav-bar { background-color:#111211; }
+    .preview-panel { background-color:#070807; }
+    .slide { background-color:#0B0C0B; border-color:#2B2C2B; }
+    .slide-accordion + .slide-accordion { position:relative; }
+    .slide-accordion + .slide-accordion::before { content:''; position:absolute; left:8%; right:8%; top:-10px; border-top:1px solid rgba(196,154,87,.55); }
+    .slide-dragging { outline:2px solid var(--brand-gold); opacity:.45 !important; }
+    .slide-list-mode { position:fixed !important; inset:70px 18px 70px 18px !important; z-index:10050; overflow:auto !important; background:var(--brand-black); padding:18px !important; border:1px solid var(--brand-gold) !important; border-radius:14px !important; box-shadow:0 30px 80px rgba(0,0,0,.85); }
+    .slide-list-mode .slide-accordion { margin:0 0 8px !important; min-height:58px; cursor:grab; }
+    .slide-list-mode .slide-accordion .element-box, .slide-list-mode .slide-accordion .global-var-panel, .slide-list-mode .slide-accordion .form-group, .slide-list-mode .slide-accordion > div:not(.slide-accordion-header) { display:none !important; }
+    .slide-list-mode .slide-accordion-header { border:0; padding:0; }
+    .slide-list-mode .slide-accordion-header strong { font-size:12px !important; }
+    .slide-drop-target { outline:2px dashed var(--brand-gold) !important; background:rgba(196,154,87,.08) !important; }
+    .slide-body { column-gap:16px; row-gap:16px; }
+    .draggable-element { min-width:0; }
+    .draggable-element > * { max-width:100%; min-width:0; }
+    .draggable-element img, .draggable-element canvas, .draggable-element table { max-width:100%; }
+
+    /* COVER LAYOUT — centered vertically, including elements placed beside the cover. */
+    .slide-body.has-cover {
+        align-items:center !important;
+        align-content:center !important;
+        justify-content:flex-start;
+        min-height:0;
+        height:auto;
+    }
+    .slide-body.has-cover .draggable-element {
+        align-self:center !important;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+    }
+    .slide-body.has-cover .draggable-element > .cover-container {
+        align-self:center;
+    }
+    .slide-body.has-cover .draggable-element[class*='elem-width-'] {
+        margin-top:0;
+        margin-bottom:0;
+    }
+    .slide-body.has-cover .image-preview-wrapper,
+    .slide-body.has-cover .image-preview-wrapper img {
+        max-height:100%;
+    }
+    .cover-container {
+        width:100% !important;
+        height:auto !important;
+        min-height:0 !important;
+        max-width:100% !important;
+        flex:0 1 auto !important;
+        justify-content:center !important;
+        box-sizing:border-box;
+        padding:20px 0;
+    }
+    .chart-list-enhanced + .form-group{}
+    .chart-list-enhanced ~ .form-group { }
+    .dynamic-table-editor { border:1px solid #454645; padding:10px; border-radius:8px; background:rgba(255,255,255,.015); }
+    .table-fields-grid { display:grid; gap:7px; }
+    .table-row-editor { display:grid; gap:7px; }
+    .table-cell-editor { display:flex; gap:6px; align-items:center; }
+    .table-cell-editor input { min-width:0; }
+    .image-upload-ui { display:grid; gap:8px; }
+    .form-image-thumb { width:72px; height:52px; object-fit:contain; border:1px solid var(--brand-grey); border-radius:6px; background:#111211; }
+    .image-preview-wrapper { display:flex; justify-content:center; align-items:center; width:100%; min-height:160px; overflow:hidden; }
+    .image-preview-wrapper img { width:100%; height:100%; object-fit:contain; min-width:0; min-height:0; }
+    .image-preview-wrapper.is-circle { width:180px; height:180px; min-height:180px; margin:0 auto; aspect-ratio:1/1; border-radius:50%; }
+    .image-preview-wrapper.is-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .image-preview-wrapper.is-pill { min-height:90px; border-radius:999px; }
+    .image-preview-wrapper.is-pill img { border-radius:999px; }
+    .social-icon { width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; background:var(--grad-gold); color:#111211; font-weight:900; font-size:11px; flex:0 0 24px; }
+    .social-head { display:flex; align-items:center; gap:7px; }
+    .link-card { width:100%; padding:12px; border:1px solid rgba(196,154,87,.55); background:var(--grad-gold); border-radius:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .link-card a { color:#FEFEFE; text-decoration:none; font-weight:800; }
+    .busy-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:99999; background:rgba(17,18,17,.82); backdrop-filter:blur(5px); pointer-events:auto; }
+    .busy-overlay.show { display:flex; }
+    .busy-card { width:min(330px,90vw); padding:24px; border:1px solid var(--brand-gold); border-radius:14px; background:var(--brand-charcoal); text-align:center; box-shadow:0 25px 70px rgba(0,0,0,.7); }
+    .busy-spinner { width:34px; height:34px; margin:0 auto 12px; border:3px solid rgba(196,154,87,.25); border-top-color:var(--brand-gold-hi); border-radius:50%; animation:malevinSpin .8s linear infinite; }
+    .busy-title { font-size:11px; font-weight:900; letter-spacing:1.5px; color:var(--brand-gold-hi); }
+    .busy-sub { margin-top:6px; font-size:9px; color:#d0d0d0; }
+    @keyframes malevinSpin { to { transform:rotate(360deg); } }
+    .filename-modal { max-width:430px; }
+
+    /* EXPORT STAGE: isolate PDF rendering from preview scaling/zoom. */
+    #pdf-export-stage {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 850px !important;
+        min-width: 850px !important;
+        transform: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        pointer-events: none !important;
+        z-index: -1 !important;
+    }
+    #pdf-export-stage .slide {
+        transform: none !important;
+        margin: 0 !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* HEADER: tag/badge selalu di atas judul, bukan satu baris ke samping. */
+    .header-element-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+    }
+    .header-element-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+    }
+
+    /* Slide reorder: hanya handle yang draggable. Area teks/editor tetap normal. */
+    .slide-drag-handle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 26px;
+        flex: 0 0 30px;
+        border: 1px solid var(--border-obsidian);
+        border-radius: 5px;
+        color: var(--accent-gold);
+        background: var(--card-obsidian);
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .slide-drag-handle:active { cursor: grabbing; }
+    .slide-drag-hint { white-space: nowrap; }
+
+    /* Tombol tambah slide selalu ikut viewport saat editor discroll. */
+    .floating-add-slide {
+        position: fixed;
+        right: 20px;
+        bottom: 72px;
+        z-index: 10020;
+        box-shadow: 0 12px 30px rgba(0,0,0,.55);
+    }
+    body.exporting-pdf .floating-add-slide { display:none !important; }
+    @media(max-width:768px){
+        .floating-add-slide { right:12px; bottom:64px; }
+        .slide-drag-hint { display:none !important; }
+    }
+    @media(max-width:768px){ .slide-list-mode{inset:62px 10px 62px 10px !important;} .editor-panel{padding-left:10px !important;padding-right:10px !important;} .cover-container{width:100% !important;height:auto !important;min-height:0 !important;flex-basis:auto;transform:none !important;} .slide-body.has-cover .draggable-element{align-self:center !important;} .slide-accordion + .slide-accordion::before{left:4%;right:4%;} }
+
 </style>
 </head>
 <body>
@@ -385,20 +532,45 @@
         </div>
     </div>
 
+    <div class="busy-overlay" id="busyOverlay" aria-hidden="true">
+        <div class="busy-card">
+            <div class="busy-spinner"></div>
+            <div class="busy-title" id="busyTitle">MEMPROSES EXPORT</div>
+            <div class="busy-sub" id="busySub">Mohon tunggu, jangan klik area lain.</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="filenameModalOverlay">
+        <div class="modal-box filename-modal">
+            <div class="modal-title" id="filenameModalTitle">Nama File Export</div>
+            <div class="form-group">
+                <label id="filenameModalLabel">Nama file</label>
+                <input type="text" class="form-control" id="filenameInput" maxlength="120" placeholder="malevin-deck">
+                <span style="font-size:8px;color:var(--text-muted);">Ekstensi file akan ditambahkan otomatis.</span>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeFilenameModal()">Batal</button>
+                <button class="btn btn-gold" onclick="confirmFilenameExport()">Export & Download</button>
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER ATAS -->
     <div class="topbar">
         <div class="brand-title">
             <span>MALEVIN</span>
         </div>
         <div class="topbar-actions">
-            <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handlePDFImport(event)">
             <input type="file" id="jsonInput" accept="application/json" style="display:none" onchange="importMetadataJSON(event)">
-            <button class="btn" id="importPdfBtn" onclick="document.getElementById('pdfInput').click()">Import PDF Metadata</button>
             <button class="btn" id="importJsonBtn" onclick="document.getElementById('jsonInput').click()">Import JSON</button>
+            <button class="btn" id="undoBtn" type="button" onclick="undoAction()" title="Undo (Ctrl/Cmd+Z)">↶ Undo</button>
+            <button class="btn" id="redoBtn" type="button" onclick="redoAction()" title="Redo (Ctrl/Cmd+Y)">↷ Redo</button>
             <button class="btn" id="exportJsonBtn" onclick="exportMetadataJSON()">Export JSON</button>
             <button class="btn btn-gold" id="downloadBtn" onclick="downloadPDF()">Export Deck (PDF)</button>
         </div>
     </div>
+
+    <button type="button" class="btn btn-gold floating-add-slide" id="floatingAddSlideBtn" onclick="addSlide()">+ Slide Baru</button>
 
     <div class="app-container">
         <div class="editor-panel" id="editorPanel">
@@ -497,7 +669,7 @@
                             /* bar: taruh di tengah-tengah tinggi bar biar gampang kebaca */
                             x = element.x;
                             y = (element.y + element.base) / 2;
-                            ctx.fillStyle = '#0A0B0A';
+                            ctx.fillStyle = '#111211';
                         }
                         ctx.fillText(label, x, y);
                         ctx.restore();
@@ -634,6 +806,8 @@
         function handleVarModalImgUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { alert('Ukuran gambar maksimal 5 MB.'); event.target.value = ''; return; }
+            if (!file.type.startsWith('image/')) { alert('File harus berupa gambar.'); event.target.value = ''; return; }
             const reader = new FileReader();
             reader.onload = function (e) {
                 varModalImageData = e.target.result;
@@ -1225,8 +1399,9 @@
             else if (type === 'social') { newElem.socialLinks = [{ platform: 'Instagram', handle: '@malevin', stat: '10K' }]; }
             else if (type === 'breakdown') { newElem.title = 'WAWASAN AUDIENS'; newElem.rowsData = 'Kategori A, 60%\nKategori B, 40%'; }
             else if (type === 'wawasan') { newElem.title = 'CATATAN ANALISIS'; newElem.content = 'Poin ringkasan analisis...'; }
-            else if (type === 'chart') { newElem.title = 'Grafik Analisis'; newElem.subtitle = 'Data Penjualan'; newElem.chartType = 'bar'; newElem.labels = 'Jan, Feb, Mar'; newElem.data = '10, 20, 30'; newElem.badgeType = 'trend'; newElem.showValues = false; newElem.valueSuffix = ''; }
+            else if (type === 'chart') { newElem.title = 'Grafik Analisis'; newElem.subtitle = 'Data Penjualan'; newElem.chartType = 'bar'; newElem.labels = 'Jan, Feb, Mar'; newElem.data = '10, 20, 30'; newElem.badgeType = 'trend'; newElem.showBadge = false; newElem.showValues = false; newElem.valueSuffix = ''; }
             else if (type === 'comparison') { newElem.label = 'PERBANDINGAN'; newElem.compareMode = 'trend'; newElem.prevVal = '100'; newElem.currVal = '150'; }
+            else if (type === 'link') { newElem.label = 'TAUTAN'; newElem.text = 'Buka Tautan'; newElem.url = 'https://example.com'; }
 
             slidesData[sIdx].elements.push(newElem);
             saveToLocalStorage();
@@ -1269,7 +1444,7 @@
                         </select></div>`;
 
                     const styleShape = elem.shapeStyle || 'rounded';
-                    const shapeSelector = `<div class="form-group"><label>Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option></select></div>`;
+                    const shapeSelector = `<div class="form-group"><label>Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option><option value="circle" ${styleShape === 'circle' ? 'selected' : ''}>Lingkaran</option><option value="pill" ${styleShape === 'pill' ? 'selected' : ''}>Pill</option></select></div>`;
                     
                     let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / Badge ID</label>${varInputHTML('elem', sIdx, eIdx, 'brand', elem.brand, '', false)}</div>`;
 
@@ -1287,11 +1462,12 @@
                             </div>
                             <div class="form-group"><label>Skala Ukuran (Scale)</label>
                                 <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'scale', parseFloat(this.value))">
-                                    <option value="0.8" ${coverScale === 0.8 ? 'selected' : ''}>Kecil (80%)</option>
-                                    <option value="1" ${coverScale === 1 ? 'selected' : ''}>Normal (100%)</option>
-                                    <option value="1.1" ${coverScale === 1.1 ? 'selected' : ''}>Besar (110%)</option>
-                                    <option value="1.25" ${coverScale === 1.25 ? 'selected' : ''}>Sangat Besar (125%)</option>
-                                    <option value="1.4" ${coverScale === 1.4 ? 'selected' : ''}>Extra Besar (140%)</option>
+                                    <option value="0.25" ${coverScale === 0.25 ? 'selected' : ''}>25%</option>
+                                    <option value="0.5" ${coverScale === 0.5 ? 'selected' : ''}>50%</option>
+                                    <option value="0.75" ${coverScale === 0.75 ? 'selected' : ''}>75%</option>
+                                    <option value="1" ${coverScale === 1 ? 'selected' : ''}>100%</option>
+                                    <option value="1.25" ${coverScale === 1.25 ? 'selected' : ''}>125%</option>
+                                    <option value="1.5" ${coverScale === 1.5 ? 'selected' : ''}>150%</option>
                                 </select>
                             </div>
                         </div>
@@ -1358,9 +1534,7 @@
                         <button class="btn btn-gold" style="margin-top:6px; font-size:9px;" onclick="addKpiMetric(${sIdx}, ${eIdx})">+ Tambah Item KPI</button>`;
                     }
                     else if (elem.type === 'table') {
-                        fields += `
-                        <div class="form-group"><label>Header Kolom (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'headers', elem.headers, 'Metrik, Nilai, Status', false)}</div>
-                        <div class="form-group"><label>Baris Data Tabel (Satu Baris Per-Baris, Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'rowsData', elem.rowsData, 'Reach, 150K, Normal\nEngagement, 4.8%, Naik', true)}</div>`;
+                        fields += `<div class="dynamic-table-editor" data-table-editor="${sIdx}:${eIdx}"><div class="two-col-form"><div class="form-group"><label>Jumlah Kolom</label><input type="number" min="1" max="12" class="form-control" value="${getTableModel(elem).headers.length}" onchange="setTableDimensions(${sIdx},${eIdx},this.value,${getTableModel(elem).rows.length})"></div><div class="form-group"><label>Jumlah Baris</label><input type="number" min="1" max="50" class="form-control" value="${getTableModel(elem).rows.length}" onchange="setTableDimensions(${sIdx},${eIdx},${getTableModel(elem).headers.length},this.value)"></div></div><div class="form-group"><label>Style Tabel</label><select class="form-control" onchange="updateElem(${sIdx},${eIdx},'tableStyle',this.value)"><option value="horizontal" ${elem.tableStyle === 'horizontal' ? 'selected' : ''}>Garis Horizontal</option><option value="grid" ${elem.tableStyle === 'grid' ? 'selected' : ''}>Grid Penuh</option><option value="clean" ${(!elem.tableStyle || elem.tableStyle === 'clean') ? 'selected' : ''}>Minimalis / Clean</option></select></div><div class="table-fields-grid">${renderDynamicTableInputs(sIdx,eIdx,elem)}</div></div>`;
                     }
                     else if (elem.type === 'social') {
                         const links = elem.socialLinks || [];
@@ -1392,8 +1566,11 @@
                         <div class="form-group"><label>Rekomendasi / Insight</label>${varInputHTML('elem', sIdx, eIdx, 'content', elem.content, 'Tuliskan poin hasil analisis di sini...', true)}</div>`;
                     }
                     else if (elem.type === 'image') { 
-                        fields += `<div class="form-group"><label>Upload Gambar / Logo Elemen</label><input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(${sIdx}, ${eIdx}, this)"></div>`; 
+                        fields += `<div class="image-upload-ui"><div class="form-group"><label>Gambar / Logo Elemen (maks. 5 MB)</label></div><button type="button" class="btn btn-gold image-picker-btn" onclick="triggerImageReplace(${sIdx}, ${eIdx})">${elem.imgData ? 'Ganti Gambar' : 'Ambil Gambar'}</button>${elem.imgData ? `<img src="${elem.imgData}" class="form-image-thumb" alt="preview">` : ''}</div>`; 
                     } 
+                    else if (elem.type === 'link') {
+                        fields += `<div class="form-group"><label>Label Tautan</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label || 'TAUTAN', 'TAUTAN', false)}</div><div class="form-group"><label>Teks Tombol / Link</label>${varInputHTML('elem', sIdx, eIdx, 'text', elem.text || 'Buka Tautan', 'Buka Tautan', false)}</div><div class="form-group"><label>URL</label><input class="form-control" type="url" value="${escapeHtml(elem.url || '')}" placeholder="https://..." onchange="updateElem(${sIdx}, ${eIdx}, 'url', this.value)"></div>`;
+                    }
                     else if (elem.type === 'comparison') {
                         fields += `
                         <div class="form-group"><label>Label Perbandingan</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label, '', false)}</div>
@@ -1435,7 +1612,8 @@
                                         <option value="doughnut" ${elem.chartType === 'doughnut' ? 'selected' : ''}>Doughnut Diagram</option>
                                     </select>
                                 </div>
-                                <div class="form-group"><label>Opsi Indikator Grafik</label>
+                                <div class="form-group"><label>Indikator Grafik</label>
+                                    <label style="display:flex;align-items:center;gap:7px;margin-bottom:5px;color:var(--text-white);font-size:9px;cursor:pointer;"><input type="checkbox" ${elem.showBadge ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'showBadge', this.checked)"> Tampilkan indikator</label>
                                     <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'badgeType', this.value)">
                                         <option value="trend" ${(elem.badgeType || 'trend') === 'trend' ? 'selected' : ''}>Tren Kenaikan/Penurunan (%)</option>
                                         <option value="compare" ${elem.badgeType === 'compare' ? 'selected' : ''}>Perbandingan Pertumbuhan</option>
@@ -1462,7 +1640,7 @@
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
                 });
 
-                card.innerHTML = `<div class="slide-accordion-header"><strong style="font-size:12px; color:var(--accent-gold); cursor:grab;">☷ SLIDE ${sIdx + 1}</strong><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
+                card.innerHTML = `<div class="slide-accordion-header"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><button type="button" class="slide-drag-handle" data-slide-drag-handle aria-label="Tahan untuk memindahkan slide" title="Tahan lalu geser untuk memindahkan slide">⋮⋮</button><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong></div><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
                 <div class="form-group"><label>Footer Left</label>${varInputHTML('slide', sIdx, null, 'footerLeft', slide.footerLeft, '', false)}</div>
                 ${elementsHTML}
                 <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN BARU:</label>
@@ -1471,6 +1649,7 @@
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'header')">+ HEADER</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'text')">+ TEKS</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
+                    <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'link')">+ LINK</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'columns')">+ KOLOM DOKUMEN</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI METRIK</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL DATA</button>
@@ -1485,7 +1664,7 @@
             renderPreview();
         }
 
-        function getRadiusCss(style) { return style === 'rounded' ? '6px' : '0px'; }
+        function getRadiusCss(style) { if (style === 'circle') return '50%'; if (style === 'pill') return '999px'; return style === 'rounded' ? '6px' : '0px'; }
         function handleImageUpload(sIdx, eIdx, input) { 
             if (input.files && input.files[0]) { 
                 const reader = new FileReader(); 
@@ -1759,10 +1938,10 @@
             slidesData.forEach((slide, sIdx) => {
                 const slideEl = document.createElement('div'); slideEl.className = 'slide';
                 const slideBody = document.createElement('div');
-                /* has-cover cuma dipakai buat slide judul murni (isinya cuma 1 elemen cover),
-                   supaya slide berisi cover + elemen lain (chart, perbandingan, dst) TIDAK
-                   ikut ter-center semua dan tetap top-left rapi. */
-                const hasCover = slide.elements.length === 1 && slide.elements[0].type === 'cover';
+                /* Cover punya layout khusus: seluruh isi cover (termasuk elemen lain yang
+                   ditempatkan sejajar dengannya, mis. logo/gambar) di-center secara vertikal.
+                   Ini sengaja berlaku untuk semua slide yang memiliki elemen cover. */
+                const hasCover = slide.elements.some(el => el.type === 'cover');
                 slideBody.className = `slide-body ${hasCover ? 'has-cover' : ''}`;
                 slideBody.dataset.slideIndex = sIdx;
                 slideBody.setAttribute('ondragover', 'onSlideBodyDragOver(event)');
@@ -1807,7 +1986,7 @@
                         if (alignVal === 'center') flexAlign = 'center';
                         else if (alignVal === 'right') flexAlign = 'flex-end';
 
-                        p = `<div class="cover-container" style="text-align: ${alignVal}; align-items: ${flexAlign}; transform: scale(${scaleVal}); transform-origin: center ${alignVal};">
+                        p = `<div class="cover-container" style="text-align: ${alignVal}; align-items: ${flexAlign}; transform: scale(${scaleVal}); transform-origin: center center;">
                                 ${(pill || elem.tag) ? `<div style="display:flex; justify-content:${flexAlign}; gap:6px; margin-bottom:12px; width:100%;">
                                     ${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}
                                 </div>` : ''}
@@ -1818,8 +1997,10 @@
                     else if (elem.type === 'header') {
                         const parsedTag = renderVarsInText(elem.tag || '', globalVars, sIdx, eIdx, 'tag');
                         const parsedTitle = renderVarsInText(elem.title || '', globalVars, sIdx, eIdx, 'title');
-                        p = `${(pill || elem.tag) ? `<div style="display:flex; gap:6px; align-items:center; margin-bottom:4px;">${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}</div>` : ''}
-                             <div class="elem-title">${parsedTitle}</div>`;
+                        p = `<div class="header-element-content">
+                                ${(pill || elem.tag) ? `<div class="header-element-meta">${pill}${elem.tag ? `<span class="elem-tag">${parsedTag}</span>` : ''}</div>` : ''}
+                                <div class="elem-title">${parsedTitle}</div>
+                             </div>`;
                     }
                     else if (elem.type === 'text') {
                         const styleCls = elem.style === 'hero' ? 't-hero' : (elem.style === 'judul' ? 't-judul' : (elem.style === 'subjudul' ? 't-subjudul' : 't-paragraf'));
@@ -1892,7 +2073,13 @@
                         p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><div style="font-size:10px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">${parsedTitle}</div><div style="font-size:11px; line-height:1.4;">${parsedContent}</div></div>`;
                     }
                     else if (elem.type === 'image') {
-                        p = elem.imgData ? `<img src="${elem.imgData}" class="img-preview-box" style="border-radius:${br}">` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px; border-radius:${br}">Belum ada gambar/logo diupload</div>`;
+                        p = elem.imgData ? `<div class="image-preview-wrapper ${elem.shapeStyle === 'circle' ? 'is-circle' : (elem.shapeStyle === 'pill' ? 'is-pill' : '')}" style="border-radius:${br};"><img src="${elem.imgData}" class="img-preview-box" style="border-radius:${br}; width:100%; height:100%;"></div>` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px; border-radius:${br}">Belum ada gambar/logo diupload</div>`;
+                    }
+                    else if (elem.type === 'link') {
+                        const linkLabel = renderVarsInText(elem.label || 'TAUTAN', globalVars, sIdx, eIdx, 'label');
+                        const linkText = renderVarsInText(elem.text || elem.url || 'Buka Tautan', globalVars, sIdx, eIdx, 'text');
+                        const safeUrl = String(elem.url || '#').replace(/"/g,'&quot;');
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="link-card" style="border-radius:${br};"><div><div style="font-size:8px;letter-spacing:1px;color:#E0CC75;font-weight:800;">${linkLabel}</div><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a></div><span style="font-size:18px;">↗</span></div>`;
                     }
                     else if (elem.type === 'comparison') {
                         const parsedLabel = renderVarsInText(elem.label || 'PERBANDINGAN', globalVars, sIdx, eIdx, 'label');
@@ -1927,7 +2114,7 @@
                                         <div style="font-size:12px; font-weight:800; color:var(--text-white);">${parsedTitle}</div>
                                         ${parsedSub ? `<div style="font-size:9px; color:var(--text-muted);">${parsedSub}</div>` : ''}
                                     </div>
-                                    <span class="var-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+                                    ${elem.showBadge ? `<span class="var-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>` : ''}
                                 </div>
                                 <div style="height:170px; width:100%; position:relative;"><canvas id="${chartId}"></canvas></div>
                              </div>`;
@@ -1963,7 +2150,7 @@
                         const isPieLike = (c.type === 'pie' || c.type === 'doughnut');
                         let chartBg;
                         if (isPieLike) {
-                            chartBg = ['#C49A57', '#B08847', '#9C7639', '#8A6831', '#785A2A'];
+                            chartBg = ['#C49A57', '#D0AA63', '#B88F4F', '#E0CC75', '#8F6F3D'];
                         } else {
                             /* Gradient emas vertikal (gold -> gold-dark), migrasi dari tampilan gradient bar versi PDF vektor */
                             const grad = canvasCtx2d.createLinearGradient(0, 0, 0, ctx.height || 170);
@@ -2001,47 +2188,6 @@
                 });
             }, 50);
         }
-
-        /* PERBAIKAN 2: REAL IMPORT METADATA PDF DARI HASIL EXPORT MALEVIN */
-        async function handlePDFImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                const meta = await pdfDoc.getMetadata();
-
-                let metadataString = null;
-                if (meta && meta.info && meta.info.Subject) {
-                    if (meta.info.Subject.startsWith('MALEVIN_METADATA:')) {
-                        metadataString = meta.info.Subject.replace('MALEVIN_METADATA:', '');
-                    }
-                }
-
-                if (!metadataString) {
-                    alert("Gagal Import PDF!\nFile PDF ini tidak mengandung metadata MALEVIN yang valid atau dibuat dari aplikasi luar/lain.");
-                    event.target.value = '';
-                    return;
-                }
-
-                const payload = JSON.parse(metadataString);
-                if (payload && payload.slidesData && payload.customVariables) {
-                    slidesData = payload.slidesData;
-                    customVariables = payload.customVariables;
-                    saveToLocalStorage();
-                    renderForms();
-                    alert("Metadata PDF Berhasil Diimport!\nSemua variabel dan komponen slide telah dipulihkan dan dapat diedit langsung.");
-                } else {
-                    alert("Format metadata PDF rusak atau tidak sesuai.");
-                }
-            } catch (err) {
-                console.error("PDF Import Error:", err);
-                alert("Tidak dapat membaca file PDF. Pastikan file PDF valid dan berasal dari Export MALEVIN.");
-            }
-            event.target.value = '';
-        }
-
         /* ===== EXPORT PDF (metode: setiap slide di-screenshot jadi gambar dulu, baru ditempel ke PDF) ===== */
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
@@ -2052,13 +2198,6 @@
             const originalMarginBottom = container.style.marginBottom;
             container.style.transform = 'none';
             container.style.marginBottom = '0px';
-
-            const metadataPayload = {
-                app: "MALEVIN_DECK_STUDIO",
-                version: "6.0-image-export",
-                slidesData: slidesData,
-                customVariables: customVariables
-            };
 
             let pdf = null;
             const pageWidth = 850;
@@ -2071,7 +2210,7 @@
                     const canvas = await html2canvas(slide, {
                         scale: 2,
                         useCORS: true,
-                        backgroundColor: '#0A0B0A',
+                        backgroundColor: '#111211',
                         logging: false
                     });
 
@@ -2085,14 +2224,6 @@
                             orientation: 'landscape',
                             unit: 'pt',
                             format: [pageWidth, pageHeight]
-                        });
-                        /* Metadata deck (semua slide + variabel) disisipkan di field Subject PDF,
-                           supaya bisa dipulihkan lagi lewat "Import PDF Metadata" */
-                        pdf.setProperties({
-                            title: "MALEVIN Deck Presentation",
-                            subject: "MALEVIN_METADATA:" + JSON.stringify(metadataPayload),
-                            keywords: "MALEVIN_STUDIO_DECK",
-                            author: "MALEVIN"
                         });
                     } else {
                         pdf.addPage([pageWidth, pageHeight], 'landscape');
@@ -2138,7 +2269,7 @@
             reader.onload = function() {
                 try {
                     const payload = JSON.parse(reader.result);
-                    if (!payload || !payload.slidesData || !payload.customVariables) {
+                    if (!payload || !Array.isArray(payload.slidesData) || !Array.isArray(payload.customVariables)) {
                         throw new Error('invalid');
                     }
                     slidesData = payload.slidesData;
@@ -2158,5 +2289,317 @@
 
 
     </script>
+
+<script>
+/* ===== MALEVIN ENHANCEMENT LAYER ===== */
+(function(){
+  const LEGACY_RENDER_FORMS = renderForms;
+  const LEGACY_ADD_ELEMENT = addElementToSlide;
+  const LEGACY_UPDATE_ELEM = updateElem;
+  let pendingExportType = null;
+
+  window.getTableModel = function(elem){
+    let headers = Array.isArray(elem.headersData) ? elem.headersData.slice() : String(elem.headers || 'Metrik, Nilai').split(',').map(x=>x.trim()).filter(Boolean);
+    if(!headers.length) headers=['Kolom 1'];
+    let rows = Array.isArray(elem.tableData) ? elem.tableData.map(r=>Array.isArray(r)?r.slice():[]) : String(elem.rowsData || '').split('\n').filter(Boolean).map(r=>r.split(',').map(x=>x.trim()));
+    if(!rows.length) rows=[Array(headers.length).fill('')];
+    rows=rows.map(r=>{ const a=r.slice(0,headers.length); while(a.length<headers.length)a.push(''); return a; });
+    return {headers,rows};
+  };
+  window.syncTableLegacy = function(elem){ const m=getTableModel(elem); elem.headersData=m.headers; elem.tableData=m.rows; elem.headers=m.headers.join(', '); elem.rowsData=m.rows.map(r=>r.join(', ')).join('\n'); };
+  window.renderDynamicTableInputs = function(sIdx,eIdx,elem){
+    const m=getTableModel(elem);
+    const h=m.headers.map((v,i)=>`<div class="table-cell-editor"><span style="width:22px;color:var(--brand-gold);font-size:8px;font-weight:800;">C${i+1}</span><input class="form-control" value="${escapeHtml(v)}" placeholder="Nama kolom" oninput="updateTableHeader(${sIdx},${eIdx},${i},this.value)"></div>`).join('');
+    const r=m.rows.map((row,ri)=>`<div class="table-row-editor"><div style="font-size:8px;color:var(--text-muted);font-weight:800;">BARIS ${ri+1}</div>${row.map((v,ci)=>`<div class="table-cell-editor"><span style="width:22px;color:var(--text-muted);font-size:8px;">C${ci+1}</span><input class="form-control" value="${escapeHtml(v)}" placeholder="Isi sel" oninput="updateTableCell(${sIdx},${eIdx},${ri},${ci},this.value)"></div>`).join('')}</div>`).join('');
+    return `<div style="display:grid;gap:10px;"><div><div style="font-size:8px;color:var(--text-muted);margin-bottom:5px;">NAMA KOLOM</div>${h}</div><div><div style="font-size:8px;color:var(--text-muted);margin-bottom:5px;">DATA BARIS</div>${r}</div></div>`;
+  };
+  window.updateTableHeader=function(s,e,i,v){const x=slidesData[s].elements[e]; const m=getTableModel(x); m.headers[i]=v; x.headersData=m.headers;x.tableData=m.rows;syncTableLegacy(x);saveToLocalStorage();renderPreview();};
+  window.updateTableCell=function(s,e,r,c,v){const x=slidesData[s].elements[e]; const m=getTableModel(x); if(m.rows[r])m.rows[r][c]=v; x.headersData=m.headers;x.tableData=m.rows;syncTableLegacy(x);saveToLocalStorage();renderPreview();};
+  window.setTableDimensions=function(s,e,cols,rows){cols=Math.max(1,Math.min(12,parseInt(cols)||1));rows=Math.max(1,Math.min(50,parseInt(rows)||1));const x=slidesData[s].elements[e];const m=getTableModel(x);m.headers=Array.from({length:cols},(_,i)=>m.headers[i]||`Kolom ${i+1}`);m.rows=Array.from({length:rows},(_,ri)=>Array.from({length:cols},(_,ci)=>(m.rows[ri]&&m.rows[ri][ci])||''));x.headersData=m.headers;x.tableData=m.rows;syncTableLegacy(x);saveToLocalStorage();renderForms();};
+
+  window.renderForms=function(){ LEGACY_RENDER_FORMS(); enhanceFormCards(); };
+  function enhanceFormCards(){
+    document.querySelectorAll('.slide-accordion').forEach((card,sIdx)=>{
+      // Only the small handle can start slide dragging. Clicking/holding text or inputs never triggers it.
+      card.draggable = false;
+      const handle = card.querySelector('[data-slide-drag-handle]');
+      if(handle){
+        handle.draggable = true;
+        handle.addEventListener('dragstart',e=>startSlideDrag(e,sIdx));
+        handle.addEventListener('dragend',endSlideDrag);
+        handle.addEventListener('pointerdown',e=>{
+          if(e.pointerType==='touch') beginTouchSlideDrag(e,card,sIdx,handle);
+        });
+      }
+      card.addEventListener('dragover',overSlideDrag);
+      card.addEventListener('dragleave',leaveSlideDrag);
+      card.addEventListener('drop',dropSlideDrag);
+      const elemTypes=slidesData[sIdx]?.elements||[];
+      card.querySelectorAll('.element-box').forEach((box,eIdx)=>{
+        if(elemTypes[eIdx]?.type==='table'){ const editor=box.querySelector(`[data-table-editor="${sIdx}:${eIdx}"]`); if(editor) editor.querySelectorAll('.table-fields-grid').forEach(x=>x.innerHTML=renderDynamicTableInputs(sIdx,eIdx,elemTypes[eIdx])); }
+      });
+      card.querySelectorAll('.element-box').forEach((box,eIdx)=>{ if(elemTypes[eIdx]?.type==='link') addLinkFields(box,sIdx,eIdx,elemTypes[eIdx]); });
+    });
+  }
+  function addLinkFields(box,s,e,el){ if(box.querySelector('.link-enhanced-fields'))return; const host=box.querySelector('.element-header'); if(!host)return; const wrap=document.createElement('div');wrap.className='link-enhanced-fields';wrap.style.cssText='display:grid;gap:7px;margin-top:7px;';wrap.innerHTML=`<div class="form-group"><label>Label Tautan</label><input class="form-control" value="${escapeHtml(el.label||'TAUTAN')}" oninput="updateElem(${s},${e},'label',this.value)"></div><div class="form-group"><label>Teks Link</label><input class="form-control" value="${escapeHtml(el.text||'Buka Tautan')}" oninput="updateElem(${s},${e},'text',this.value)"></div><div class="form-group"><label>URL</label><input class="form-control" type="url" value="${escapeHtml(el.url||'')}" placeholder="https://..." oninput="updateElem(${s},${e},'url',this.value)"></div>`;box.appendChild(wrap); }
+
+  // Dynamic list UI for comma-separated chart labels/data: small rows with +/-.
+  function enhanceChartLists(){ document.querySelectorAll('.element-box').forEach((box)=>{ const header=box.querySelector('.element-header'); if(!header)return; const m=header.textContent.match(/ELEM (\d+)/); if(!m)return; const eIdx=Number(m[1])-1; const card=box.closest('.slide-accordion');const sIdx=Number(card?.dataset.slideIndex);const el=slidesData[sIdx]?.elements[eIdx]; if(!el||el.type!=='chart'||box.querySelector('.chart-list-enhanced'))return; const groups=[['labels','Label X'],['data','Data Y']]; const panel=document.createElement('div');panel.className='chart-list-enhanced';panel.style.cssText='display:grid;gap:8px;'; const legacy=box.querySelectorAll('.form-group'); legacy.forEach(g=>{const t=(g.querySelector('label')?.textContent||'').toLowerCase();if(t.includes('label x')||t.includes('data y'))g.style.display='none';}); groups.forEach(([key,label])=>{ const g=document.createElement('div');g.className='form-group';g.innerHTML=`<label>${label}</label><div class="dynamic-list" data-list-key="${key}"></div>`;panel.appendChild(g); }); box.appendChild(panel); groups.forEach(([key])=>renderList(panel.querySelector(`[data-list-key="${key}"]`),el,key,sIdx,eIdx)); }); }
+  function renderList(host,el,key,s,e){host.innerHTML='';const vals=String(el[key]||'').split(',').map(x=>x.trim()).filter((x,i,a)=>x||a.length===1);if(!vals.length)vals=[''];vals.forEach((v,i)=>{const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto auto;gap:5px;margin-top:4px;';row.innerHTML=`<input class="form-control" value="${escapeHtml(v)}"><button class="btn btn-gold" type="button">+</button><button class="btn btn-danger" type="button">−</button>`;const input=row.children[0];input.oninput=()=>{vals[i]=input.value;el[key]=vals.join(', ');saveToLocalStorage();renderPreview();};row.children[1].onclick=()=>{vals.splice(i+1,0,'');el[key]=vals.join(', ');saveToLocalStorage();renderForms();};row.children[2].onclick=()=>{if(vals.length<=1)return;vals.splice(i,1);el[key]=vals.join(', ');saveToLocalStorage();renderForms();};host.appendChild(row);});}
+  const origRenderForms2=window.renderForms; window.renderForms=function(){origRenderForms2(); enhanceChartLists();};
+
+  // Slide list-view drag and drop: explicit handle only, no preventDefault on editor text.
+  let slideDrag=null, touchTimer=null, touchDragHandle=null, touchStartY=0, touchStartX=0;
+  function startSlideDrag(e,sIdx){
+    if(!e.currentTarget?.matches?.('[data-slide-drag-handle]')) return;
+    slideDrag=sIdx;
+    document.getElementById('forms-wrapper').classList.add('slide-list-mode');
+    const card=e.currentTarget.closest('.slide-accordion');
+    if(card) card.classList.add('slide-dragging');
+    try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','slide:'+sIdx);}catch(_){}
+  }
+  function endSlideDrag(){
+    document.getElementById('forms-wrapper').classList.remove('slide-list-mode');
+    document.querySelectorAll('.slide-accordion').forEach(x=>x.classList.remove('slide-dragging','slide-drop-target'));
+    document.body.style.overflow='';
+    slideDrag=null;
+    touchDragHandle=null;
+  }
+  function overSlideDrag(e){
+    if(slideDrag===null)return;
+    e.preventDefault();
+    const target=e.currentTarget;
+    if(Number(target.dataset.slideIndex)!==slideDrag)target.classList.add('slide-drop-target');
+  }
+  function leaveSlideDrag(e){e.currentTarget.classList.remove('slide-drop-target');}
+  function dropSlideDrag(e){
+    if(slideDrag===null)return;
+    e.preventDefault();
+    const target=Number(e.currentTarget.dataset.slideIndex);
+    if(Number.isInteger(target)&&target!==slideDrag){
+      const moved=slidesData.splice(slideDrag,1)[0];
+      slidesData.splice(target,0,moved);
+      slidesData.forEach((s,i)=>s.id=i+1);
+      saveToLocalStorage();
+    }
+    endSlideDrag();
+    renderForms();
+  }
+  function beginTouchSlideDrag(e,card, sIdx, handle){
+    clearTimeout(touchTimer);
+    touchDragHandle=handle;
+    touchStartY=e.clientY; touchStartX=e.clientX;
+    touchTimer=setTimeout(()=>{
+      slideDrag=sIdx;
+      document.getElementById('forms-wrapper').classList.add('slide-list-mode');
+      card.classList.add('slide-dragging');
+      document.body.style.overflow='hidden';
+      try{handle.setPointerCapture(e.pointerId);}catch(_){}
+    },520);
+  }
+  document.addEventListener('pointermove',e=>{
+    if(touchDragHandle && slideDrag===null && e.pointerType==='touch'){
+      if(Math.hypot(e.clientX-touchStartX,e.clientY-touchStartY)>10){
+        clearTimeout(touchTimer); touchTimer=null; touchDragHandle=null;
+      }
+    }
+    if(slideDrag===null||!document.getElementById('forms-wrapper').classList.contains('slide-list-mode'))return;
+    const els=[...document.querySelectorAll('.slide-accordion')];
+    let nearest=null,best=Infinity;
+    els.forEach(el=>{const r=el.getBoundingClientRect();const d=Math.abs(e.clientY-(r.top+r.height/2));if(d<best){best=d;nearest=el;}});
+    els.forEach(x=>x.classList.remove('slide-drop-target'));
+    if(nearest&&Number(nearest.dataset.slideIndex)!==slideDrag)nearest.classList.add('slide-drop-target');
+  });
+  document.addEventListener('pointerup',e=>{
+    clearTimeout(touchTimer); touchTimer=null;
+    if(slideDrag!==null&&document.getElementById('forms-wrapper').classList.contains('slide-list-mode')){
+      const els=[...document.querySelectorAll('.slide-accordion')];
+      let target=null,best=Infinity;
+      els.forEach(el=>{const r=el.getBoundingClientRect();const d=Math.abs(e.clientY-(r.top+r.height/2));if(d<best){best=d;target=el;}});
+      if(target){
+        const t=Number(target.dataset.slideIndex);
+        if(Number.isInteger(t)&&t!==slideDrag){
+          const moved=slidesData.splice(slideDrag,1)[0];
+          slidesData.splice(t,0,moved);
+          slidesData.forEach((x,i)=>x.id=i+1);
+          saveToLocalStorage();
+        }
+      }
+      endSlideDrag(); renderForms();
+    }
+    touchDragHandle=null;
+  });
+
+  // 5MB image guard + modern replace button.
+  window.triggerImageReplace=function(s,e){let input=document.getElementById('imageReplaceInput');if(!input){input=document.createElement('input');input.type='file';input.accept='image/*';input.id='imageReplaceInput';input.style.display='none';document.body.appendChild(input);}input.onchange=()=>{if(input.files[0])handleImageUpload(s,e,input);input.value='';};input.click();};
+  window.handleImageUpload=function(s,e,input){const f=input.files&&input.files[0];if(!f)return;if(f.size>5*1024*1024){alert('Ukuran gambar maksimal 5 MB.');input.value='';return;}if(!f.type.startsWith('image/')){alert('File harus berupa gambar.');return;}const reader=new FileReader();reader.onload=ev=>{slidesData[s].elements[e].imgData=ev.target.result;saveToLocalStorage();renderForms();};reader.readAsDataURL(f);};
+
+  // Social platform icon fallback and compact card styling are rendered through a post-process.
+  function socialIcon(platform){const p=String(platform||'').toLowerCase(); if(p.includes('instagram'))return '◎';if(p.includes('tiktok'))return '♪';if(p.includes('youtube'))return '▶';if(p.includes('facebook'))return 'f';if(p.includes('x')||p.includes('twitter'))return '𝕏';if(p.includes('linkedin'))return 'in';return String(platform||'?').slice(0,2).toUpperCase();}
+  const oldRenderPreview=renderPreview;
+  window.renderPreview=function(){oldRenderPreview();setTimeout(()=>{document.querySelectorAll('.social-card').forEach(card=>{const label=card.querySelector('div');if(!label||card.querySelector('.social-head'))return;const plat=label.textContent.trim();const stat=card.querySelector('.social-card-val');const handle=stat?.nextElementSibling;label.remove();const head=document.createElement('div');head.className='social-head';head.innerHTML=`<span class="social-icon">${escapeHtml(socialIcon(plat))}</span><div style="font-size:8px;color:var(--text-muted);font-weight:800;text-transform:uppercase;">${escapeHtml(plat||'Social')}</div>`;card.prepend(head);if(stat)stat.style.fontSize='16px';});},0);};
+
+  // Filename modal + repeatable export.
+  window.openFilenameModal=function(type){pendingExportType=type;document.getElementById('filenameModalTitle').textContent=type==='pdf'?'Nama File PDF':'Nama File JSON';document.getElementById('filenameInput').value=type==='pdf'?'MALEVIN_Deck':'MALEVIN_Deck_Project';document.getElementById('filenameModalOverlay').classList.add('show');setTimeout(()=>{const i=document.getElementById('filenameInput');i.focus();i.select();},30);};
+  window.closeFilenameModal=function(){document.getElementById('filenameModalOverlay').classList.remove('show');pendingExportType=null;};
+  window.confirmFilenameExport=function(){const raw=document.getElementById('filenameInput').value.trim().replace(/[\/:*?"<>|]+/g,'-');if(!raw){alert('Nama file wajib diisi.');return;}const type=pendingExportType;closeFilenameModal();if(type==='pdf')downloadPDF(raw);else exportMetadataJSON(raw);};
+  document.getElementById('downloadBtn').onclick=()=>openFilenameModal('pdf');
+  document.getElementById('exportJsonBtn').onclick=()=>openFilenameModal('json');
+  window.downloadPDF=async function(fileBase){
+    const {jsPDF}=window.jspdf;
+    const overlay=document.getElementById('busyOverlay');
+    const container=document.getElementById('deck-container');
+    const stage=document.createElement('div');
+    stage.id='pdf-export-stage';
+    document.body.appendChild(stage);
+    const originalParent=container.parentNode;
+    const originalNextSibling=container.nextSibling;
+    const originalTransform=container.style.transform;
+    const originalMarginBottom=container.style.marginBottom;
+    const slideNodes=[...container.querySelectorAll('.slide')];
+    overlay.classList.add('show');
+    document.body.classList.add('exporting-pdf');
+    try{
+      // Move the real rendered slides out of the zoomed preview. This preserves their
+      // exact editor geometry while keeping Chart.js canvases and image data intact.
+      slideNodes.forEach(slide=>stage.appendChild(slide));
+      container.style.transform='none';
+      container.style.marginBottom='0';
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      let pdf=null;
+      const pageWidth=850;
+      for(let i=0;i<slideNodes.length;i++){
+        document.getElementById('busySub').textContent=`Merender slide ${i+1} dari ${slideNodes.length}…`;
+        const slide=slideNodes[i];
+        const cssWidth=850;
+        const cssHeight=Math.max(478, Math.ceil(slide.getBoundingClientRect().height));
+        const canvas=await html2canvas(slide,{
+          scale:3,
+          width:cssWidth,
+          height:cssHeight,
+          windowWidth:cssWidth,
+          windowHeight:cssHeight,
+          useCORS:true,
+          allowTaint:false,
+          backgroundColor:'#0B0C0B',
+          logging:false,
+          imageTimeout:20000,
+          scrollX:0,
+          scrollY:0
+        });
+        const imgData=canvas.toDataURL('image/jpeg',0.96);
+        const pageHeight=cssHeight*(pageWidth/cssWidth);
+        if(i===0){
+          pdf=new jsPDF({orientation:'landscape',unit:'pt',format:[pageWidth,pageHeight],compress:true});
+        }else{
+          pdf.addPage([pageWidth,pageHeight],'landscape');
+        }
+        // 1 CSS px in the editor maps to 1 PDF point. The html2canvas scale is
+        // raster-only, so it increases DPI without changing layout geometry.
+        pdf.addImage(imgData,'JPEG',0,0,pageWidth,pageHeight,undefined,'FAST');
+      }
+      if(pdf)pdf.save((fileBase||'MALEVIN_Deck')+'.pdf');
+    }catch(err){
+      console.error(err);
+      alert('Export PDF gagal. Silakan coba lagi.');
+    }finally{
+      // Restore the exact DOM position and preview zoom.
+      slideNodes.forEach(slide=>{
+        if(slide.parentNode===stage) originalParent.insertBefore(slide,originalNextSibling);
+      });
+      container.style.transform=originalTransform;
+      container.style.marginBottom=originalMarginBottom;
+      stage.remove();
+      document.body.classList.remove('exporting-pdf');
+      overlay.classList.remove('show');
+      renderPreview();
+      setTimeout(autoScaleDeckContainer,50);
+    }
+  };
+  window.exportMetadataJSON=function(fileBase){const payload={app:'MALEVIN_DECK_STUDIO',version:'7.0',slidesData,customVariables};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(fileBase||'MALEVIN_Deck_Project')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  // UNDO / REDO — snapshot based, with rapid text edits grouped into one action.
+  const __historyUndo=[];
+  const __historyRedo=[];
+  let __historyCurrent='';
+  let __historyBurstTimer=null;
+  let __historyBurstActive=false;
+  let __historyRestoring=false;
+  function __historyState(){return JSON.stringify({slidesData,customVariables});}
+  function __applyHistoryState(raw){
+    try{
+      const state=JSON.parse(raw);
+      if(!Array.isArray(state.slidesData)||!Array.isArray(state.customVariables))return false;
+      slidesData=state.slidesData; customVariables=state.customVariables;
+      saveToLocalStorage();
+      renderForms(); renderPreview();
+      return true;
+    }catch(e){console.error('History restore error',e);return false;}
+  }
+  // Wrap the persistence function so every real mutation becomes undoable without
+  // changing the existing mutation functions throughout the app.
+  const __legacySave=saveToLocalStorage;
+  window.saveToLocalStorage=function(){
+    const next=__historyState();
+    if(!__historyCurrent) __historyCurrent=next;
+    if(!__historyRestoring && next!==__historyCurrent){
+      if(!__historyBurstActive){
+        __historyUndo.push(__historyCurrent);
+        if(__historyUndo.length>100)__historyUndo.shift();
+        __historyRedo.length=0;
+        __historyBurstActive=true;
+      }
+      __historyCurrent=next;
+      clearTimeout(__historyBurstTimer);
+      __historyBurstTimer=setTimeout(()=>{__historyBurstActive=false;},450);
+      updateHistoryButtons();
+    }
+    __legacySave();
+  };
+  window.undoAction=function(){
+    if(!__historyUndo.length)return;
+    clearTimeout(__historyBurstTimer); __historyBurstActive=false;
+    const current=__historyCurrent||__historyState();
+    const previous=__historyUndo.pop();
+    __historyRedo.push(current);
+    __historyRestoring=true;
+    const ok=__applyHistoryState(previous);
+    __historyRestoring=false;
+    __historyCurrent=previous;
+    updateHistoryButtons();
+  };
+  window.redoAction=function(){
+    if(!__historyRedo.length)return;
+    clearTimeout(__historyBurstTimer); __historyBurstActive=false;
+    const current=__historyCurrent||__historyState();
+    const next=__historyRedo.pop();
+    __historyUndo.push(current);
+    __historyRestoring=true;
+    const ok=__applyHistoryState(next);
+    __historyRestoring=false;
+    __historyCurrent=next;
+    updateHistoryButtons();
+  };
+  function updateHistoryButtons(){
+    const u=document.getElementById('undoBtn'),r=document.getElementById('redoBtn');
+    if(u){u.disabled=__historyUndo.length===0;u.style.opacity=u.disabled?.45:1;}
+    if(r){r.disabled=__historyRedo.length===0;r.style.opacity=r.disabled?.45:1;}
+  }
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='z'){
+      if(e.shiftKey){e.preventDefault();redoAction();}
+      else{e.preventDefault();undoAction();}
+    }else if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='y'){
+      e.preventDefault();redoAction();
+    }
+  });
+  __historyCurrent=__historyState();
+  updateHistoryButtons();
+
+  // Remove legacy PDF metadata import controls/handlers entirely.
+  const pdfInput=document.getElementById('pdfInput'); if(pdfInput)pdfInput.remove(); const pdfBtn=document.getElementById('importPdfBtn');if(pdfBtn)pdfBtn.remove();
+  // Initialize new model fields for existing tables and images.
+  slidesData.forEach(s=>s.elements.forEach(el=>{if(el.type==='table')syncTableLegacy(el);if(el.type==='chart'&&el.showBadge===undefined)el.showBadge=false;}));
+})();
+</script>
 </body>
 </html>
