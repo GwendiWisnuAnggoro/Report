@@ -643,6 +643,20 @@
     }
     @media(max-width:768px){ .slide-list-mode{inset:62px 10px 62px 10px !important;} .editor-panel{padding-left:10px !important;padding-right:10px !important;} .cover-container{width:100% !important;height:auto !important;min-height:0 !important;flex-basis:auto;transform:none !important;} .slide-body.has-cover .draggable-element{align-self:center !important;} .slide-accordion + .slide-accordion::before{left:4%;right:4%;} }
 
+
+    /* DUPLIKAT SLIDE */
+    .dup-info { font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+    .dup-master { display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; color: var(--accent-gold); cursor: pointer; padding: 8px 10px; border: 1px solid var(--accent-gold); border-radius: 6px; background: rgba(196,154,87,.08); }
+    .dup-master input, .dup-var-row input { accent-color: var(--accent-gold); width: 15px; height: 15px; flex: 0 0 auto; cursor: pointer; }
+    .dup-var-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+    .dup-var-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border-obsidian); border-radius: 6px; background: rgba(255,255,255,.02); cursor: pointer; font-size: 10px; }
+    .dup-var-row.is-on { border-color: var(--accent-gold); background: rgba(196,154,87,.07); }
+    .dup-var-row .dup-var-name { color: var(--text-white); font-weight: 800; word-break: break-all; }
+    .dup-var-row .dup-var-arrow { display: none; color: var(--accent-gold); font-weight: 800; word-break: break-all; }
+    .dup-var-row.is-on .dup-var-arrow { display: inline; }
+    .dup-var-row .dup-var-type { margin-left: auto; font-size: 8px; color: var(--text-muted); text-transform: uppercase; flex: 0 0 auto; }
+    .dup-note { font-size: 9px; color: var(--text-muted); line-height: 1.5; }
+    .table-cell-editor .var-input { min-width: 0; flex: 1; }
 </style>
 </head>
 <body>
@@ -666,6 +680,21 @@
     </div>
 
     <div id="varAutocomplete"></div>
+
+    <!-- MODAL DUPLIKAT SLIDE -->
+    <div class="modal-overlay" id="dupSlideOverlay">
+        <div class="modal-box" style="max-width:440px;">
+            <div class="modal-title">Duplikat Slide</div>
+            <div class="dup-info" id="dupSlideInfo"></div>
+            <label class="dup-master"><input type="checkbox" id="dupMasterCheck" onchange="dupToggleAll(this.checked)"> Duplikat semua variable juga</label>
+            <div class="dup-var-list" id="dupVarList"></div>
+            <div class="dup-note">Tidak dicentang: slide baru tetap memakai variable yang sama (mengubah isinya ikut mengubah kedua slide). Dicentang: dibuat variable baru berisi sama dengan akhiran (1), (2), dst., dan slide baru memakai variable baru itu. Variable baru tetap bisa diedit bebas.</div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeDupSlideModal()">Batal</button>
+                <button class="btn btn-gold" onclick="confirmDupSlide()">Duplikat Slide</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL VARIABEL -->
     <div class="modal-overlay" id="varModalOverlay">
@@ -899,7 +928,14 @@
             if (collapsedSlides.has(sIdx)) { collapsedSlides.delete(sIdx); if (card) card.classList.remove('is-collapsed'); }
             else { collapsedSlides.add(sIdx); if (card) card.classList.add('is-collapsed'); }
         }
-        function sanitizeVarName(raw) { return (raw || '').trim().replace(/[^a-zA-Z0-9_]/g, ''); }
+        function sanitizeVarName(raw) {
+            let str = (raw || '').trim();
+            let suffix = '';
+            const m = str.match(/^(.*?)\s*\((\d+)\)$/);
+            if (m) { str = m[1]; suffix = ' (' + m[2] + ')'; }
+            str = str.replace(/[^a-zA-Z0-9_]/g, '');
+            return str ? str + suffix : '';
+        }
         function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
         function setMode(mode) {
@@ -1368,7 +1404,7 @@
         function varTextToHtml(str) {
             if (!str) return '';
             const escaped = escapeHtml(str);
-            return escaped.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (m, name) => {
+            return escaped.replace(/\{\{\s*([a-zA-Z0-9_]+(?:\s?\(\d+\))?)\s*\}\}/g, (m, name) => {
                 const exists = customVariables.some(v => v.name.toLowerCase() === name.toLowerCase());
                 const cls = exists ? 'var-token' : 'var-token var-token-missing';
                 return `<span class="${cls}" contenteditable="false" data-var="${name}">${exists ? name : name + '?'}</span>`;
@@ -1416,6 +1452,19 @@
             } else if (vtype === 'slide') {
                 const key = el.getAttribute('data-key');
                 slidesData[sIdx][key] = raw;
+            } else if (vtype === 'thead') {
+                updateTableHeader(sIdx, parseInt(el.getAttribute('data-eidx'), 10), parseInt(el.getAttribute('data-mkey'), 10), raw);
+                return;
+            } else if (vtype === 'tcell') {
+                const rc = el.getAttribute('data-mkey').split('.');
+                updateTableCell(sIdx, parseInt(el.getAttribute('data-eidx'), 10), parseInt(rc[0], 10), parseInt(rc[1], 10), raw);
+                return;
+            } else if (vtype === 'chartlist') {
+                const eIdx = parseInt(el.getAttribute('data-eidx'), 10);
+                const key = el.getAttribute('data-key');
+                const host = el.closest('[data-list-key]');
+                const vals = Array.from(host.querySelectorAll('.var-input')).map(x => serializeVarInput(x).trim());
+                slidesData[sIdx].elements[eIdx][key] = vals.join(', ');
             } else if (vtype === 'metric' || vtype === 'social' || vtype === 'col') {
                 const eIdx = parseInt(el.getAttribute('data-eidx'), 10);
                 const [arrIdx, field] = el.getAttribute('data-mkey').split('.');
@@ -1433,7 +1482,7 @@
             if (node.nodeType !== Node.TEXT_NODE) return;
 
             const text = node.textContent;
-            const match = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/.exec(text);
+            const match = /\{\{\s*([a-zA-Z0-9_]+(?:\s?\(\d+\))?)\s*\}\}/.exec(text);
             if (match) {
                 const fullMatch = match[0];
                 const varName = match[1];
@@ -1597,7 +1646,7 @@
         function updateCalcPreview() {
             const raw = serializeVarInput(document.getElementById('calcFormulaInput'));
             const vars = computeGlobalVariables();
-            let expr = raw.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (m, k) => {
+            let expr = raw.replace(/\{\{\s*([a-zA-Z0-9_]+(?:\s?\(\d+\))?)\s*\}\}/g, (m, k) => {
                 const mk = Object.keys(vars).find(x => x.toLowerCase() === k.toLowerCase());
                 if (!mk || vars[mk].type === 'image') return '0';
                 const n = parseFloat(vars[mk].value);
@@ -1682,7 +1731,7 @@
             const node = sel.anchorNode;
             if (node.nodeType !== Node.TEXT_NODE) return null;
             const textBefore = node.textContent.substring(0, sel.anchorOffset);
-            const m = textBefore.match(/\{\{?([a-zA-Z0-9_]*)$/);
+            const m = textBefore.match(/\{\{?([a-zA-Z0-9_]*(?:\s?\(\d*\)?)?)$/);
             if (!m) return null;
             return { node, query: m[1], matchStart: sel.anchorOffset - m[0].length, matchEnd: sel.anchorOffset };
         }
@@ -1795,9 +1844,18 @@
             return vars;
         }
 
+        /* Ganti {{variable}} jadi teks polos (gambar -> kosong). Dipakai untuk URL & label kanvas grafik. */
+        function resolveVarsPlain(str, vars) {
+            return String(str == null ? '' : str).replace(/\{\{\s*([a-zA-Z0-9_]+(?:\s?\(\d+\))?)\s*\}\}/g, (m, k) => {
+                const mk = Object.keys(vars).find(x => x.toLowerCase() === k.toLowerCase());
+                if (!mk || vars[mk].type === 'image') return '';
+                return String(vars[mk].value == null ? '' : vars[mk].value);
+            });
+        }
+
         function renderVarsInText(str, vars, sIdx, eIdx, fieldKey, subType, subIdx) {
             if (!str) return '';
-            let parsed = String(str).replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, varKey) => {
+            let parsed = String(str).replace(/\{\{\s*([a-zA-Z0-9_]+(?:\s?\(\d+\))?)\s*\}\}/g, (match, varKey) => {
                 const keyLower = varKey.toLowerCase();
                 const matchedKey = Object.keys(vars).find(k => k.toLowerCase() === keyLower);
                 if (!matchedKey) return `<span style="color:var(--negative); font-size:9px; border:1px dashed var(--negative); padding:0 3px;">{{${varKey}}}?</span>`;
@@ -1990,6 +2048,182 @@
             renderForms();
         }
 
+
+        /* ===== DUPLIKAT SLIDE ===== */
+        const VAR_REF_SRC = '\\{\\{\\s*([a-zA-Z0-9_]+(?:\\s?\\(\\d+\\))?)\\s*\\}\\}';
+        const MASK_CH = '\uE000', MASK_END = '\uE001';
+        function _escRe(t) { return String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+        function _eachString(node, fn, key) {
+            if (typeof node === 'string') { fn(node, key); return; }
+            if (Array.isArray(node)) { node.forEach(n => _eachString(n, fn, key)); return; }
+            if (node && typeof node === 'object') Object.keys(node).forEach(k => { if (k !== 'imgData') _eachString(node[k], fn, k); });
+        }
+        function _mapStrings(node, fn, key) {
+            if (typeof node === 'string') return fn(node, key);
+            if (Array.isArray(node)) { for (let i = 0; i < node.length; i++) node[i] = _mapStrings(node[i], fn, key); return node; }
+            if (node && typeof node === 'object') { Object.keys(node).forEach(k => { if (k !== 'imgData') node[k] = _mapStrings(node[k], fn, k); }); return node; }
+            return node;
+        }
+
+        /* Variable apa saja yang dipakai slide: {{nama}}, nama polos di dalam ${...}, dan pilihan variable gambar */
+        function collectSlideVariables(slide) {
+            const found = new Set();
+            const byLower = {};
+            customVariables.forEach(v => { byLower[v.name.toLowerCase()] = v; });
+            const bare = customVariables.filter(v => v.type !== 'image' && /^[a-zA-Z0-9_]+$/.test(v.name));
+            _eachString(slide, (str, key) => {
+                if (key === 'imgVarRef') { if (byLower[str.toLowerCase()]) found.add(str.toLowerCase()); return; }
+                if (str.indexOf('{{') < 0 && str.indexOf('${') < 0) return;
+                const masked = str.replace(new RegExp(VAR_REF_SRC, 'g'), (m, n) => {
+                    if (byLower[n.toLowerCase()]) found.add(n.toLowerCase());
+                    return MASK_CH + MASK_END;
+                });
+                masked.replace(/\$\{([^}]+)\}/g, (m, expr) => {
+                    bare.forEach(v => { if (new RegExp('\\b' + _escRe(v.name) + '\\b').test(expr)) found.add(v.name.toLowerCase()); });
+                    return m;
+                });
+            });
+            return customVariables.filter(v => found.has(v.name.toLowerCase()));
+        }
+
+        function _rewriteVarString(str, lowerMap, bareList) {
+            if (str.indexOf('{{') < 0 && str.indexOf('${') < 0) return str;
+            const toks = [];
+            const mk = t => { toks.push(t); return MASK_CH.repeat(toks.length) + MASK_END; };
+            let out = str.replace(new RegExp(VAR_REF_SRC, 'g'), (m, n) => {
+                const nn = lowerMap[n.toLowerCase()];
+                return mk(nn ? '{{' + nn + '}}' : m);
+            });
+            out = out.replace(/\$\{([^}]+)\}/g, (m, expr) => {
+                let e = expr;
+                bareList.forEach(r => {
+                    e = e.replace(new RegExp('\\b' + _escRe(r.oldName) + '\\b', 'g'), () => mk('{{' + r.newName + '}}'));
+                });
+                return '${' + e + '}';
+            });
+            return out.replace(new RegExp(MASK_CH + '+' + MASK_END, 'g'), m => toks[m.length - 2]);
+        }
+        function rewriteVarRefs(slide, renames) {
+            const lowerMap = {};
+            renames.forEach(r => { lowerMap[r.oldName.toLowerCase()] = r.newName; });
+            const bareList = renames.filter(r => r.type !== 'image' && /^[a-zA-Z0-9_]+$/.test(r.oldName));
+            _mapStrings(slide, (str, key) => {
+                if (key === 'imgVarRef') return lowerMap[str.toLowerCase()] || str;
+                return _rewriteVarString(str, lowerMap, bareList);
+            });
+        }
+
+        /* Nama salinan: dasar nama + " (1)", " (2)", dst. (nomor kosong pertama) */
+        function nextVarCopyName(name, reserved) {
+            const base = name.replace(/\s?\(\d+\)$/, '');
+            const taken = new Set(customVariables.map(v => v.name.toLowerCase()));
+            (reserved || []).forEach(n => taken.add(n.toLowerCase()));
+            let n = 1;
+            while (taken.has((base + ' (' + n + ')').toLowerCase())) n++;
+            return base + ' (' + n + ')';
+        }
+
+        function duplicateSlide(sIdx) {
+            const src = slidesData[sIdx];
+            if (!src) return;
+            const used = collectSlideVariables(src);
+            if (!used.length) { performDuplicateSlide(sIdx, []); return; }
+            openDupSlideModal(sIdx, used);
+        }
+
+        function performDuplicateSlide(sIdx, varsToCopy) {
+            const clone = JSON.parse(JSON.stringify(slidesData[sIdx]));
+
+            if (varsToCopy.length) {
+                const reserved = [];
+                const renames = varsToCopy.map(v => {
+                    const newName = nextVarCopyName(v.name, reserved);
+                    reserved.push(newName);
+                    return { oldName: v.name, newName, type: v.type, value: v.value };
+                });
+                renames.forEach(r => customVariables.push({ name: r.newName, type: r.type, value: r.value }));
+                rewriteVarRefs(clone, renames);
+            }
+
+            /* uid elemen harus unik; tumpukan (stackTo) diarahkan ke uid baru di slide salinan */
+            const uidMap = {};
+            (clone.elements || []).forEach(el => {
+                if (el.uid) {
+                    const nu = 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                    uidMap[el.uid] = nu; el.uid = nu;
+                }
+            });
+            (clone.elements || []).forEach(el => {
+                if (el.stackTo) { if (uidMap[el.stackTo]) el.stackTo = uidMap[el.stackTo]; else delete el.stackTo; }
+            });
+
+            slidesData.splice(sIdx + 1, 0, clone);
+            slidesData.forEach((sl, i) => { sl.id = i + 1; });
+
+            const shifted = new Set();
+            collapsedSlides.forEach(i => shifted.add(i > sIdx ? i + 1 : i));
+            collapsedSlides.clear(); shifted.forEach(i => collapsedSlides.add(i));
+
+            saveToLocalStorage();
+            renderForms();
+
+            const card = document.querySelector('.slide-accordion[data-slide-index="' + (sIdx + 1) + '"]');
+            if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showMalevinToast('success', 'Slide Diduplikat',
+                'Slide ' + (sIdx + 1) + ' disalin menjadi slide ' + (sIdx + 2) +
+                (varsToCopy.length ? ' beserta ' + varsToCopy.length + ' variable baru.' : '.'));
+        }
+
+        let dupSlideState = null;
+        function openDupSlideModal(sIdx, used) {
+            dupSlideState = { sIdx, used };
+            const reserved = [];
+            const rows = used.map((v, i) => {
+                const preview = nextVarCopyName(v.name, reserved);
+                reserved.push(preview);
+                return `<label class="dup-var-row" data-i="${i}">
+                    <input type="checkbox" onchange="dupRowChanged()">
+                    <span class="dup-var-name">${v.type === 'image' ? '🖼️ ' : ''}${escapeHtml(v.name)}</span>
+                    <span class="dup-var-arrow">→ ${escapeHtml(preview)}</span>
+                    <span class="dup-var-type">${VAR_TYPE_LABELS[v.type] || v.type}</span>
+                </label>`;
+            }).join('');
+            document.getElementById('dupSlideInfo').textContent =
+                'Slide ' + (sIdx + 1) + ' memakai ' + used.length + ' variable. Centang variable yang ikut diduplikat.';
+            document.getElementById('dupVarList').innerHTML = rows;
+            document.getElementById('dupMasterCheck').checked = false;
+            document.getElementById('dupSlideOverlay').classList.add('show');
+        }
+        function closeDupSlideModal() {
+            document.getElementById('dupSlideOverlay').classList.remove('show');
+            dupSlideState = null;
+        }
+        function dupRowChanged() {
+            const boxes = document.querySelectorAll('#dupVarList .dup-var-row');
+            let all = true;
+            boxes.forEach(r => {
+                const on = r.querySelector('input').checked;
+                r.classList.toggle('is-on', on);
+                if (!on) all = false;
+            });
+            document.getElementById('dupMasterCheck').checked = all && boxes.length > 0;
+        }
+        function dupToggleAll(checked) {
+            document.querySelectorAll('#dupVarList .dup-var-row input').forEach(i => { i.checked = checked; });
+            dupRowChanged();
+        }
+        function confirmDupSlide() {
+            if (!dupSlideState) return;
+            const { sIdx, used } = dupSlideState;
+            const chosen = [];
+            document.querySelectorAll('#dupVarList .dup-var-row').forEach(r => {
+                if (r.querySelector('input').checked) chosen.push(used[parseInt(r.getAttribute('data-i'), 10)]);
+            });
+            closeDupSlideModal();
+            performDuplicateSlide(sIdx, chosen);
+        }
+
         function addElementToSlide(sIdx, type) {
             const newElem = { type, width: 'full', shapeStyle: 'rounded' };
             if (type === 'cover') { 
@@ -2155,8 +2389,8 @@
                         fields += `
                         <div class="form-group"><label>Label</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label, 'HASIL PERHITUNGAN', false)}</div>
                         <div class="two-col-form">
-                            <div class="form-group"><label>Prefix (mis: Rp)</label><input class="form-control" value="${escapeHtml(elem.prefix || '')}" oninput="updateElem(${sIdx},${eIdx},'prefix',this.value)"></div>
-                            <div class="form-group"><label>Suffix (mis: %)</label><input class="form-control" value="${escapeHtml(elem.suffix || '')}" oninput="updateElem(${sIdx},${eIdx},'suffix',this.value)"></div>
+                            <div class="form-group"><label>Prefix (mis: Rp)</label>${varInputHTML('elem', sIdx, eIdx, 'prefix', elem.prefix, 'Rp', false)}</div>
+                            <div class="form-group"><label>Suffix (mis: %)</label>${varInputHTML('elem', sIdx, eIdx, 'suffix', elem.suffix, '%', false)}</div>
                         </div>
                         <div class="form-group"><label>Rumus</label>${varInputHTML('elem', sIdx, eIdx, 'formula', elem.formula, '10 + 20', false, 'number')}</div>
                         <button class="btn btn-gold" style="margin-top:2px; font-size:9px;" onclick="openCalcModal(${sIdx},${eIdx})">∑ Buka Kalkulator</button>`;
@@ -2300,7 +2534,7 @@
                         ${(imgPos === 'absolute' || imgPos === 'background') ? `<div class="form-group"><label>Opacity (${elem.imgOpacity != null ? elem.imgOpacity : 100}%)</label><input type="range" min="5" max="100" class="form-control" value="${elem.imgOpacity != null ? elem.imgOpacity : 100}" oninput="this.previousElementSibling.textContent='Opacity ('+this.value+'%)';updateElemNum(${sIdx},${eIdx},'imgOpacity',this.value)"></div>` : ''}`; 
                     } 
                     else if (elem.type === 'link') {
-                        fields += `<div class="form-group"><label>Label Tautan</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label || 'TAUTAN', 'TAUTAN', false)}</div><div class="form-group"><label>Teks Tombol / Link</label>${varInputHTML('elem', sIdx, eIdx, 'text', elem.text || 'Buka Tautan', 'Buka Tautan', false)}</div><div class="form-group"><label>URL</label><input class="form-control" type="url" value="${escapeHtml(elem.url || '')}" placeholder="https://..." onchange="updateElem(${sIdx}, ${eIdx}, 'url', this.value)"></div>`;
+                        fields += `<div class="form-group"><label>Label Tautan</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label || 'TAUTAN', 'TAUTAN', false)}</div><div class="form-group"><label>Teks Tombol / Link</label>${varInputHTML('elem', sIdx, eIdx, 'text', elem.text || 'Buka Tautan', 'Buka Tautan', false)}</div><div class="form-group"><label>URL</label>${varInputHTML('elem', sIdx, eIdx, 'url', elem.url, 'https://...', false)}</div>`;
                     }
                     else if (elem.type === 'comparison') {
                         fields += `
@@ -2354,7 +2588,7 @@
                                 </div>
                             </div>
                             <div class="form-group"><label>Label X (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'labels', elem.labels, 'Jan, Feb, Mar', false)}</div>
-                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>
+                            <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false, 'number')}</div>
                             <div class="two-col-form">
                                 <div class="form-group">
                                     <label class="toggle-label">
@@ -2363,7 +2597,7 @@
                                     </label>
                                 </div>
                                 <div class="form-group"><label>Sufiks Value (Opsional, cth: %)</label>
-                                    <input type="text" class="form-control" placeholder="%" value="${elem.valueSuffix || ''}" onchange="updateElem(${sIdx}, ${eIdx}, 'valueSuffix', this.value)">
+                                    ${varInputHTML('elem', sIdx, eIdx, 'valueSuffix', elem.valueSuffix, '%', false)}
                                 </div>
                             </div>`; 
                     }
@@ -2372,7 +2606,7 @@
                 });
 
                 if (collapsedSlides.has(sIdx)) card.classList.add('is-collapsed');
-                card.innerHTML = `<div class="slide-accordion-header"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><button type="button" class="slide-drag-handle" data-slide-drag-handle aria-label="Tahan untuk memindahkan slide" title="Tahan lalu geser untuk memindahkan slide">⋮⋮</button><button type="button" class="slide-collapse-btn" title="Tutup/buka bagian edit slide ini" onclick="toggleSlideCollapse(${sIdx})">▾</button><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong></div><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
+                card.innerHTML = `<div class="slide-accordion-header"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><button type="button" class="slide-drag-handle" data-slide-drag-handle aria-label="Tahan untuk memindahkan slide" title="Tahan lalu geser untuk memindahkan slide">⋮⋮</button><button type="button" class="slide-collapse-btn" title="Tutup/buka bagian edit slide ini" onclick="toggleSlideCollapse(${sIdx})">▾</button><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong></div><div style="display:flex;gap:6px;flex-shrink:0;"><button class="btn btn-gold" title="Duplikat slide ini (muncul tepat di bawahnya)" onclick="duplicateSlide(${sIdx})">⧉ Duplikat</button><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div></div>
                 <div class="form-group"><label>Footer Left</label>${varInputHTML('slide', sIdx, null, 'footerLeft', slide.footerLeft, '', false)}</div>
                 ${elementsHTML}
                 <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN BARU:</label>
@@ -2846,7 +3080,7 @@
                     }
                     else if (elem.type === 'calc') {
                         const label = renderVarsInText(elem.label || 'HASIL PERHITUNGAN', globalVars, sIdx, eIdx, 'label');
-                        let expr = String(elem.formula || '0').replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (m, k) => {
+                        let expr = String(elem.formula || '0').replace(/\{\{\s*([a-zA-Z0-9_]+(?:\s?\(\d+\))?)\s*\}\}/g, (m, k) => {
                             const mk = Object.keys(globalVars).find(x => x.toLowerCase() === k.toLowerCase());
                             if (!mk || globalVars[mk].type === 'image') return '0';
                             const n = parseFloat(globalVars[mk].value);
@@ -2861,7 +3095,7 @@
                                 resultText = (r === undefined || r === null || Number.isNaN(r) || !isFinite(r)) ? 'Error' : String(Math.round(r * 10000) / 10000);
                             } catch (err) { resultText = 'Error'; }
                         }
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="calc-capsule"><span class="calc-label">${label}</span><span class="calc-result">${escapeHtml(elem.prefix || '')}${resultText}${escapeHtml(elem.suffix || '')}</span></div>`;
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="calc-capsule"><span class="calc-label">${label}</span><span class="calc-result">${renderVarsInText(elem.prefix || '', globalVars, sIdx, eIdx, 'prefix')}${resultText}${renderVarsInText(elem.suffix || '', globalVars, sIdx, eIdx, 'suffix')}</span></div>`;
                     }
                     else if (elem.type === 'kpi') {
                         const metrics = elem.metrics || [];
@@ -2944,7 +3178,7 @@
                     else if (elem.type === 'link') {
                         const linkLabel = renderVarsInText(elem.label || 'TAUTAN', globalVars, sIdx, eIdx, 'label');
                         const linkText = renderVarsInText(elem.text || elem.url || 'Buka Tautan', globalVars, sIdx, eIdx, 'text');
-                        const safeUrl = String(elem.url || '#').replace(/"/g,'&quot;');
+                        const safeUrl = String(resolveVarsPlain(elem.url || '', globalVars) || '#').replace(/"/g,'&quot;');
                         p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="link-card" style="border-radius:${br};"><div><div style="font-size:8px;letter-spacing:1px;color:var(--accent-gold);font-weight:800; margin-bottom:2px;">${linkLabel}</div><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a></div><span class="link-arrow">↗</span></div>`;
                     }
                     else if (elem.type === 'comparison') {
@@ -2991,7 +3225,7 @@
                             labels: rawLabels,
                             data: dataArr,
                             showValues: !!elem.showValues,
-                            valueSuffix: elem.valueSuffix || ''
+                            valueSuffix: resolveVarsPlain(elem.valueSuffix || '', globalVars)
                         });
                     }
 
@@ -3184,8 +3418,8 @@
   window.syncTableLegacy = function(elem){ const m=getTableModel(elem); elem.headersData=m.headers; elem.tableData=m.rows; elem.headers=m.headers.join(', '); elem.rowsData=m.rows.map(r=>r.join(', ')).join('\n'); };
   window.renderDynamicTableInputs = function(sIdx,eIdx,elem){
     const m=getTableModel(elem);
-    const h=m.headers.map((v,i)=>`<div class="table-cell-editor"><span style="width:22px;color:var(--brand-gold);font-size:8px;font-weight:800;">C${i+1}</span><input class="form-control" value="${escapeHtml(v)}" placeholder="Nama kolom" oninput="updateTableHeader(${sIdx},${eIdx},${i},this.value)"></div>`).join('');
-    const r=m.rows.map((row,ri)=>`<div class="table-row-editor"><div style="font-size:8px;color:var(--text-muted);font-weight:800;">BARIS ${ri+1}</div>${row.map((v,ci)=>`<div class="table-cell-editor"><span style="width:22px;color:var(--text-muted);font-size:8px;">C${ci+1}</span><input class="form-control" value="${escapeHtml(v)}" placeholder="Isi sel" oninput="updateTableCell(${sIdx},${eIdx},${ri},${ci},this.value)"></div>`).join('')}</div>`).join('');
+    const h=m.headers.map((v,i)=>`<div class="table-cell-editor"><span style="width:22px;color:var(--brand-gold);font-size:8px;font-weight:800;">C${i+1}</span>${varInputHTML('thead', sIdx, eIdx, String(i), v, 'Nama kolom', false)}</div>`).join('');
+    const r=m.rows.map((row,ri)=>`<div class="table-row-editor"><div style="font-size:8px;color:var(--text-muted);font-weight:800;">BARIS ${ri+1}</div>${row.map((v,ci)=>`<div class="table-cell-editor"><span style="width:22px;color:var(--text-muted);font-size:8px;">C${ci+1}</span>${varInputHTML('tcell', sIdx, eIdx, ri + '.' + ci, v, 'Isi sel', false)}</div>`).join('')}</div>`).join('');
     return `<div style="display:grid;gap:10px;"><div><div style="font-size:8px;color:var(--text-muted);margin-bottom:5px;">NAMA KOLOM</div>${h}</div><div><div style="font-size:8px;color:var(--text-muted);margin-bottom:5px;">DATA BARIS</div>${r}</div></div>`;
   };
   window.updateTableHeader=function(s,e,i,v){const x=slidesData[s].elements[e]; const m=getTableModel(x); m.headers[i]=v; x.headersData=m.headers;x.tableData=m.rows;syncTableLegacy(x);saveToLocalStorage();renderPreview();};
@@ -3216,11 +3450,24 @@
       card.querySelectorAll('.element-box').forEach((box,eIdx)=>{ if(elemTypes[eIdx]?.type==='link') addLinkFields(box,sIdx,eIdx,elemTypes[eIdx]); });
     });
   }
-  function addLinkFields(box,s,e,el){ if(box.querySelector('.link-enhanced-fields'))return; const host=box.querySelector('.element-header'); if(!host)return; const wrap=document.createElement('div');wrap.className='link-enhanced-fields';wrap.style.cssText='display:grid;gap:7px;margin-top:7px;';wrap.innerHTML=`<div class="form-group"><label>Label Tautan</label><input class="form-control" value="${escapeHtml(el.label||'TAUTAN')}" oninput="updateElem(${s},${e},'label',this.value)"></div><div class="form-group"><label>Teks Link</label><input class="form-control" value="${escapeHtml(el.text||'Buka Tautan')}" oninput="updateElem(${s},${e},'text',this.value)"></div><div class="form-group"><label>URL</label><input class="form-control" type="url" value="${escapeHtml(el.url||'')}" placeholder="https://..." oninput="updateElem(${s},${e},'url',this.value)"></div>`;box.appendChild(wrap); }
+  function addLinkFields(box,s,e,el){ return; /* dinonaktifkan: Label/Teks/URL sudah ada di form utama dan mendukung variable */ if(box.querySelector('.link-enhanced-fields'))return; const host=box.querySelector('.element-header'); if(!host)return; const wrap=document.createElement('div');wrap.className='link-enhanced-fields';wrap.style.cssText='display:grid;gap:7px;margin-top:7px;';wrap.innerHTML=`<div class="form-group"><label>Label Tautan</label><input class="form-control" value="${escapeHtml(el.label||'TAUTAN')}" oninput="updateElem(${s},${e},'label',this.value)"></div><div class="form-group"><label>Teks Link</label><input class="form-control" value="${escapeHtml(el.text||'Buka Tautan')}" oninput="updateElem(${s},${e},'text',this.value)"></div><div class="form-group"><label>URL</label><input class="form-control" type="url" value="${escapeHtml(el.url||'')}" placeholder="https://..." oninput="updateElem(${s},${e},'url',this.value)"></div>`;box.appendChild(wrap); }
 
   // Dynamic list UI for comma-separated chart labels/data: small rows with +/-.
   function enhanceChartLists(){ document.querySelectorAll('.element-box').forEach((box)=>{ const header=box.querySelector('.element-header'); if(!header)return; const m=header.textContent.match(/ELEM (\d+)/); if(!m)return; const eIdx=Number(m[1])-1; const card=box.closest('.slide-accordion');const sIdx=Number(card?.dataset.slideIndex);const el=slidesData[sIdx]?.elements[eIdx]; if(!el||el.type!=='chart'||box.querySelector('.chart-list-enhanced'))return; const groups=[['labels','Label X'],['data','Data Y']]; const panel=document.createElement('div');panel.className='chart-list-enhanced';panel.style.cssText='display:grid;gap:8px;'; const legacy=box.querySelectorAll('.form-group'); legacy.forEach(g=>{const t=(g.querySelector('label')?.textContent||'').toLowerCase();if(t.includes('label x')||t.includes('data y'))g.style.display='none';}); groups.forEach(([key,label])=>{ const g=document.createElement('div');g.className='form-group';g.innerHTML=`<label>${label}</label><div class="dynamic-list" data-list-key="${key}"></div>`;panel.appendChild(g); }); box.appendChild(panel); groups.forEach(([key])=>renderList(panel.querySelector(`[data-list-key="${key}"]`),el,key,sIdx,eIdx)); }); }
-  function renderList(host,el,key,s,e){host.innerHTML='';const vals=String(el[key]||'').split(',').map(x=>x.trim()).filter((x,i,a)=>x||a.length===1);if(!vals.length)vals=[''];vals.forEach((v,i)=>{const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto auto;gap:5px;margin-top:4px;';row.innerHTML=`<input class="form-control" value="${escapeHtml(v)}"><button class="btn btn-gold" type="button">+</button><button class="btn btn-danger" type="button">−</button>`;const input=row.children[0];input.oninput=()=>{vals[i]=input.value;el[key]=vals.join(', ');saveToLocalStorage();renderPreview();};row.children[1].onclick=()=>{vals.splice(i+1,0,'');el[key]=vals.join(', ');saveToLocalStorage();renderForms();};row.children[2].onclick=()=>{if(vals.length<=1)return;vals.splice(i,1);el[key]=vals.join(', ');saveToLocalStorage();renderForms();};host.appendChild(row);});}
+  function renderList(host,el,key,s,e){
+    host.innerHTML='';
+    let vals=String(el[key]||'').split(',').map(x=>x.trim());
+    if(!vals.length)vals=[''];
+    const readVals=()=>Array.from(host.querySelectorAll('.var-input')).map(x=>serializeVarInput(x).trim());
+    vals.forEach((v,i)=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px;margin-top:4px;';
+      row.innerHTML=`<div class="form-control var-input" contenteditable="true" data-vtype="chartlist" data-sidx="${s}" data-eidx="${e}" data-key="${key}" ${key==='data'?'data-accept="number"':''} data-placeholder="${key==='data'?'Angka atau {{variable}}':'Label atau {{variable}}'}">${varTextToHtml(v)}</div><button class="btn btn-gold" type="button">+</button><button class="btn btn-danger" type="button">−</button>`;
+      row.children[1].onclick=()=>{const a=readVals();a.splice(i+1,0,'');el[key]=a.join(', ');saveToLocalStorage();renderForms();};
+      row.children[2].onclick=()=>{const a=readVals();if(a.length<=1)return;a.splice(i,1);el[key]=a.join(', ');saveToLocalStorage();renderForms();};
+      host.appendChild(row);
+    });
+  }
   const origRenderForms2=window.renderForms; window.renderForms=function(){origRenderForms2(); enhanceChartLists();};
 
   // Slide list-view drag and drop: explicit handle only, no preventDefault on editor text.
