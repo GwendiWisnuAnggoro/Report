@@ -107,6 +107,12 @@
     }
     .slide-accordion { background-color: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box; }
     .slide-accordion-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-obsidian); padding-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+    .slide-accordion.is-collapsed { gap: 0; padding-bottom: 12px; }
+    .slide-accordion.is-collapsed > *:not(.slide-accordion-header) { display: none !important; }
+    .slide-accordion.is-collapsed .slide-accordion-header { border-bottom: 0; padding-bottom: 0; }
+    .slide-collapse-btn { background: transparent; border: 1px solid var(--border-obsidian); color: var(--text-muted); width: 22px; height: 22px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; transition: transform .15s ease; }
+    .slide-collapse-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+    .slide-accordion.is-collapsed .slide-collapse-btn { transform: rotate(-90deg); }
     
     .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .add-elem-btn { background-color: var(--surface-dark); color: var(--text-white); border: 1px solid var(--border-obsidian); font-size: 9px; padding: 8px 4px; border-radius: 4px; cursor: pointer; font-weight: 700; letter-spacing: 0.5px; text-align: center; }
@@ -133,6 +139,13 @@
     .global-var-list { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
     .global-var-list::-webkit-scrollbar { height: 4px; }
     .global-var-list::-webkit-scrollbar-thumb { background: var(--border-obsidian); border-radius: 2px; }
+    .global-var-list.bulk-mode { flex-direction: column; flex-wrap: wrap; overflow-x: visible; max-height: 260px; overflow-y: auto; }
+    .var-bulk-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--border-obsidian); border-radius: 5px; background: rgba(255,255,255,.02); }
+    .var-bulk-name { font-size: 9px; font-weight: 800; color: var(--accent-gold); flex: 0 0 auto; min-width: 90px; }
+    .var-bulk-input { flex: 1; min-width: 0; padding: 5px 8px; font-size: 10px; }
+    .var-bulk-img-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-obsidian); flex: 0 0 auto; }
+    .var-bulk-edit, .var-bulk-del { cursor: pointer; font-size: 10px; flex: 0 0 auto; }
+    .var-bulk-del { color: #E55353; }
 
     .var-pill-btn { background: rgba(196, 154, 87, 0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 9px; padding: 3px 8px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
     .var-pill-btn:hover { background: var(--accent-gold); color: #111211; }
@@ -180,6 +193,41 @@
     .slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #C49A57 0%, rgba(196,154,87,0.2) 100%); }
     
     .slide-body { flex: 1; display: flex; flex-wrap: wrap; flex-direction: row; align-content: flex-start; align-items: flex-start; gap: 16px; justify-content: flex-start; margin: 10px 0; position: relative; width: 100%; }
+    .slide-body[data-slide-index] { display: grid; grid-template-columns: repeat(60, 1fr); grid-auto-rows: 1px; grid-auto-flow: row dense; gap: 0; align-items: stretch; width: calc(100% + 16px); margin: 10px -16px -6px 0; }
+    /* jarak antar elemen = margin kanan + bawah (16px), selalu sama horizontal & vertikal */
+    .slide-body[data-slide-index] .draggable-element { min-width: 0; align-self: stretch; margin: 0 16px 16px 0; }
+    /* konten elemen ikut memenuhi tinggi kotak yang sudah dicocokkan (kartu tidak menyisakan margin kosong) */
+    .slide-body[data-slide-index] .draggable-element { display: flex; flex-direction: column; }
+    .slide-body[data-slide-index] .draggable-element > :not(.elem-drag-bar) { flex: 1 1 auto; min-height: 0; box-sizing: border-box; }
+    .slide-body[data-slide-index] > .bento-drop-slot { margin: 0 16px 16px 0; box-sizing: border-box; }
+
+    /* BENTO EMPTY-SLOT — lubang kosong di grid yang bisa menerima drag & drop elemen */
+    .bento-drop-slot {
+        border: 1.5px dashed transparent;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: transparent;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        background: transparent;
+        transition: all 0.15s ease;
+        pointer-events: none; /* aktif hanya saat drag, di slide asal elemen */
+        padding: 4px;
+    }
+    body.is-dragging-elem .slide-body.drag-source > .bento-drop-slot { pointer-events: auto; border-color: rgba(196, 154, 87, 0.75); color: var(--accent-gold); background: rgba(196, 154, 87, 0.07); animation: bentoSlotPulse 1.1s ease-in-out infinite; }
+    @keyframes bentoSlotPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(196,154,87,0); } 50% { box-shadow: 0 0 0 3px rgba(196,154,87,0.18); } }
+    .slide-body > .bento-drop-slot.bento-newrow { display: none; }
+    body.is-dragging-elem .slide-body.drag-source > .bento-drop-slot.bento-newrow { display: flex; }
+    .bento-drop-slot:hover, .bento-drop-slot.drag-over {
+        border-color: var(--accent-gold);
+        color: var(--accent-gold);
+        background: rgba(196, 154, 87, 0.09);
+    }
 
     .slide-body.drag-over-empty {
         outline: 1px dashed var(--accent-gold);
@@ -220,15 +268,60 @@
     .draggable-element:active { cursor: grabbing; opacity: 0.75; }
     .draggable-element:hover { border-color: rgba(196, 154, 87, 0.4); background: rgba(196, 154, 87, 0.02); }
 
+    .draggable-element.drag-over-swap { outline: 2px dashed var(--accent-gold); outline-offset: -2px; background: rgba(196, 154, 87, 0.10) !important; }
+    .draggable-element.drag-over-swap::after { content: '\21C4  TUKAR POSISI'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: var(--accent-gold); background: rgba(11, 12, 11, 0.6); pointer-events: none; z-index: 9; }
     .draggable-element.drag-over-top { border-top: 3px solid var(--accent-gold) !important; box-shadow: 0 -8px 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-bottom { border-bottom: 3px solid var(--accent-gold) !important; box-shadow: 0 8px 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-left { border-left: 3px solid var(--accent-gold) !important; box-shadow: -8px 0 15px var(--accent-gold-glow); }
     .draggable-element.drag-over-right { border-right: 3px solid var(--accent-gold) !important; box-shadow: 8px 0 15px var(--accent-gold-glow); }
 
-    .elem-drag-bar { display: none; position: absolute; top: -12px; right: 6px; background: var(--card-obsidian); border: 1px solid var(--accent-gold); border-radius: 4px; padding: 2px 6px; font-size: 8px; font-weight: 800; color: var(--accent-gold); gap: 4px; z-index: 10; cursor: default; }
+
+    /* SENTUH (HP): tahan lama untuk menyeret, ketuk untuk menampilkan tombol ukuran */
+    .draggable-element { -webkit-touch-callout: none; -webkit-user-select: none; }
+    .draggable-element.is-selected { border-color: rgba(196, 154, 87, 0.6); }
+    .draggable-element.is-selected .elem-drag-bar { display: flex; }
+    .draggable-element.touch-armed { border-color: var(--accent-gold); box-shadow: 0 0 0 2px var(--accent-gold-glow); }
+    .draggable-element.touch-lifting { opacity: .35; }
+    .touch-drag-ghost { position: fixed; z-index: 100001; pointer-events: none; transform: translate(-50%, -130%); background: var(--card-obsidian); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 10px; font-weight: 800; letter-spacing: 1px; padding: 8px 14px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.7); white-space: nowrap; }
+    body.touch-dragging { overflow: hidden; touch-action: none; }
+    body.touch-dragging #previewPanel { overflow: hidden; }
+    .elem-drag-bar { display: none; position: absolute; top: -13px; right: 6px; background: var(--card-obsidian); border: 1px solid var(--accent-gold); border-radius: 20px; padding: 3px 8px; font-size: 8px; font-weight: 800; color: var(--accent-gold); align-items: center; gap: 6px; z-index: 10; cursor: default; box-shadow: 0 3px 10px rgba(0,0,0,0.5); }
     .draggable-element:hover .elem-drag-bar { display: flex; }
-    .grid-opt-btn { cursor: pointer; padding: 1px 4px; border-radius: 2px; }
-    .grid-opt-btn:hover { background: var(--accent-gold); color: #111211; }
+    .elem-drag-bar > span:first-child { letter-spacing: 1px; opacity: .85; }
+    .elem-drag-bar .opt-sep { width: 1px; height: 10px; background: var(--border-obsidian); flex-shrink: 0; }
+    .elem-drag-bar .opt-group { display: inline-flex; gap: 3px; }
+
+    .grid-opt-btn {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        color: var(--text-muted);
+        background: var(--surface-dark);
+        border: 1px solid var(--border-obsidian);
+        transition: all 0.15s ease;
+        user-select: none;
+    }
+    .grid-opt-btn:hover { background: var(--accent-gold-glow); color: var(--accent-gold); border-color: var(--accent-gold); transform: translateY(-1px); }
+    .grid-opt-btn:active { transform: translateY(0); }
+    .grid-opt-btn.active { background: linear-gradient(135deg, #C49A57 0%, #E0CC75 100%); color: #111211; border-color: transparent; box-shadow: 0 2px 8px var(--accent-gold-glow); }
+    .elem-drag-bar .grid-opt-btn { padding: 2px 7px; font-size: 8px; background: transparent; border-color: rgba(196,154,87,0.35); color: var(--accent-gold); }
+    .elem-drag-bar .grid-opt-btn:hover, .elem-drag-bar .grid-opt-btn.active { background: var(--accent-gold); color: #111211; border-color: var(--accent-gold); }
+
+    /* TOGGLE SWITCH — menggantikan checkbox bawaan browser */
+    .toggle-switch { position: relative; display: inline-flex; align-items: center; width: 34px; height: 19px; flex-shrink: 0; cursor: pointer; vertical-align: middle; }
+    .toggle-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+    .toggle-switch .toggle-track { position: absolute; inset: 0; background: var(--surface-dark); border: 1px solid var(--border-obsidian); border-radius: 20px; transition: all 0.2s ease; }
+    .toggle-switch .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--text-muted); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+    .toggle-switch input:checked ~ .toggle-track { background: rgba(196, 154, 87, 0.25); border-color: var(--accent-gold); }
+    .toggle-switch input:checked ~ .toggle-thumb { left: 17px; background: linear-gradient(135deg, #C49A57 0%, #E0CC75 100%); }
+    .toggle-switch input:focus-visible ~ .toggle-track { box-shadow: 0 0 0 2px var(--accent-gold-glow); }
+    label.toggle-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 
     .elem-brand-pill { background: linear-gradient(135deg, #C49A57 0%, #E0CC75 100%); color: #111211; font-size: 8px; font-weight: 800; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; display: inline-block; }
     .elem-tag { font-size: 9px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; display: inline-block; }
@@ -241,9 +334,42 @@
 
     .text-card-wrap { background-color: rgba(15, 16, 15, 0.72); border: 1px solid var(--border-obsidian); border-left: 2px solid var(--accent-gold); padding: 12px 14px; border-radius: 0 4px 4px 0; }
 
-    .kpi-grid { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
-    .kpi-card { flex: 1; min-width: 100px; background: rgba(15, 16, 15, 0.82); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; }
-    .kpi-value { font-size: 20px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; margin-top: 4px; }
+    /* KPI GRID — CSS Grid dengan dense packing.
+       - Setiap baris tingginya mengikuti kartu tertinggi di baris itu (default grid behaviour).
+       - grid-auto-flow: dense membuat kartu pendek otomatis "naik" mengisi lubang kosong
+         yang ditinggalkan kartu lain, tanpa mengubah urutan datanya.
+       - Tinggi tiap kartu dihitung ulang oleh equalizeKpiGrid() (lihat script) berdasarkan
+         panjang teks di dalamnya, dibulatkan ke satuan baris grid-auto-rows di bawah.
+       - Ada batas tinggi maksimal (lihat MAX_SPAN di equalizeKpiGrid) — kartu dengan isi
+         sangat panjang akan dipotong (overflow:hidden) alih-alih mendorong baris lain. */
+    .kpi-grid { display: grid; gap: 10px; width: 100%; grid-auto-flow: dense; grid-auto-rows: 8px; align-items: stretch; }
+    .kpi-grid.kpi-cols-auto { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); }
+    .kpi-grid.kpi-cols-1 { grid-template-columns: repeat(1, 1fr); }
+    .kpi-grid.kpi-cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid.kpi-cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .kpi-card { min-width: 0; grid-row-end: span 5; max-height: 220px; overflow: hidden; background: rgba(15, 16, 15, 0.82); border: 1px solid var(--border-obsidian); padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; gap: 4px; box-sizing: border-box; }
+    .kpi-card.kpi-stroke { border: 1px solid var(--accent-gold); }
+    .kpi-card.kpi-highlight { background: rgba(196, 154, 87, 0.08); }
+    .kpi-label-block { order: 1; }
+    .kpi-card.kpi-label-bottom .kpi-label-block { order: 3; }
+    .kpi-card.kpi-label-none .kpi-label-block { display: none; }
+    .kpi-card .kpi-label { font-size: 9px; color: var(--accent-gold); font-weight: 800; }
+    .kpi-card .kpi-label.lbl-sm { font-size: 8px; }
+    .kpi-card .kpi-label.lbl-md { font-size: 9px; }
+    .kpi-card .kpi-label.lbl-lg { font-size: 11px; }
+    .kpi-card .kpi-label.lbl-xl { font-size: 14px; }
+    .kpi-sublabel { font-size: 8px; color: var(--text-white); font-weight: 600; opacity: .85; margin-top: 2px; }
+    .kpi-subvalue { order: 2; font-size: 9px; color: var(--text-white); font-weight: 600; opacity: .85; white-space: pre-line; line-height: 1.3; }
+    .kpi-value { font-size: 20px; font-weight: 800; color: var(--accent-gold); letter-spacing: 1px; order: 2; white-space: pre-line; }
+    .kpi-wrap { display: flex; flex-direction: column; width: 100%; }
+    .kpi-main-label { width: 100%; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-gold); padding: 7px 12px; border-left: 3px solid var(--accent-gold); background: rgba(196, 154, 87, 0.08); border-radius: 4px; }
+    .kpi-main-label.lbl-sm { font-size: 9px; }
+    .kpi-main-label.lbl-md { font-size: 11px; }
+    .kpi-main-label.lbl-lg { font-size: 14px; }
+    .kpi-main-label.lbl-xl { font-size: 20px; }
+    .kpi-main-label.is-top { margin-bottom: 8px; }
+    .kpi-main-label.is-bottom { margin-top: 8px; }
+    .kpi-main-sublabel { font-size: 9px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text-white); opacity: .85; margin-top: 3px; }
 
     .col-wrap { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
     .col-item { flex: 1; min-width: 120px; }
@@ -253,9 +379,29 @@
     .col-card--numbered { position: relative; background: rgba(15, 16, 15, 0.72); border: 1px solid var(--border-obsidian); padding: 10px 12px 10px 36px; }
     .col-num-badge { position: absolute; left: 8px; top: 10px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #C49A57, #E0CC75); color: #111211; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
-    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; width: 100%; }
-    .social-card { background: rgba(15, 16, 15, 0.78); border: 1px solid var(--border-obsidian); border-radius: 4px; padding: 10px; }
-    .social-card-val { font-size: 14px; font-weight: 800; color: var(--text-white); margin: 3px 0; word-break: break-all; }
+    /* ELEGANT LIST STYLE */
+    .list-elegant { list-style: none; display: flex; flex-direction: column; gap: 9px; width: 100%; }
+    .list-elegant-item { display: flex; align-items: flex-start; gap: 10px; font-size: 11px; color: #DCDCDC; line-height: 1.5; }
+    .list-elegant-dot { flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-gold); margin-top: 6px; }
+    .list-elegant-dash { flex: 0 0 14px; width: 14px; height: 1px; background: var(--accent-gold); margin-top: 8px; }
+    .list-elegant-check { flex: 0 0 16px; width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .list-elegant-num { flex: 0 0 18px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+    /* KALKULASI CAPSULE (rumus) */
+    .calc-capsule { display: inline-flex; align-items: center; gap: 10px; background: #FEFEFE; color: #111211; border-radius: 999px; padding: 8px 18px; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+    .calc-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: #6b6b6b; }
+    .calc-result { font-size: 15px; font-weight: 900; color: #111211; }
+    .calc-chip { background: rgba(196,154,87,.12); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-size: 9px; font-weight: 800; padding: 4px 9px; border-radius: 12px; cursor: pointer; }
+    .calc-chip:hover { background: var(--accent-gold); color: #111211; }
+    .calc-op-btn { background: var(--surface-dark); border: 1px solid var(--border-obsidian); color: var(--text-white); font-size: 11px; font-weight: 800; width: 30px; height: 26px; border-radius: 4px; cursor: pointer; }
+    .calc-op-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+
+    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; width: 100%; align-content: start; }
+    .social-card { background: rgba(15, 16, 15, 0.78); border: 1px solid var(--border-obsidian); border-radius: 8px; padding: 7px 12px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; min-height: 0; }
+    .social-card .social-head { min-width: 0; flex: 1 1 auto; }
+    .social-stat { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; text-align: right; flex: 0 0 auto; line-height: 1.1; }
+    .social-stat .social-card-val { margin-top: 0; }
+    .social-card-val { font-size: 15px; font-weight: 800; color: var(--text-white); margin-top: 2px; }
 
     .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #C0C2C0; padding: 4px 0; border-bottom: 1px dashed var(--border-obsidian); }
     .wawasan-box { background: rgba(196, 154, 87, 0.05); border: 1px solid var(--accent-gold); padding: 12px; font-size: 11px; color: #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
@@ -277,6 +423,7 @@
 
     /* PERBAIKAN STYLES UNTUK GENERASI PDF PRESISI */
     body.exporting-pdf .elem-drag-bar,
+    body.exporting-pdf .bento-drop-slot,
     body.exporting-pdf #highlightPopup,
     body.exporting-pdf #badgeActionPopup,
     body.exporting-pdf #varAutocomplete,
@@ -393,10 +540,12 @@
     .image-preview-wrapper.is-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
     .image-preview-wrapper.is-pill { min-height:90px; border-radius:999px; }
     .image-preview-wrapper.is-pill img { border-radius:999px; }
-    .social-icon { width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; background:var(--grad-gold); color:#111211; font-weight:900; font-size:11px; flex:0 0 24px; }
-    .social-head { display:flex; align-items:center; gap:7px; }
-    .link-card { width:100%; padding:12px; border:1px solid rgba(196,154,87,.55); background:var(--grad-gold); border-radius:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .link-card a { color:#FEFEFE; text-decoration:none; font-weight:800; }
+    .social-icon { width:26px; height:26px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:11px; flex:0 0 26px; }
+    .social-head { display:flex; align-items:center; gap:8px; }
+    .link-card { width:100%; padding:12px 14px; border:1px solid var(--border-obsidian); background:rgba(20,21,20,.6); border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:12px; transition: border-color .15s ease; }
+    .link-card:hover { border-color: var(--accent-gold); }
+    .link-card a { color:var(--text-white); text-decoration:none; font-weight:800; font-size:12px; }
+    .link-card .link-arrow { color: var(--accent-gold); font-size:16px; flex-shrink:0; }
     .busy-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:99999; background:rgba(17,18,17,.82); backdrop-filter:blur(5px); pointer-events:auto; }
     .busy-overlay.show { display:flex; }
     .busy-card { width:min(330px,90vw); padding:24px; border:1px solid var(--brand-gold); border-radius:14px; background:var(--brand-charcoal); text-align:center; box-shadow:0 25px 70px rgba(0,0,0,.7); }
@@ -405,6 +554,20 @@
     .busy-sub { margin-top:6px; font-size:9px; color:#d0d0d0; }
     @keyframes malevinSpin { to { transform:rotate(360deg); } }
     .filename-modal { max-width:430px; }
+
+    /* THEMED TOAST ALERT (import success/fail, etc) */
+    #malevinToastHost { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+    .malevin-toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 10px; width: min(360px, 88vw); background: var(--card-obsidian); border: 1px solid var(--border-obsidian); border-left: 3px solid var(--accent-gold); border-radius: 8px; padding: 12px 14px; box-shadow: 0 20px 50px rgba(0,0,0,.6); opacity: 0; transform: translateY(-14px) scale(.97); transition: opacity .25s ease, transform .25s ease; }
+    .malevin-toast.show { opacity: 1; transform: translateY(0) scale(1); }
+    .malevin-toast.malevin-toast-success { border-left-color: var(--positive); }
+    .malevin-toast.malevin-toast-error { border-left-color: var(--negative); }
+    .malevin-toast-icon { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; background: rgba(196,154,87,.15); color: var(--accent-gold); animation: malevinToastPop .35s ease; }
+    .malevin-toast-success .malevin-toast-icon { background: rgba(76,175,122,.18); color: var(--positive); }
+    .malevin-toast-error .malevin-toast-icon { background: rgba(229,83,83,.18); color: var(--negative); }
+    .malevin-toast-body { flex: 1; min-width: 0; }
+    .malevin-toast-title { font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--text-white); }
+    .malevin-toast-msg { font-size: 10px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+    @keyframes malevinToastPop { 0%{transform:scale(.4);opacity:0;} 60%{transform:scale(1.15);opacity:1;} 100%{transform:scale(1);} }
 
     /* EXPORT STAGE: isolate PDF rendering from preview scaling/zoom. */
     #pdf-export-stage {
@@ -484,9 +647,12 @@
 </head>
 <body>
 
+    <div id="malevinToastHost"></div>
+
     <!-- TOOLTIP POPUP PADA BLOCK TEKS EDITOR -->
     <div id="highlightPopup">
         <button class="hl-pop-btn" onclick="createVariableFromHighlight()">+ Variabel</button>
+        <button class="hl-pop-btn" onclick="insertFormulaAtHighlight()">∑ Rumus</button>
         <button class="hl-pop-btn btn-up" onclick="applyHighlightTrend('up')">▲ Kenaikan</button>
         <button class="hl-pop-btn btn-down" onclick="applyHighlightTrend('down')">▼ Penurunan</button>
     </div>
@@ -528,6 +694,32 @@
             <div class="modal-actions">
                 <button class="btn" onclick="closeVarModal()">Batal</button>
                 <button class="btn btn-gold" onclick="saveVarModal()">Simpan Variabel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="calcModalOverlay">
+        <div class="modal-box">
+            <div class="modal-title">Kalkulator Rumus</div>
+            <div class="form-group">
+                <label>Rumus</label>
+                <div id="calcFormulaInput" class="form-control var-input" contenteditable="true" data-placeholder="Ketik {{ untuk variable, atau angka & operator langsung" oninput="updateCalcPreview()"></div>
+            </div>
+            <div class="form-group">
+                <label>Sisipkan Variable Angka</label>
+                <div id="calcVarChips" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Operator</label>
+                <div id="calcOpButtons" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Pratinjau Hasil</label>
+                <div id="calcPreviewResult" style="font-size:18px; font-weight:800; color:var(--accent-gold);">—</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeCalcModal()">Batal</button>
+                <button class="btn btn-gold" onclick="applyCalcModal()">Terapkan Rumus</button>
             </div>
         </div>
     </div>
@@ -576,12 +768,15 @@
         <div class="editor-panel" id="editorPanel">
             <!-- GLOBAL VARIABLE MANAGER WIDGET -->
             <div class="global-var-panel">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
                     <span style="font-size:11px; font-weight:800; color:var(--accent-gold);">MANAJEMEN VARIABEL KUSTOM</span>
-                    <button class="btn btn-gold" onclick="openVarModal(null)" style="padding: 3px 8px; font-size:8px;">+ Variabel Baru</button>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn" id="bulkEditVarsBtn" onclick="toggleBulkEditVars()" style="padding: 3px 8px; font-size:8px;">✎ Edit Semua</button>
+                        <button class="btn btn-gold" onclick="openVarModal(null)" style="padding: 3px 8px; font-size:8px;">+ Variabel Baru</button>
+                    </div>
                 </div>
                 <div style="font-size:9px; color:var(--text-muted); line-height:1.4;">
-                    <strong>Petunjuk:</strong> Ketik <code>{</code> atau <code>{{</code> untuk autocomplete. Blok teks untuk opsi Variabel / Highlight.
+                    <strong>Petunjuk:</strong> Ketik <code>{</code> atau <code>{{</code> untuk autocomplete. Blok teks untuk opsi Variabel / Highlight. Klik "Edit Semua" untuk ubah banyak nilai variabel sekaligus di satu halaman.
                 </div>
                 <div class="global-var-list" id="globalVarListUI"></div>
             </div>
@@ -685,6 +880,25 @@
 
         const VAR_TYPE_LABELS = { text: 'Teks', number: 'Angka', calculation: 'Rumus / Kalkulasi', image: 'Gambar' };
 
+        function showMalevinToast(kind, title, msg, duration) {
+            const host = document.getElementById('malevinToastHost');
+            if (!host) { alert(title + (msg ? '\n' + msg : '')); return; }
+            const el = document.createElement('div');
+            el.className = 'malevin-toast malevin-toast-' + (kind === 'success' ? 'success' : 'error');
+            el.innerHTML = `<div class="malevin-toast-icon">${kind === 'success' ? '✓' : '✕'}</div><div class="malevin-toast-body"><div class="malevin-toast-title">${escapeHtml(title || '')}</div>${msg ? `<div class="malevin-toast-msg">${escapeHtml(msg)}</div>` : ''}</div>`;
+            host.appendChild(el);
+            requestAnimationFrame(() => el.classList.add('show'));
+            setTimeout(() => {
+                el.classList.remove('show');
+                setTimeout(() => el.remove(), 300);
+            }, duration || 3600);
+        }
+        const collapsedSlides = new Set();
+        function toggleSlideCollapse(sIdx) {
+            const card = document.querySelector(`.slide-accordion[data-slide-index="${sIdx}"]`);
+            if (collapsedSlides.has(sIdx)) { collapsedSlides.delete(sIdx); if (card) card.classList.remove('is-collapsed'); }
+            else { collapsedSlides.add(sIdx); if (card) card.classList.add('is-collapsed'); }
+        }
         function sanitizeVarName(raw) { return (raw || '').trim().replace(/[^a-zA-Z0-9_]/g, ''); }
         function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
@@ -727,6 +941,239 @@
         }
 
         window.addEventListener('resize', autoScaleDeckContainer);
+        window.addEventListener('resize', () => { clearTimeout(window.__kpiResizeT); window.__kpiResizeT = setTimeout(() => { equalizeKpiGrid(); equalizeSlideGrid(); renderBentoHoles(); }, 120); });
+
+        // Menghitung ulang tinggi baris tiap kartu KPI berdasarkan panjang isi teksnya,
+        // lalu membiarkan CSS Grid (grid-auto-flow: dense) merapikan & mengisi lubang kosong.
+        function equalizeKpiGrid(root) {
+            const ROW = 8, GAP = 10, MAX_SPAN = 13; // unit baris diperkecil (8px) supaya kartu membungkus tinggi kontennya secara presisi, MAX_SPAN = batas tinggi maksimal kartu (~220px)
+            (root || document).querySelectorAll('.kpi-grid').forEach(grid => {
+                if (!grid.offsetWidth) return; // panel preview sedang tersembunyi -> ukuran belum valid, jangan diukur
+                const cards = grid.querySelectorAll('.kpi-card');
+                // reset dulu supaya scrollHeight yang diukur adalah tinggi konten asli
+                cards.forEach(card => { card.style.gridRowEnd = 'span 1'; });
+                cards.forEach(card => {
+                    const needed = card.scrollHeight;
+                    let span = Math.max(1, Math.ceil((needed + GAP) / (ROW + GAP)));
+                    if (span > MAX_SPAN) span = MAX_SPAN; // kelebihan konten dipotong (overflow:hidden), bukan mendorong baris lain
+                    card.style.gridRowEnd = 'span ' + span;
+                });
+            });
+        }
+        window.equalizeKpiGrid = equalizeKpiGrid;
+
+        // ====================================================================
+        // BENTO PACKING ENGINE (v3 — model baris/lajur, presisi piksel)
+        //  - Grid 60 kolom (100/66/50/33/25% pas tanpa sisa), tinggi baris 1px, tanpa gap CSS.
+        //    Jarak 16px dibuat lewat margin kanan+bawah tiap elemen => jarak horizontal =
+        //    vertikal = 16px di mana pun, dan tinggi elemen tepat piksel.
+        //  - Struktur: BAND (baris) -> LAJUR (kolom) -> elemen bertumpuk. Tiap elemen (urut
+        //    array) masuk ke posisi pertama yang tersedia dengan prioritas: (1) sisa ruang
+        //    tinggi di lajur selebar dia di band mana pun dari atas, (2) sisa lebar di band
+        //    (kiri->kanan), (3) band baru di bawah. Jadi celah otomatis terisi bila muat.
+        //  - Tinggi band = tinggi elemen tertinggi (yang 100% tidak berubah). 100% = ikut
+        //    tinggi band; 50%/33% = pecahan band (dikurangi gap saat bertumpuk). Konten yang
+        //    lebih tinggi dari jatahnya memperbesar band (tidak pernah terpotong).
+        //  - Sisa ruang yang tak terisi (bawah lajur / kanan band) jadi slot drop.
+        // ====================================================================
+        const BENTO_COLS = 60, BENTO_GAP = 16;
+        const _bentoLayoutCache = new WeakMap();
+
+        function _bentoBuildBands(meta) {
+            const bands = [];
+            meta.forEach(m => {
+                const w = m.colSpan, p = m.heightPct;
+                let done = false;
+                for (const b of bands) {
+                    const anchorLane = m.stackTo ? b.lanes.find(l => l.colSpan === w && l.items.some(x => x.uid && x.uid === m.stackTo)) : null;
+                    const lane = anchorLane || b.lanes.find(l => l.colSpan === w && l.sumPct + p <= 100.5);
+                    if (lane) { lane.items.push(m); lane.sumPct += p; done = true; break; }
+                    if (b.usedCols + w <= BENTO_COLS) {
+                        b.lanes.push({ colSpan: w, items: [m], sumPct: p });
+                        b.usedCols += w; done = true; break;
+                    }
+                }
+                if (!done) bands.push({ lanes: [{ colSpan: w, items: [m], sumPct: p }], usedCols: w });
+            });
+            return bands;
+        }
+
+        // Tinggi band (px) + tinggi tiap elemen. Tinggi kotak elemen = tinggi kontennya (tidak dilar-lar).
+        // Ruang sisa di lajur yang lebih pendek menjadi slot drop (bisa diisi elemen lain).
+        function _bentoSizeBand(b) {
+            let H = 0;
+            b.lanes.forEach(l => {
+                l.fill = false;
+                l.items.forEach(m => { m.finalPx = m.naturalPx; });
+                H = Math.max(H, l.items.reduce((sum, m) => sum + m.naturalPx, 0) + (l.items.length - 1) * BENTO_GAP);
+            });
+            b.heightPx = H;
+        }
+
+        // Tinggi area isi slide saat masih kosong (= min-height slide dikurangi padding, footer, gap).
+        function _bentoBaseBodyHeight(body) {
+            const slide = body.closest('.slide'); if (!slide) return 0;
+            const cs = getComputedStyle(slide), bcs = getComputedStyle(body);
+            const others = [...slide.children].filter(c => c !== body && getComputedStyle(c).position !== 'absolute');
+            const sumOthers = others.reduce((sum, c) => sum + c.offsetHeight, 0);
+            return (parseFloat(cs.minHeight) || 478)
+                - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+                - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth)
+                - sumOthers - (parseFloat(cs.rowGap) || 0) * others.length
+                - parseFloat(bcs.marginTop) - parseFloat(bcs.marginBottom);
+        }
+
+        const BENTO_NEWROW_H = 72;
+
+        function equalizeSlideGrid(root) {
+            (root || document).querySelectorAll('.slide-body').forEach(body => {
+                if (!body.offsetWidth) return; // preview sedang tersembunyi (mode edit) -> jangan hitung ulang dengan ukuran 0
+                const isCover = body.dataset.cover === '1';
+                const items = [...body.querySelectorAll(':scope > .draggable-element:not(.elem-img-floating)')];
+                if (!items.length) { _bentoLayoutCache.set(body, { holes: [] }); return; }
+
+                // Ukur tinggi konten asli pada lebar sebenarnya.
+                items.forEach(el => { el.style.gridRow = 'span 1'; el.style.alignSelf = 'start'; el.style.height = 'auto'; el.style.transform = ''; });
+                let meta = items.map((el, i) => {
+                    const colSpan = Math.max(1, Math.min(BENTO_COLS, parseInt(el.dataset.colSpan, 10) || BENTO_COLS));
+                    const heightPct = Math.max(10, Math.min(100, parseFloat(el.dataset.heightPct) || 100));
+                    const naturalPx = Math.ceil(Math.max(el.offsetHeight, el.scrollHeight));
+                    return { id: i, el, eIdx: Number(el.dataset.elemIndex), colSpan, heightPct, naturalPx, finalPx: naturalPx, uid: el.dataset.uid || '', stackTo: el.dataset.stackTo || '' };
+                });
+                items.forEach(el => { el.style.alignSelf = ''; el.style.height = ''; });
+
+                // Cover selalu jadi baris pertama.
+                if (isCover) {
+                    const ci = meta.findIndex(m => m.el.dataset.type === 'cover');
+                    if (ci > 0) meta = [meta[ci], ...meta.slice(0, ci), ...meta.slice(ci + 1)];
+                }
+
+                // Tinggi tetap baris cover = tinggi area isi slide kosong.
+                const baseH = isCover ? Math.max(0, Math.floor(_bentoBaseBodyHeight(body)) - BENTO_GAP) : 0;
+                const colPx = body.clientWidth / BENTO_COLS;
+
+                const bands = _bentoBuildBands(meta);
+                const holes = [];
+                let y = 0, lastIdx = -1;
+                bands.forEach((b, bi) => {
+                    _bentoSizeBand(b);
+                    const centered = isCover && bi === 0;
+                    if (centered) b.heightPx = Math.max(b.heightPx, baseH);
+                    let x = 0, shift = 0;
+                    if (centered) { const r = BENTO_COLS - b.usedCols; x = Math.floor(r / 2); shift = (r % 2) ? colPx / 2 : 0; }
+                    const startX = x;
+                    const bandLastIdx = Math.max(...b.lanes.flatMap(l => l.items.map(m => m.eIdx)));
+                    lastIdx = Math.max(lastIdx, bandLastIdx);
+                    b.lanes.forEach(l => {
+                        let ly = y;
+                        if (centered) { // tiap lajur berada persis di tengah vertikal baris
+                            const t = l.items.reduce((sum, m) => sum + m.finalPx, 0) + (l.items.length - 1) * BENTO_GAP;
+                            ly = y + Math.max(0, Math.floor((b.heightPx + BENTO_GAP - t) / 2)); // pusat = tengah kotak baris (termasuk jarak bawah 16px)
+                        }
+                        l.items.forEach(m => {
+                            m.el.style.gridColumn = `${x + 1} / span ${l.colSpan}`;
+                            m.el.style.gridRow = `${ly + 1} / span ${m.finalPx + BENTO_GAP}`;
+                            m.el.style.transform = shift ? `translateX(${shift}px)` : '';
+                            ly += m.finalPx + BENTO_GAP;
+                        });
+                        if (!centered) {
+                            const remain = y + b.heightPx + BENTO_GAP - ly; // sisa tinggi lajur (termasuk gap bawah)
+                            if (remain - BENTO_GAP >= 32 && l.colSpan >= 9)
+                                holes.push({ kind: 'lane', col: x, cols: l.colSpan, row: ly, h: remain, remPct: Math.max(10, Math.round(100 - l.sumPct)), after: bandLastIdx, anchor: l.items[l.items.length - 1].eIdx });
+                        }
+                        x += l.colSpan;
+                    });
+                    if (centered) { // ruang kiri & kanan baris cover (bisa diisi elemen sejajar)
+                        if (startX >= 9 && b.heightPx >= 32) holes.push({ kind: 'band', col: 0, cols: startX, row: y, h: b.heightPx + BENTO_GAP, remPct: 100, after: bandLastIdx });
+                        if (BENTO_COLS - x >= 9 && b.heightPx >= 32) holes.push({ kind: 'band', col: x, cols: BENTO_COLS - x, row: y, h: b.heightPx + BENTO_GAP, remPct: 100, after: bandLastIdx });
+                    } else if (BENTO_COLS - x >= 9 && b.heightPx >= 32) {
+                        holes.push({ kind: 'band', col: x, cols: BENTO_COLS - x, row: y, h: b.heightPx + BENTO_GAP, remPct: 100, after: bandLastIdx });
+                    }
+                    y += b.heightPx + BENTO_GAP;
+                });
+                // Baris baru di paling bawah (selalu 100%).
+                holes.push({ kind: 'row', col: 0, cols: BENTO_COLS, row: y, h: BENTO_NEWROW_H + BENTO_GAP, remPct: 100, after: lastIdx });
+                _bentoLayoutCache.set(body, { holes });
+            });
+        }
+        window.equalizeSlideGrid = equalizeSlideGrid;
+
+        // Tampilkan sisa ruang kosong sebagai slot putus-putus yang bisa menerima drag & drop.
+        function renderBentoHoles(root) {
+            (root || document).querySelectorAll('.slide-body').forEach(body => {
+                body.querySelectorAll(':scope > .bento-drop-slot').forEach(n => n.remove());
+                const cached = _bentoLayoutCache.get(body);
+                if (!cached) return;
+                const sIdx = Number(body.dataset.slideIndex);
+                cached.holes.forEach(hl => {
+                    const slot = document.createElement('div');
+                    slot.className = 'bento-drop-slot';
+                    slot.style.gridColumn = `${hl.col + 1} / span ${hl.cols}`;
+                    slot.style.gridRow = `${hl.row + 1} / span ${hl.h}`;
+                    if (hl.kind === 'row') slot.classList.add('bento-newrow');
+                    slot.textContent = hl.kind === 'row' ? '+ Baris baru (100%)' : '+ Seret elemen ke sini';
+                    slot.addEventListener('dragover', e => { e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (_) {} slot.classList.add('drag-over'); });
+                    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+                    slot.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); slot.classList.remove('drag-over'); onBentoSlotDrop(sIdx, hl.cols, hl.remPct, hl.after, hl.kind, hl.anchor); });
+                    body.appendChild(slot);
+                });
+            });
+        }
+        window.renderBentoHoles = renderBentoHoles;
+
+        function onBentoSlotDrop(targetSIdx, holeCols, remPct, insertAfter, kind, anchorEIdx) {
+            if (!draggedElemInfo || draggedElemInfo.kind === 'slide' || draggedElemInfo.sIdx !== targetSIdx) return;
+            const elements = slidesData[targetSIdx].elements;
+            const srcEIdx = draggedElemInfo.eIdx;
+            const elem = elements[srcEIdx];
+            if (!elem) return;
+
+            const holePct = Math.round(holeCols * 10000 / 60) / 100;
+            if (kind === 'lane') {
+                elem.width = holePct;                       // persis selebar lajur supaya masuk ke lajur itu
+                elem.heightPct = Math.max(10, Math.min(100, remPct)); // persis sisa tinggi lajur
+                const anchor = elements[anchorEIdx];        // elemen paling bawah di lajur tujuan
+                if (anchor && anchor !== elem) {
+                    if (!anchor.uid) anchor.uid = 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                    elem.stackTo = anchor.uid;              // tumpuk tepat di lajur elemen jangkar ini
+                } else delete elem.stackTo;
+            } else if (kind === 'row') {                     // baris baru: selalu 100% dan diletakkan paling bawah
+                elem.width = 100; elem.heightPct = 100; delete elem.stackTo;
+                insertAfter = elements.length - 1;
+            } else if (widthToPct(elem.width) > holePct) {  // celah di sisi kanan baris: ciutkan bila terlalu lebar
+                const tiers = [100, 66, 50, 33, 25].filter(t => t <= holePct + 1);
+                elem.width = tiers.length ? tiers[0] : holePct;
+                delete elem.stackTo; elem.heightPct = 100;
+            } else { delete elem.stackTo; elem.heightPct = 100; }
+
+            elements.splice(srcEIdx, 1);
+            let idx = typeof insertAfter === 'number' ? insertAfter : -1;
+            if (srcEIdx <= idx) idx -= 1;
+            elements.splice(idx + 1, 0, elem);
+            draggedElemInfo = null;
+            clearDragIndicators();
+            saveToLocalStorage();
+            renderForms();
+        }
+
+        // Lepas di bagian lain dari slide asal (footer, padding) -> tetap dianggap baris baru.
+        function _dragSourceBodyAt(node) {
+            const sl = node && node.closest && node.closest('.slide'); if (!sl) return null;
+            const b = sl.querySelector('.slide-body[data-slide-index].drag-source');
+            return b || null;
+        }
+        window._dragSourceBodyAt = _dragSourceBodyAt;
+        document.addEventListener('dragover', e => {
+            if (!draggedElemInfo || draggedElemInfo.kind !== 'element' || e.defaultPrevented) return;
+            if (_dragSourceBodyAt(e.target)) { e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (_) {} }
+        });
+        document.addEventListener('drop', e => {
+            if (!draggedElemInfo || draggedElemInfo.kind !== 'element' || e.defaultPrevented) return;
+            const b = _dragSourceBodyAt(e.target); if (!b) return;
+            e.preventDefault();
+            const sIdx = Number(b.dataset.slideIndex);
+            onBentoSlotDrop(sIdx, 60, 100, slidesData[sIdx].elements.length - 1, 'row');
+        });
 
         function saveToLocalStorage() {
             try {
@@ -875,11 +1322,38 @@
             renderForms();
         }
 
+        let bulkEditVars = false;
+        function toggleBulkEditVars() {
+            bulkEditVars = !bulkEditVars;
+            const btn = document.getElementById('bulkEditVarsBtn');
+            if (btn) { btn.textContent = bulkEditVars ? '✓ Selesai Edit' : '✎ Edit Semua'; btn.classList.toggle('btn-gold', bulkEditVars); }
+            renderCustomVarsUI();
+        }
+        function updateVarInlineValue(idx, val) {
+            if (!customVariables[idx]) return;
+            customVariables[idx].value = val;
+            saveToLocalStorage();
+            renderPreview();
+        }
         function renderCustomVarsUI() {
             const container = document.getElementById('globalVarListUI');
             if (!container) return;
+            container.classList.toggle('bulk-mode', bulkEditVars);
             if (customVariables.length === 0) {
                 container.innerHTML = '<div style="font-size:9px; color:var(--text-muted);">Belum ada variabel kustom.</div>';
+                return;
+            }
+            if (bulkEditVars) {
+                container.innerHTML = customVariables.map((v, idx) => `
+                    <div class="var-bulk-row">
+                        <span class="var-bulk-name">${v.type === 'image' ? '🖼️ ' : ''}{{${v.name}}}</span>
+                        ${v.type === 'image'
+                            ? `<img src="${v.value || ''}" class="var-bulk-img-thumb" alt="">`
+                            : `<input type="${v.type === 'number' ? 'text' : 'text'}" class="form-control var-bulk-input" value="${escapeHtml(v.value || '')}" oninput="updateVarInlineValue(${idx}, this.value)">`}
+                        <span class="var-bulk-edit" title="Edit Lengkap" onclick="openVarModal(${idx})">✎</span>
+                        <span class="var-bulk-del" title="Hapus" onclick="deleteCustomVar(${idx})">✕</span>
+                    </div>
+                `).join('');
                 return;
             }
             container.innerHTML = customVariables.map((v, idx) => `
@@ -921,11 +1395,12 @@
             return out;
         }
 
-        function varInputHTML(vtype, sIdx, eIdxOrKeyPath, key, value, placeholder, multiline) {
+        function varInputHTML(vtype, sIdx, eIdxOrKeyPath, key, value, placeholder, multiline, accept) {
             let dataAttrs;
             if (vtype === 'elem') dataAttrs = `data-vtype="elem" data-sidx="${sIdx}" data-eidx="${eIdxOrKeyPath}" data-key="${key}"`;
             else if (vtype === 'slide') dataAttrs = `data-vtype="slide" data-sidx="${sIdx}" data-key="${key}"`;
             else dataAttrs = `data-vtype="${vtype}" data-sidx="${sIdx}" data-eidx="${eIdxOrKeyPath}" data-mkey="${key}"`;
+            if (accept) dataAttrs += ` data-accept="${accept}"`;
             const cls = multiline ? 'form-control var-input var-multiline' : 'form-control var-input';
             return `<div class="${cls}" contenteditable="true" ${dataAttrs} data-placeholder="${escapeHtml(placeholder || '')}">${varTextToHtml(value || '')}</div>`;
         }
@@ -1086,6 +1561,86 @@
             applyVarInputChange(el);
         }
 
+        let calcModalTarget = null;
+        function openCalcModal(sIdx, eIdx) {
+            calcModalTarget = { sIdx, eIdx };
+            const elem = slidesData[sIdx].elements[eIdx];
+            const input = document.getElementById('calcFormulaInput');
+            input.innerHTML = varTextToHtml(elem.formula || '');
+            const numVars = customVariables.filter(v => v.type === 'number' || v.type === 'calculation');
+            document.getElementById('calcVarChips').innerHTML = numVars.length
+                ? numVars.map(v => `<span class="calc-chip" onclick="insertCalcVar('${v.name}')">{{${v.name}}}</span>`).join('')
+                : '<span style="font-size:9px; color:var(--text-muted);">Belum ada variable angka/kalkulasi.</span>';
+            document.getElementById('calcOpButtons').innerHTML = ['+', '-', '*', '/', '(', ')', '%'].map(op => `<button type="button" class="calc-op-btn" onclick="insertCalcText('${op === '%' ? '%' : op}')">${op}</button>`).join('');
+            document.getElementById('calcModalOverlay').classList.add('show');
+            updateCalcPreview();
+        }
+        function closeCalcModal() {
+            document.getElementById('calcModalOverlay').classList.remove('show');
+            calcModalTarget = null;
+        }
+        function insertCalcVar(name) {
+            insertVarTokenIntoField(document.getElementById('calcFormulaInput'), name, null);
+            updateCalcPreview();
+        }
+        function insertCalcText(txt) {
+            const el = document.getElementById('calcFormulaInput');
+            el.focus();
+            const sel = window.getSelection();
+            if (sel.rangeCount === 0 || !el.contains(sel.anchorNode)) {
+                const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
+                sel.removeAllRanges(); sel.addRange(r);
+            }
+            document.execCommand('insertText', false, txt);
+            updateCalcPreview();
+        }
+        function updateCalcPreview() {
+            const raw = serializeVarInput(document.getElementById('calcFormulaInput'));
+            const vars = computeGlobalVariables();
+            let expr = raw.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (m, k) => {
+                const mk = Object.keys(vars).find(x => x.toLowerCase() === k.toLowerCase());
+                if (!mk || vars[mk].type === 'image') return '0';
+                const n = parseFloat(vars[mk].value);
+                return isNaN(n) ? '0' : String(n);
+            });
+            const out = document.getElementById('calcPreviewResult');
+            if (!/^[\d\s+\-*/().,%A-Za-z]*$/.test(expr)) { out.textContent = 'Rumus tidak valid'; out.style.color = 'var(--negative)'; return; }
+            try {
+                const fn = new Function('Math', 'with(Math){ return (' + expr + '); }');
+                const r = fn(Math);
+                if (r === undefined || r === null || Number.isNaN(r) || !isFinite(r)) throw new Error('bad');
+                out.textContent = String(Math.round(r * 10000) / 10000);
+                out.style.color = 'var(--accent-gold)';
+            } catch (err) {
+                out.textContent = 'Rumus tidak valid';
+                out.style.color = 'var(--negative)';
+            }
+        }
+        function applyCalcModal() {
+            if (!calcModalTarget) return;
+            const raw = serializeVarInput(document.getElementById('calcFormulaInput'));
+            slidesData[calcModalTarget.sIdx].elements[calcModalTarget.eIdx].formula = raw;
+            saveToLocalStorage();
+            closeCalcModal();
+            renderForms();
+            renderPreview();
+        }
+        function insertFormulaAtHighlight() {
+            if (!activeVarTarget) return;
+            const { el, range, text } = activeVarTarget;
+            document.getElementById('highlightPopup').style.display = 'none';
+
+            el.focus();
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            const inner = (text && text.trim()) ? text.trim() : '';
+            document.execCommand('insertText', false, `\${${inner}}`);
+            applyVarInputChange(el);
+            showMalevinToast('success', 'Rumus Ditambahkan', 'Tulis ekspresi di dalam ${...} — bisa pakai nama variable, angka, dan fungsi Math seperti sqrt(), pow(). Contoh: ${revenue * 1.1}');
+        }
+
         function insertVarTokenIntoField(el, name, range) {
             el.focus();
             const sel = window.getSelection();
@@ -1136,12 +1691,15 @@
             const ctx = getAutocompleteContext(el);
             if (!ctx) { closeAutocomplete(); return; }
             const q = ctx.query.toLowerCase();
-            acItems = customVariables.filter(v => v.name.toLowerCase().includes(q));
+            const accept = el.getAttribute('data-accept');
+            let pool = customVariables;
+            if (accept === 'number') pool = customVariables.filter(v => v.type === 'number' || v.type === 'calculation');
+            acItems = pool.filter(v => v.name.toLowerCase().includes(q));
             acActiveEl = el; acIndex = acItems.length ? 0 : -1;
 
             const box = document.getElementById('varAutocomplete');
-            if (customVariables.length === 0) {
-                box.innerHTML = '<div class="var-ac-empty">Belum ada variabel kustom.</div>';
+            if (pool.length === 0) {
+                box.innerHTML = `<div class="var-ac-empty">${accept === 'number' ? 'Belum ada variabel angka/kalkulasi.' : 'Belum ada variabel kustom.'}</div>`;
             } else if (acItems.length === 0) {
                 box.innerHTML = '<div class="var-ac-empty">Tidak ada variabel cocok</div>';
             } else {
@@ -1248,7 +1806,27 @@
                 return item.value;
             });
 
-            parsed = parsed.replace(/\[(up|down):([^\]]+)\]/g, (match, dir, val) => {
+            parsed = parsed.replace(/\$\{([^}]+)\}/g, (match, expr) => {
+                let e = expr;
+                Object.keys(vars).forEach(k => {
+                    if (vars[k].type === 'image') return;
+                    const re = new RegExp('\\b' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+                    const numVal = parseFloat(vars[k].value);
+                    e = e.replace(re, isNaN(numVal) ? '0' : String(numVal));
+                });
+                if (!/^[\d\s+\-*/().,%A-Za-z]*$/.test(e)) return '<span style="color:var(--negative); font-size:9px;">[Formula Tidak Valid]</span>';
+                try {
+                    const fn = new Function('Math', 'with(Math){ return (' + e + '); }');
+                    const result = fn(Math);
+                    if (result === undefined || result === null || Number.isNaN(result) || !isFinite(result)) throw new Error('bad result');
+                    return String(Math.round(result * 10000) / 10000);
+                } catch (err) {
+                    return '<span style="color:var(--negative); font-size:9px;">[Formula Error]</span>';
+                }
+            });
+
+            parsed = parsed.replace(/\[(up|down):([^\]]*)\]/g, (match, dir, val) => {
+                if (!val || !val.trim()) return '';
                 const cls = dir === 'up' ? 'var-up' : 'var-down';
                 const arrow = dir === 'up' ? '▲' : '▼';
                 const metaAttrs = `data-sidx="${sIdx}" data-eidx="${eIdx}" data-field="${fieldKey}" data-dir="${dir}" data-val="${escapeHtml(val)}" ${subType ? `data-subtype="${subType}" data-subidx="${subIdx}"` : ''}`;
@@ -1344,6 +1922,18 @@
             slidesData[sIdx].elements[eIdx].metrics.splice(mIdx, 1);
             saveToLocalStorage(); renderForms();
         }
+        function updateKpiMetric(sIdx, eIdx, mIdx, key, val) {
+            slidesData[sIdx].elements[eIdx].metrics[mIdx][key] = val;
+            saveToLocalStorage(); renderPreview();
+        }
+        function toggleKpiMainSub(sIdx, eIdx, checked) {
+            slidesData[sIdx].elements[eIdx].kpiMainSubEnabled = checked;
+            saveToLocalStorage(); renderForms(); renderPreview();
+        }
+        function toggleKpiMainLabel(sIdx, eIdx, checked) {
+            slidesData[sIdx].elements[eIdx].kpiMainLabelEnabled = checked;
+            saveToLocalStorage(); renderForms(); renderPreview();
+        }
         function addColItem(sIdx, eIdx) {
             if (!slidesData[sIdx].elements[eIdx].cols) slidesData[sIdx].elements[eIdx].cols = [];
             slidesData[sIdx].elements[eIdx].cols.push({ title: 'Judul Kolom', content: 'Keterangan isi...' });
@@ -1355,12 +1945,30 @@
         }
         function addSocialLink(sIdx, eIdx) {
             if (!slidesData[sIdx].elements[eIdx].socialLinks) slidesData[sIdx].elements[eIdx].socialLinks = [];
-            slidesData[sIdx].elements[eIdx].socialLinks.push({ platform: 'Sosmed', handle: '@user', stat: '0' });
+            slidesData[sIdx].elements[eIdx].socialLinks.push({ platform: 'Instagram', handle: '@user', stat: '0', showStat: true });
             saveToLocalStorage(); renderForms();
         }
         function removeSocialLink(sIdx, eIdx, lIdx) {
             slidesData[sIdx].elements[eIdx].socialLinks.splice(lIdx, 1);
             saveToLocalStorage(); renderForms();
+        }
+        function updateSocialLink(sIdx, eIdx, lIdx, key, val) {
+            slidesData[sIdx].elements[eIdx].socialLinks[lIdx][key] = val;
+            saveToLocalStorage(); renderPreview();
+        }
+        const SOCIAL_PLATFORMS = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'X (Twitter)', 'LinkedIn', 'WhatsApp', 'Telegram', 'Threads', 'Website'];
+        function socialMeta(platform) {
+            const p = String(platform || '').toLowerCase();
+            if (p.includes('instagram')) return { glyph: 'IG', color: '#D6448B' };
+            if (p.includes('tiktok')) return { glyph: '♪', color: '#25F4EE' };
+            if (p.includes('youtube')) return { glyph: '▶', color: '#FF3B30' };
+            if (p.includes('facebook')) return { glyph: 'f', color: '#4C8BF5' };
+            if (p.includes('x') || p.includes('twitter')) return { glyph: '𝕏', color: '#E8E8E8' };
+            if (p.includes('linkedin')) return { glyph: 'in', color: '#4C8BF5' };
+            if (p.includes('whatsapp')) return { glyph: '✆', color: '#3ECF6E' };
+            if (p.includes('telegram')) return { glyph: '➤', color: '#4EA4E8' };
+            if (p.includes('threads')) return { glyph: '@', color: '#E8E8E8' };
+            return { glyph: (String(platform || '?').trim().charAt(0) || '?').toUpperCase(), color: 'var(--accent-gold)' };
         }
 
         function addSlide() {
@@ -1394,9 +2002,11 @@
             else if (type === 'header') { newElem.tag = 'HEADER'; newElem.title = 'Judul Header Baru'; }
             else if (type === 'text') { newElem.style = 'paragraf'; newElem.content = 'Tulis teks penjelasan di sini...'; newElem.card = false; }
             else if (type === 'columns') { newElem.colStyle = 'accent'; newElem.cols = [{ title: 'Kolom 1', content: 'Keterangan ringkas...' }]; }
+            else if (type === 'list') { newElem.listText = 'Poin pertama yang ingin disampaikan\nPoin kedua yang relevan\nPoin ketiga sebagai penutup'; newElem.listMarker = 'dot'; }
+            else if (type === 'calc') { newElem.label = 'HASIL PERHITUNGAN'; newElem.formula = '10 + 20'; newElem.prefix = ''; newElem.suffix = ''; }
             else if (type === 'kpi') { newElem.metrics = [{ label: 'METRIK 1', value: '100%' }]; }
             else if (type === 'table') { newElem.headers = 'Metrik, Nilai'; newElem.rowsData = 'Target, 100%\nCapaian, 95%'; }
-            else if (type === 'social') { newElem.socialLinks = [{ platform: 'Instagram', handle: '@malevin', stat: '10K' }]; }
+            else if (type === 'social') { newElem.socialLinks = [{ platform: 'Instagram', handle: '@malevin', stat: '10K', showStat: true }]; }
             else if (type === 'breakdown') { newElem.title = 'WAWASAN AUDIENS'; newElem.rowsData = 'Kategori A, 60%\nKategori B, 40%'; }
             else if (type === 'wawasan') { newElem.title = 'CATATAN ANALISIS'; newElem.content = 'Poin ringkasan analisis...'; }
             else if (type === 'chart') { newElem.title = 'Grafik Analisis'; newElem.subtitle = 'Data Penjualan'; newElem.chartType = 'bar'; newElem.labels = 'Jan, Feb, Mar'; newElem.data = '10, 20, 30'; newElem.badgeType = 'trend'; newElem.showBadge = false; newElem.showValues = false; newElem.valueSuffix = ''; }
@@ -1419,6 +2029,17 @@
             saveToLocalStorage();
             renderPreview();
         }
+        function updateElemNum(sIdx, eIdx, key, val) {
+            const n = parseFloat(val);
+            slidesData[sIdx].elements[eIdx][key] = isNaN(n) ? 0 : n;
+            saveToLocalStorage();
+            renderPreview();
+        }
+        function pickImageVariable(sIdx, eIdx, name) {
+            slidesData[sIdx].elements[eIdx].imgVarRef = name || '';
+            saveToLocalStorage();
+            renderForms();
+        }
 
         function renderForms() {
             renderCustomVarsUI();
@@ -1433,20 +2054,23 @@
                 let elementsHTML = '';
 
                 slide.elements.forEach((elem, eIdx) => {
-                    const widthVal = elem.width || 'full';
+                    const widthPctVal = widthToPct(elem.width);
                     const layoutSelector = `
-                        <div class="form-group"><label>Lebar Grid</label>
-                        <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'width', this.value)">
-                            <option value="full" ${widthVal === 'full' ? 'selected' : ''}>Full (100%)</option>
-                            <option value="half" ${widthVal === 'half' ? 'selected' : ''}>1/2 Kolom (50%)</option>
-                            <option value="third" ${widthVal === 'third' ? 'selected' : ''}>1/3 Kolom (33%)</option>
-                            <option value="twothird" ${widthVal === 'twothird' ? 'selected' : ''}>2/3 Kolom (66%)</option>
-                        </select></div>`;
+                        <div class="form-group"><label>Lebar (%)</label>
+                            <input type="number" class="form-control" min="10" max="100" step="1" value="${widthPctVal}" onchange="updateElemPct(${sIdx}, ${eIdx}, 'width', this.value, 10, 100)">
+                            <div style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap;">
+                                <span class="grid-opt-btn ${widthPctVal == 100 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 100)">100%</span>
+                                <span class="grid-opt-btn ${widthPctVal == 66 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 66)">66%</span>
+                                <span class="grid-opt-btn ${widthPctVal == 50 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 50)">50%</span>
+                                <span class="grid-opt-btn ${widthPctVal == 33 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 33)">33%</span>
+                            </div>
+                        </div>
+                        `;
 
                     const styleShape = elem.shapeStyle || 'rounded';
                     const shapeSelector = `<div class="form-group"><label>Sudut</label><select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'shapeStyle', this.value)"><option value="sharp" ${styleShape === 'sharp' ? 'selected' : ''}>Kotak</option><option value="rounded" ${styleShape === 'rounded' ? 'selected' : ''}>Melengkung</option><option value="circle" ${styleShape === 'circle' ? 'selected' : ''}>Lingkaran</option><option value="pill" ${styleShape === 'pill' ? 'selected' : ''}>Pill</option></select></div>`;
                     
-                    let fields = `<div class="two-col-form">${layoutSelector}${shapeSelector}</div><div class="form-group"><label>Brand / Badge ID</label>${varInputHTML('elem', sIdx, eIdx, 'brand', elem.brand, '', false)}</div>`;
+                    let fields = `<div class="form-group">${layoutSelector}</div><div class="form-group">${shapeSelector}</div><div class="form-group"><label>Brand / Badge ID</label>${varInputHTML('elem', sIdx, eIdx, 'brand', elem.brand, '', false)}</div>`;
 
                     if (elem.type === 'cover') {
                         const coverAlign = elem.align || 'left';
@@ -1489,7 +2113,7 @@
                             </select>
                         </div>
                         <div class="form-group"><label>Isi Teks</label>${varInputHTML('elem', sIdx, eIdx, 'content', elem.content, '', true)}</div>
-                        <div class="form-group"><label><input type="checkbox" ${elem.card ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'card', this.checked)"> Bungkus Dalam Kartu Obsidian</label></div>`; 
+                        <div class="form-group"><label class="toggle-label"><span class="toggle-switch"><input type="checkbox" ${elem.card ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'card', this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Bungkus Dalam Kartu Obsidian</label></div>`; 
                     } 
                     else if (elem.type === 'columns') {
                         const cols = elem.cols || [];
@@ -1515,6 +2139,28 @@
                         ${colItemsHTML}
                         <button class="btn btn-gold" style="margin-top:6px; font-size:9px;" onclick="addColItem(${sIdx}, ${eIdx})">+ Tambah Item Kolom</button>`;
                     }
+                    else if (elem.type === 'list') {
+                        fields += `
+                        <div class="form-group"><label>Gaya Penanda</label>
+                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'listMarker', this.value)">
+                                <option value="dot" ${(!elem.listMarker || elem.listMarker === 'dot') ? 'selected' : ''}>Titik Emas</option>
+                                <option value="dash" ${elem.listMarker === 'dash' ? 'selected' : ''}>Garis Minimalis</option>
+                                <option value="check" ${elem.listMarker === 'check' ? 'selected' : ''}>Centang</option>
+                                <option value="number" ${elem.listMarker === 'number' ? 'selected' : ''}>Angka</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Item List (satu poin per baris)</label>${varInputHTML('elem', sIdx, eIdx, 'listText', elem.listText, 'Poin pertama...\nPoin kedua...', true)}</div>`;
+                    }
+                    else if (elem.type === 'calc') {
+                        fields += `
+                        <div class="form-group"><label>Label</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label, 'HASIL PERHITUNGAN', false)}</div>
+                        <div class="two-col-form">
+                            <div class="form-group"><label>Prefix (mis: Rp)</label><input class="form-control" value="${escapeHtml(elem.prefix || '')}" oninput="updateElem(${sIdx},${eIdx},'prefix',this.value)"></div>
+                            <div class="form-group"><label>Suffix (mis: %)</label><input class="form-control" value="${escapeHtml(elem.suffix || '')}" oninput="updateElem(${sIdx},${eIdx},'suffix',this.value)"></div>
+                        </div>
+                        <div class="form-group"><label>Rumus</label>${varInputHTML('elem', sIdx, eIdx, 'formula', elem.formula, '10 + 20', false, 'number')}</div>
+                        <button class="btn btn-gold" style="margin-top:2px; font-size:9px;" onclick="openCalcModal(${sIdx},${eIdx})">∑ Buka Kalkulator</button>`;
+                    }
                     else if (elem.type === 'kpi') {
                         const metrics = elem.metrics || [];
                         let metricItemsHTML = metrics.map((m, mIdx) => `
@@ -1523,13 +2169,72 @@
                                     <span style="font-size:9px; font-weight:800; color:var(--accent-gold);">METRIK ${mIdx + 1}</span>
                                     <button class="btn btn-danger" onclick="removeKpiMetric(${sIdx}, ${eIdx}, ${mIdx})">Hapus</button>
                                 </div>
+                                <div class="form-group"><label>Label Metrik (Enter = baris baru)</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.label`, m.label, '', true)}</div>
+                                <div class="form-group"><label>Ukuran Label</label>
+                                    <select class="form-control" onchange="updateKpiMetric(${sIdx},${eIdx},${mIdx},'labelSize',this.value)">
+                                        <option value="sm" ${m.labelSize === 'sm' ? 'selected' : ''}>Kecil</option>
+                                        <option value="md" ${(!m.labelSize || m.labelSize === 'md') ? 'selected' : ''}>Sedang</option>
+                                        <option value="lg" ${m.labelSize === 'lg' ? 'selected' : ''}>Besar</option>
+                                        <option value="xl" ${m.labelSize === 'xl' ? 'selected' : ''}>Judul (Extra Besar)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>Nilai Utama</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.value`, m.value, '', false)}</div>
+                                <div class="form-group"><label>Sub Judul di Bawah Angka (opsional, Enter = baris baru)</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.sub`, m.sub, 'kosongkan jika tidak perlu', true)}</div>
                                 <div class="two-col-form">
-                                    <div class="form-group"><label>Label Metrik</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.label`, m.label, '', false)}</div>
-                                    <div class="form-group"><label>Nilai Utama</label>${varInputHTML('metric', sIdx, eIdx, `${mIdx}.value`, m.value, '', false)}</div>
+                                    <div class="form-group"><label>Posisi Label</label>
+                                        <select class="form-control" onchange="updateKpiMetric(${sIdx},${eIdx},${mIdx},'labelPos',this.value)">
+                                            <option value="top" ${(!m.labelPos || m.labelPos === 'top') ? 'selected' : ''}>Atas</option>
+                                            <option value="bottom" ${m.labelPos === 'bottom' ? 'selected' : ''}>Bawah</option>
+                                            <option value="none" ${m.labelPos === 'none' ? 'selected' : ''}>Tanpa Label</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex-direction:row; align-items:center; gap:14px; padding-top:14px;">
+                                        <label class="toggle-label" style="text-transform:none; font-size:9px;"><span class="toggle-switch"><input type="checkbox" ${m.stroke ? 'checked' : ''} onchange="updateKpiMetric(${sIdx},${eIdx},${mIdx},'stroke',this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Stroke Emas</label>
+                                        <label class="toggle-label" style="text-transform:none; font-size:9px;"><span class="toggle-switch"><input type="checkbox" ${m.highlight ? 'checked' : ''} onchange="updateKpiMetric(${sIdx},${eIdx},${mIdx},'highlight',this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Highlight</label>
+                                    </div>
                                 </div>
                             </div>
                         `).join('');
                         fields += `
+                        <div class="form-group"><label>Jumlah Kolom KPI</label>
+                            <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'kpiCols', this.value)">
+                                <option value="auto" ${(!elem.kpiCols || elem.kpiCols === 'auto') ? 'selected' : ''}>Otomatis (Fleksibel)</option>
+                                <option value="1" ${elem.kpiCols === '1' ? 'selected' : ''}>1 Kolom</option>
+                                <option value="2" ${elem.kpiCols === '2' ? 'selected' : ''}>2 Kolom</option>
+                                <option value="3" ${elem.kpiCols === '3' ? 'selected' : ''}>3 Kolom</option>
+                            </select>
+                        </div>
+                        <div style="border:1px solid var(--accent-gold); border-radius:6px; padding:10px; margin-top:6px; background:rgba(196,154,87,.06);">
+                            <div style="font-size:11px; font-weight:800; color:var(--accent-gold);">🏷️ JUDUL UTAMA GRUP KPI (di luar kotak-kotak metrik)</div>
+                            <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:8px;">
+                                <label class="toggle-label" style="text-transform:none; font-size:10px; font-weight:700; margin:0;">
+                                    <span class="toggle-switch"><input type="checkbox" ${elem.kpiMainLabelEnabled ? 'checked' : ''} onchange="toggleKpiMainLabel(${sIdx},${eIdx},this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Judul Utama
+                                </label>
+                                <label class="toggle-label" style="text-transform:none; font-size:10px; font-weight:700; margin:0;">
+                                    <span class="toggle-switch"><input type="checkbox" ${(elem.kpiMainSubEnabled !== undefined ? elem.kpiMainSubEnabled : !!(elem.kpiMainLabelSub || '').trim()) ? 'checked' : ''} onchange="toggleKpiMainSub(${sIdx},${eIdx},this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Sub Judul Utama
+                                </label>
+                            </div>
+                            ${(elem.kpiMainLabelEnabled || (elem.kpiMainSubEnabled !== undefined ? elem.kpiMainSubEnabled : !!(elem.kpiMainLabelSub || '').trim())) ? `
+                            <div class="two-col-form" style="margin-top:8px;">
+                                <div class="form-group"><label>Posisi</label>
+                                    <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'kpiMainLabelPos', this.value)">
+                                        <option value="top" ${(!elem.kpiMainLabelPos || elem.kpiMainLabelPos === 'top') ? 'selected' : ''}>Di Atas Kotak Metrik</option>
+                                        <option value="bottom" ${elem.kpiMainLabelPos === 'bottom' ? 'selected' : ''}>Di Bawah Kotak Metrik</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>Ukuran Judul</label>
+                                    <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'kpiMainLabelSize', this.value)">
+                                        <option value="sm" ${elem.kpiMainLabelSize === 'sm' ? 'selected' : ''}>Kecil</option>
+                                        <option value="md" ${(!elem.kpiMainLabelSize || elem.kpiMainLabelSize === 'md') ? 'selected' : ''}>Sedang</option>
+                                        <option value="lg" ${elem.kpiMainLabelSize === 'lg' ? 'selected' : ''}>Besar</option>
+                                        <option value="xl" ${elem.kpiMainLabelSize === 'xl' ? 'selected' : ''}>Judul (Extra Besar)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            ${elem.kpiMainLabelEnabled ? `<div class="form-group" style="margin-top:4px;"><label>Teks Judul Utama</label>${varInputHTML('elem', sIdx, eIdx, 'kpiMainLabel', elem.kpiMainLabel, 'mis: RINGKASAN KINERJA', false)}</div>` : ''}
+                            ${(elem.kpiMainSubEnabled !== undefined ? elem.kpiMainSubEnabled : !!(elem.kpiMainLabelSub || '').trim()) ? `<div class="form-group" style="margin-top:4px;"><label>Teks Sub Judul Utama</label>${varInputHTML('elem', sIdx, eIdx, 'kpiMainLabelSub', elem.kpiMainLabelSub, 'mis: Periode September 2026', false)}</div>` : ''}
+                            ` : `<div style="font-size:9px; color:var(--text-muted); margin-top:6px;">Aktifkan Judul Utama dan/atau Sub Judul Utama untuk menampilkan judul yang menaungi seluruh kotak metrik. Keduanya opsional.</div>`}
+                        </div>
                         ${metricItemsHTML}
                         <button class="btn btn-gold" style="margin-top:6px; font-size:9px;" onclick="addKpiMetric(${sIdx}, ${eIdx})">+ Tambah Item KPI</button>`;
                     }
@@ -1541,14 +2246,19 @@
                         let socialItemsHTML = links.map((l, lIdx) => `
                             <div style="border:1px solid var(--border-obsidian); padding:8px; border-radius:4px; margin-top:4px; display:flex; flex-direction:column; gap:6px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:9px; font-weight:800; color:var(--accent-gold);">AKUN / STAT SOSMED ${lIdx + 1}</span>
+                                    <span style="font-size:9px; font-weight:800; color:var(--accent-gold);">AKUN SOSMED ${lIdx + 1}</span>
                                     <button class="btn btn-danger" onclick="removeSocialLink(${sIdx}, ${eIdx}, ${lIdx})">Hapus</button>
                                 </div>
-                                <div class="form-group"><label>Nama Platform</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.platform`, l.platform, 'Instagram / TikTok', false)}</div>
-                                <div class="two-col-form">
-                                    <div class="form-group"><label>Username / Link</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.handle`, l.handle, '@username', false)}</div>
-                                    <div class="form-group"><label>Stat / Metrik</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.stat`, l.stat, '50K Followers', false)}</div>
+                                <div class="form-group"><label>Platform</label>
+                                    <select class="form-control" onchange="updateSocialLink(${sIdx},${eIdx},${lIdx},'platform',this.value)">
+                                        ${SOCIAL_PLATFORMS.map(p => `<option value="${p}" ${((l.platform||'Instagram').toLowerCase()===p.toLowerCase()) ? 'selected' : ''}>${p}</option>`).join('')}
+                                    </select>
                                 </div>
+                                <div class="two-col-form">
+                                    <div class="form-group"><label>Username / Akun</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.handle`, l.handle, '@username', false)}</div>
+                                    <div class="form-group"><label>Jumlah Followers</label>${varInputHTML('social', sIdx, eIdx, `${lIdx}.stat`, l.stat, '50K', false)}</div>
+                                </div>
+                                <label class="toggle-label" style="text-transform:none; font-size:9px; color:var(--text-muted);"><span class="toggle-switch"><input type="checkbox" ${l.showStat === false ? '' : 'checked'} onchange="updateSocialLink(${sIdx},${eIdx},${lIdx},'showStat',this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Tampilkan Jumlah Followers</label>
                             </div>
                         `).join('');
                         fields += `
@@ -1566,7 +2276,28 @@
                         <div class="form-group"><label>Rekomendasi / Insight</label>${varInputHTML('elem', sIdx, eIdx, 'content', elem.content, 'Tuliskan poin hasil analisis di sini...', true)}</div>`;
                     }
                     else if (elem.type === 'image') { 
-                        fields += `<div class="image-upload-ui"><div class="form-group"><label>Gambar / Logo Elemen (maks. 5 MB)</label></div><button type="button" class="btn btn-gold image-picker-btn" onclick="triggerImageReplace(${sIdx}, ${eIdx})">${elem.imgData ? 'Ganti Gambar' : 'Ambil Gambar'}</button>${elem.imgData ? `<img src="${elem.imgData}" class="form-image-thumb" alt="preview">` : ''}</div>`; 
+                        const imgVars = customVariables.filter(v => v.type === 'image');
+                        const imgPos = elem.imgPosition || 'relative';
+                        fields += `<div class="image-upload-ui"><div class="form-group"><label>Gambar / Logo Elemen (maks. 5 MB)</label></div><button type="button" class="btn btn-gold image-picker-btn" onclick="triggerImageReplace(${sIdx}, ${eIdx})">${elem.imgData ? 'Ganti Gambar' : 'Ambil Gambar'}</button>${elem.imgData && !elem.imgVarRef ? `<img src="${elem.imgData}" class="form-image-thumb" alt="preview">` : ''}</div>
+                        ${imgVars.length ? `<div class="form-group" style="margin-top:8px;"><label>Atau Pakai Variable Gambar</label>
+                            <select class="form-control" onchange="pickImageVariable(${sIdx},${eIdx},this.value)">
+                                <option value="">— Tidak pakai variable —</option>
+                                ${imgVars.map(v => `<option value="${v.name}" ${elem.imgVarRef === v.name ? 'selected' : ''}>{{${v.name}}}</option>`).join('')}
+                            </select>
+                        </div>${elem.imgVarRef ? `<img src="${(customVariables.find(v=>v.name===elem.imgVarRef)||{}).value||''}" class="form-image-thumb" alt="preview">` : ''}` : ''}
+                        <div class="form-group" style="margin-top:8px;"><label>Posisi Gambar</label>
+                            <select class="form-control" onchange="updateElem(${sIdx},${eIdx},'imgPosition',this.value)">
+                                <option value="relative" ${imgPos === 'relative' ? 'selected' : ''}>Mengikuti Layout (Normal)</option>
+                                <option value="absolute" ${imgPos === 'absolute' ? 'selected' : ''}>Bebas / Absolute (Bisa Digeser)</option>
+                                <option value="background" ${imgPos === 'background' ? 'selected' : ''}>Latar Belakang Slide</option>
+                            </select>
+                        </div>
+                        ${imgPos === 'absolute' ? `<div class="two-col-form">
+                            <div class="form-group"><label>Posisi X (%)</label><input type="number" min="0" max="100" class="form-control" value="${elem.imgX != null ? elem.imgX : 10}" onchange="updateElemNum(${sIdx},${eIdx},'imgX',this.value)"></div>
+                            <div class="form-group"><label>Posisi Y (%)</label><input type="number" min="0" max="100" class="form-control" value="${elem.imgY != null ? elem.imgY : 10}" onchange="updateElemNum(${sIdx},${eIdx},'imgY',this.value)"></div>
+                        </div>
+                        <div class="form-group"><label>Lebar Gambar (%)</label><input type="number" min="5" max="100" class="form-control" value="${elem.imgW != null ? elem.imgW : 30}" onchange="updateElemNum(${sIdx},${eIdx},'imgW',this.value)"></div>` : ''}
+                        ${(imgPos === 'absolute' || imgPos === 'background') ? `<div class="form-group"><label>Opacity (${elem.imgOpacity != null ? elem.imgOpacity : 100}%)</label><input type="range" min="5" max="100" class="form-control" value="${elem.imgOpacity != null ? elem.imgOpacity : 100}" oninput="this.previousElementSibling.textContent='Opacity ('+this.value+'%)';updateElemNum(${sIdx},${eIdx},'imgOpacity',this.value)"></div>` : ''}`; 
                     } 
                     else if (elem.type === 'link') {
                         fields += `<div class="form-group"><label>Label Tautan</label>${varInputHTML('elem', sIdx, eIdx, 'label', elem.label || 'TAUTAN', 'TAUTAN', false)}</div><div class="form-group"><label>Teks Tombol / Link</label>${varInputHTML('elem', sIdx, eIdx, 'text', elem.text || 'Buka Tautan', 'Buka Tautan', false)}</div><div class="form-group"><label>URL</label><input class="form-control" type="url" value="${escapeHtml(elem.url || '')}" placeholder="https://..." onchange="updateElem(${sIdx}, ${eIdx}, 'url', this.value)"></div>`;
@@ -1594,8 +2325,8 @@
                         } else {
                             fields += `
                             <div class="two-col-form">
-                                <div class="form-group"><label>Data Lalu</label>${varInputHTML('elem', sIdx, eIdx, 'prevVal', elem.prevVal, '', false)}</div>
-                                <div class="form-group"><label>Data Sekarang</label>${varInputHTML('elem', sIdx, eIdx, 'currVal', elem.currVal, '', false)}</div>
+                                <div class="form-group"><label>Data Lalu</label>${varInputHTML('elem', sIdx, eIdx, 'prevVal', elem.prevVal, '', false, 'number')}</div>
+                                <div class="form-group"><label>Data Sekarang</label>${varInputHTML('elem', sIdx, eIdx, 'currVal', elem.currVal, '', false, 'number')}</div>
                             </div>`;
                         }
                     }
@@ -1613,7 +2344,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group"><label>Indikator Grafik</label>
-                                    <label style="display:flex;align-items:center;gap:7px;margin-bottom:5px;color:var(--text-white);font-size:9px;cursor:pointer;"><input type="checkbox" ${elem.showBadge ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'showBadge', this.checked)"> Tampilkan indikator</label>
+                                    <label class="toggle-label" style="margin-bottom:5px;color:var(--text-white);font-size:9px;"><span class="toggle-switch"><input type="checkbox" ${elem.showBadge ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'showBadge', this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span> Tampilkan indikator</label>
                                     <select class="form-control" onchange="updateElem(${sIdx}, ${eIdx}, 'badgeType', this.value)">
                                         <option value="trend" ${(elem.badgeType || 'trend') === 'trend' ? 'selected' : ''}>Tren Kenaikan/Penurunan (%)</option>
                                         <option value="compare" ${elem.badgeType === 'compare' ? 'selected' : ''}>Perbandingan Pertumbuhan</option>
@@ -1626,8 +2357,8 @@
                             <div class="form-group"><label>Data Y (Pisahkan Koma)</label>${varInputHTML('elem', sIdx, eIdx, 'data', elem.data, '10, 20, 30', false)}</div>
                             <div class="two-col-form">
                                 <div class="form-group">
-                                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                                        <input type="checkbox" ${elem.showValues ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'showValues', this.checked)">
+                                    <label class="toggle-label">
+                                        <span class="toggle-switch"><input type="checkbox" ${elem.showValues ? 'checked' : ''} onchange="updateElem(${sIdx}, ${eIdx}, 'showValues', this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
                                         Tampilkan Value di Tengah Grafik
                                     </label>
                                 </div>
@@ -1640,7 +2371,8 @@
                     elementsHTML += `<div class="element-box"><div class="element-header"><span>ELEM ${eIdx + 1}: ${ELEM_LABELS[elem.type] || elem.type}</span><button class="btn btn-danger" onclick="deleteElem(${sIdx}, ${eIdx})">Hapus</button></div>${fields}</div>`;
                 });
 
-                card.innerHTML = `<div class="slide-accordion-header"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><button type="button" class="slide-drag-handle" data-slide-drag-handle aria-label="Tahan untuk memindahkan slide" title="Tahan lalu geser untuk memindahkan slide">⋮⋮</button><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong></div><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
+                if (collapsedSlides.has(sIdx)) card.classList.add('is-collapsed');
+                card.innerHTML = `<div class="slide-accordion-header"><div style="display:flex;align-items:center;gap:8px;min-width:0;"><button type="button" class="slide-drag-handle" data-slide-drag-handle aria-label="Tahan untuk memindahkan slide" title="Tahan lalu geser untuk memindahkan slide">⋮⋮</button><button type="button" class="slide-collapse-btn" title="Tutup/buka bagian edit slide ini" onclick="toggleSlideCollapse(${sIdx})">▾</button><strong style="font-size:12px; color:var(--accent-gold);">SLIDE ${sIdx + 1}</strong></div><button class="btn btn-danger" onclick="deleteSlide(${sIdx})">Hapus Slide</button></div>
                 <div class="form-group"><label>Footer Left</label>${varInputHTML('slide', sIdx, null, 'footerLeft', slide.footerLeft, '', false)}</div>
                 ${elementsHTML}
                 <div style="margin-top:10px;"><label style="font-size:9px; color:var(--text-muted); font-weight:800;">+ TAMBAH ELEMEN BARU:</label>
@@ -1651,6 +2383,8 @@
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'image')">+ GAMBAR</button>
                     <button class="add-elem-btn" onclick="addElementToSlide(${sIdx}, 'link')">+ LINK</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'columns')">+ KOLOM DOKUMEN</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'list')">+ LIST ELEGAN</button>
+                    <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'calc')">+ KALKULASI</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'kpi')">+ KPI METRIK</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'table')">+ TABEL DATA</button>
                     <button class="add-elem-btn btn-ana" onclick="addElementToSlide(${sIdx}, 'social')">+ SOSIAL MEDIA</button>
@@ -1677,9 +2411,19 @@
             } 
         }
 
+        // Tandai slide asal elemen yang sedang di-drag: hanya slide ini yang menampilkan slot drop / baris baru.
+        function markDragSource(sIdx) {
+            document.querySelectorAll('.slide-body.drag-source').forEach(n => n.classList.remove('drag-source'));
+            const b = document.querySelector('.slide-body[data-slide-index="' + sIdx + '"]');
+            if (b) b.classList.add('drag-source');
+        }
+        window.markDragSource = markDragSource;
+
         function clearDragIndicators() {
+            document.querySelectorAll('.slide-body.drag-source').forEach(n => n.classList.remove('drag-source'));
+            document.body.classList.remove('is-dragging-elem');
             document.querySelectorAll('.draggable-element').forEach(el => {
-                el.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+                el.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right', 'drag-over-swap');
             });
             document.querySelectorAll('.slide-body').forEach(el => el.classList.remove('drag-over-empty'));
         }
@@ -1687,6 +2431,8 @@
         function onElemDragStart(e, sIdx, eIdx) {
             draggedElemInfo = { kind: 'element', sIdx, eIdx };
             dragHoverInfo = null;
+            document.body.classList.add('is-dragging-elem');
+            markDragSource(sIdx);
             try {
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', JSON.stringify({ sIdx, eIdx }));
@@ -1705,13 +2451,14 @@
             const y = e.clientY - rect.top;
             const w = Math.max(1, rect.width);
             const h = Math.max(1, rect.height);
-            const horizontalZone = Math.max(55, Math.min(w * 0.38, 120));
+            // Tepi elemen = sisipkan di sisi itu. Bagian tengah = TUKAR POSISI dengan elemen target.
+            const horizontalZone = Math.max(22, Math.min(w * 0.2, 60));
+            const verticalZone = Math.max(16, Math.min(h * 0.2, 40));
             if (x <= horizontalZone) return 'left';
             if (x >= w - horizontalZone) return 'right';
-            const verticalZone = Math.max(35, Math.min(h * 0.32, 90));
             if (y <= verticalZone) return 'top';
             if (y >= h - verticalZone) return 'bottom';
-            return x < w / 2 ? 'left' : 'right';
+            return 'swap';
         }
 
         function onElemDragOver(e) {
@@ -1723,17 +2470,21 @@
             const targetEl = e.currentTarget;
             const targetSIdx = Number(targetEl.closest('.slide-body')?.dataset.slideIndex);
             const targetEIdx = Number(targetEl.dataset.elemIndex);
+            if (targetSIdx !== draggedElemInfo.sIdx || targetEIdx === draggedElemInfo.eIdx) {
+                targetEl.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right', 'drag-over-swap');
+                return; // beda slide / elemen sendiri: bukan target
+            }
             const rect = targetEl.getBoundingClientRect();
             const side = getDropSide(e, rect);
 
             dragHoverInfo = { sIdx: targetSIdx, eIdx: targetEIdx, side };
-            targetEl.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+            targetEl.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right', 'drag-over-swap');
             targetEl.classList.add('drag-over-' + side);
         }
 
         function onElemDragLeave(e) {
             if (!e.currentTarget.contains(e.relatedTarget)) {
-                e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right');
+                e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom', 'drag-over-left', 'drag-over-right', 'drag-over-swap');
             }
         }
 
@@ -1804,6 +2555,17 @@
             const slideBody = e.currentTarget;
             slideBody.classList.remove('drag-over-empty');
 
+            // Dilepas di ruang kosong di bawah semua elemen -> jadikan BARIS BARU (100%, paling bawah).
+            {
+                const els = [...slideBody.querySelectorAll(':scope > .draggable-element')];
+                const lowest = els.reduce((m, el) => Math.max(m, el.getBoundingClientRect().bottom), -Infinity);
+                if (e.clientY >= lowest - 2) {
+                    const arr = slidesData[targetSIdx].elements;
+                    onBentoSlotDrop(targetSIdx, 60, 100, arr.length - 1, 'row');
+                    return;
+                }
+            }
+
             const srcSIdx = draggedElemInfo.sIdx;
             const srcEIdx = draggedElemInfo.eIdx;
             const elements = slidesData[targetSIdx].elements;
@@ -1855,6 +2617,24 @@
             const moved = elements[srcEIdx];
             const targetRef = elements[targetEIdx];
 
+            if (side === 'swap') {
+                // Tukar posisi: dua elemen saling bertukar tempat (urutan + ukuran + relasi tumpukan).
+                const a = moved, b = targetRef;
+                const keys = (a.type === 'cover' || b.type === 'cover') ? [] : ['uid', 'stackTo', 'width', 'heightPct'];
+                keys.forEach(k => {
+                    const ta = a[k], tb = b[k];
+                    if (tb === undefined) delete a[k]; else a[k] = tb;
+                    if (ta === undefined) delete b[k]; else b[k] = ta;
+                });
+                elements[srcEIdx] = b;
+                elements[targetEIdx] = a;
+                draggedElemInfo = null; dragHoverInfo = null;
+                clearDragIndicators();
+                saveToLocalStorage();
+                renderForms();
+                return;
+            }
+
             if (side === 'left' || side === 'right') {
                 setAdaptiveSideWidths(elements, srcEIdx, targetEIdx, side);
             }
@@ -1873,10 +2653,25 @@
             renderForms();
         }
 
-        function quickSetWidth(sIdx, eIdx, widthVal) {
-            slidesData[sIdx].elements[eIdx].width = widthVal;
+        function widthToPct(w) {
+            if (typeof w === 'number') return w;
+            if (w === 'half') return 50;
+            if (w === 'third') return 33;
+            if (w === 'twothird') return 66;
+            return 100;
+        }
+        function quickSetWidth(sIdx, eIdx, pct) {
+            slidesData[sIdx].elements[eIdx].width = pct;
             saveToLocalStorage();
             renderForms();
+        }
+        function updateElemPct(sIdx, eIdx, key, val, min, max) {
+            let n = parseFloat(val);
+            if (isNaN(n)) n = (key === 'width') ? 100 : 100;
+            n = Math.max(min, Math.min(max, n));
+            slidesData[sIdx].elements[eIdx][key] = n;
+            saveToLocalStorage();
+            renderPreview();
         }
 
         function computeChartBadge(type, dataArr) {
@@ -1942,7 +2737,8 @@
                    ditempatkan sejajar dengannya, mis. logo/gambar) di-center secara vertikal.
                    Ini sengaja berlaku untuk semua slide yang memiliki elemen cover. */
                 const hasCover = slide.elements.some(el => el.type === 'cover');
-                slideBody.className = `slide-body ${hasCover ? 'has-cover' : ''}`;
+                slideBody.className = 'slide-body';
+                if (hasCover) slideBody.dataset.cover = '1';
                 slideBody.dataset.slideIndex = sIdx;
                 slideBody.setAttribute('ondragover', 'onSlideBodyDragOver(event)');
                 slideBody.setAttribute('ondragleave', 'onSlideBodyDragLeave(event)');
@@ -1950,11 +2746,21 @@
 
                 slide.elements.forEach((elem, eIdx) => {
                     const elemWrapper = document.createElement('div');
-                    const wVal = elem.width || 'full';
-                    const wClass = wVal === 'half' ? 'elem-width-half' : (wVal === 'third' ? 'elem-width-third' : (wVal === 'twothird' ? 'elem-width-twothird' : 'elem-width-full'));
-                    
+                    const widthPct = widthToPct(elem.width);
+                    const heightPct = elem.heightPct != null ? elem.heightPct : 100;
+                    const wClass = widthPct >= 90 ? 'elem-width-full' : (widthPct >= 60 ? 'elem-width-twothird' : (widthPct >= 45 ? 'elem-width-half' : 'elem-width-third'));
+
                     elemWrapper.className = `draggable-element ${wClass}`;
+                    elemWrapper.dataset.heightPct = heightPct;
+                    {
+                        const colSpan = Math.max(1, Math.min(60, Math.round(widthPct * 0.6)));
+                        elemWrapper.dataset.colSpan = colSpan; // dipakai oleh equalizeSlideGrid() untuk bin-packing presisi
+                        elemWrapper.style.gridColumn = `span ${colSpan}`;
+                        elemWrapper.style.gridRow = 'span 1'; // dihitung ulang presisi oleh equalizeSlideGrid() berdasarkan tinggi konten asli & tetangga sebarisnya
+                    }
+                    elemWrapper.dataset.type = elem.type;
                     elemWrapper.dataset.elemIndex = eIdx;
+                    elemWrapper.dataset.uid = elem.uid || ''; elemWrapper.dataset.stackTo = elem.stackTo || '';
                     elemWrapper.setAttribute('draggable', 'true');
                     elemWrapper.setAttribute('ondragstart', `onElemDragStart(event, ${sIdx}, ${eIdx})`);
                     elemWrapper.setAttribute('ondragend', `onElemDragEnd(event)`);
@@ -1964,10 +2770,12 @@
 
                     const dragBar = `<div class="elem-drag-bar">
                         <span>⋮⋮ DRAG</span>
-                        <span style="color:var(--text-muted)">|</span>
-                        <span class="grid-opt-btn" onclick="quickSetWidth(${sIdx}, ${eIdx}, 'full')">100%</span>
-                        <span class="grid-opt-btn" onclick="quickSetWidth(${sIdx}, ${eIdx}, 'half')">50%</span>
-                        <span class="grid-opt-btn" onclick="quickSetWidth(${sIdx}, ${eIdx}, 'third')">33%</span>
+                        <span class="opt-sep"></span>
+                        <span class="opt-group">
+                            <span class="grid-opt-btn ${widthPct == 100 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 100)">100%</span>
+                            <span class="grid-opt-btn ${widthPct == 50 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 50)">50%</span>
+                            <span class="grid-opt-btn ${widthPct == 33 ? 'active' : ''}" onclick="quickSetWidth(${sIdx}, ${eIdx}, 33)">33%</span>
+                        </span>
                     </div>`;
 
                     const br = getRadiusCss(elem.shapeStyle);
@@ -2026,14 +2834,56 @@
                         }).join('');
                         p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="col-wrap">${colsHtml}</div>`;
                     }
+                    else if (elem.type === 'list') {
+                        const marker = elem.listMarker || 'dot';
+                        const items = (elem.listText || '').split('\n').filter(l => l.trim() !== '');
+                        const itemsHtml = items.map((it, iIdx) => {
+                            const pIt = renderVarsInText(it, globalVars, sIdx, eIdx, 'listText');
+                            const bullet = marker === 'number' ? `<span class="list-elegant-num">${iIdx + 1}</span>` : marker === 'check' ? `<span class="list-elegant-check">✓</span>` : marker === 'dash' ? `<span class="list-elegant-dash"></span>` : `<span class="list-elegant-dot"></span>`;
+                            return `<li class="list-elegant-item">${bullet}<span>${pIt}</span></li>`;
+                        }).join('');
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<ul class="list-elegant">${itemsHtml}</ul>`;
+                    }
+                    else if (elem.type === 'calc') {
+                        const label = renderVarsInText(elem.label || 'HASIL PERHITUNGAN', globalVars, sIdx, eIdx, 'label');
+                        let expr = String(elem.formula || '0').replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (m, k) => {
+                            const mk = Object.keys(globalVars).find(x => x.toLowerCase() === k.toLowerCase());
+                            if (!mk || globalVars[mk].type === 'image') return '0';
+                            const n = parseFloat(globalVars[mk].value);
+                            return isNaN(n) ? '0' : String(n);
+                        });
+                        let resultText;
+                        if (!/^[\d\s+\-*/().,%A-Za-z]*$/.test(expr)) { resultText = 'Error'; }
+                        else {
+                            try {
+                                const fn = new Function('Math', 'with(Math){ return (' + expr + '); }');
+                                const r = fn(Math);
+                                resultText = (r === undefined || r === null || Number.isNaN(r) || !isFinite(r)) ? 'Error' : String(Math.round(r * 10000) / 10000);
+                            } catch (err) { resultText = 'Error'; }
+                        }
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="calc-capsule"><span class="calc-label">${label}</span><span class="calc-result">${escapeHtml(elem.prefix || '')}${resultText}${escapeHtml(elem.suffix || '')}</span></div>`;
+                    }
                     else if (elem.type === 'kpi') {
                         const metrics = elem.metrics || [];
+                        const kpiCols = elem.kpiCols || 'auto';
                         const kpiHtml = metrics.map((m, mIdx) => {
                             const pLabel = renderVarsInText(m.label || '', globalVars, sIdx, eIdx, 'label', 'metric', mIdx);
+                            const pSub = renderVarsInText(m.sub || '', globalVars, sIdx, eIdx, 'sub', 'metric', mIdx);
                             const pVal = renderVarsInText(m.value || '', globalVars, sIdx, eIdx, 'value', 'metric', mIdx);
-                            return `<div class="kpi-card" style="border-radius: ${br};"><div style="font-size:9px; color:var(--text-muted); font-weight:800;">${pLabel}</div><div class="kpi-value">${pVal}</div></div>`;
+                            const labelPos = m.labelPos || 'top';
+                            const cardCls = ['kpi-card', m.stroke ? 'kpi-stroke' : '', m.highlight ? 'kpi-highlight' : '', labelPos === 'bottom' ? 'kpi-label-bottom' : '', labelPos === 'none' ? 'kpi-label-none' : ''].filter(Boolean).join(' ');
+                            const lblSizeCls = 'lbl-' + (m.labelSize || 'md');
+                            const subHtml = pSub.trim() !== '' ? `<div class="kpi-subvalue">${pSub}</div>` : '';
+                            return `<div class="${cardCls}" style="border-radius: ${br};"><div class="kpi-label-block">${pLabel !== '' ? `<div class="kpi-label ${lblSizeCls}">${pLabel}</div>` : ''}</div><div class="kpi-value">${pVal}</div>${subHtml}</div>`;
                         }).join('');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="kpi-grid">${kpiHtml}</div>`;
+                        const mainPos = elem.kpiMainLabelPos || 'top';
+                        const mainLabelOn = !!elem.kpiMainLabelEnabled;
+                        const mainSubOn = (elem.kpiMainSubEnabled !== undefined) ? !!elem.kpiMainSubEnabled : !!(elem.kpiMainLabelSub || '').trim();
+                        const mainTxt = mainLabelOn ? renderVarsInText(elem.kpiMainLabel || '', globalVars, sIdx, eIdx, 'kpiMainLabel') : '';
+                        const mainSub = mainSubOn ? renderVarsInText(elem.kpiMainLabelSub || '', globalVars, sIdx, eIdx, 'kpiMainLabelSub') : '';
+                        const mainInner = (mainTxt.trim() !== '' ? `<div>${mainTxt}</div>` : '') + (mainSub.trim() !== '' ? `<div class="kpi-main-sublabel">${mainSub}</div>` : '');
+                        const mainLabelHtml = mainInner ? `<div class="kpi-main-label lbl-${elem.kpiMainLabelSize || 'md'} ${mainPos === 'bottom' ? 'is-bottom' : 'is-top'}">${mainInner}</div>` : '';
+                        p = `<div class="kpi-wrap">${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}${mainPos === 'top' ? mainLabelHtml : ''}<div class="kpi-grid kpi-cols-${kpiCols}">${kpiHtml}</div>${mainPos === 'bottom' ? mainLabelHtml : ''}</div>`;
                     }
                     else if (elem.type === 'table') {
                         const headers = (elem.headers || '').split(',').map(h => h.trim());
@@ -2054,7 +2904,18 @@
                             const pPlat = renderVarsInText(l.platform || '', globalVars, sIdx, eIdx, 'platform', 'social', lIdx);
                             const pHandle = renderVarsInText(l.handle || '', globalVars, sIdx, eIdx, 'handle', 'social', lIdx);
                             const pStat = renderVarsInText(l.stat || '', globalVars, sIdx, eIdx, 'stat', 'social', lIdx);
-                            return `<div class="social-card" style="border-radius: ${br};"><div style="font-size:8px; color:var(--accent-gold); font-weight:800; text-transform:uppercase;">${pPlat}</div><div class="social-card-val">${pStat}</div><div style="font-size:9px; color:var(--text-muted);">${pHandle}</div></div>`;
+                            const meta = socialMeta(l.platform);
+                            const showStat = l.showStat !== false && String(pStat).replace(/<[^>]+>/g, '').trim() !== '';
+                            return `<div class="social-card" style="border-radius: ${br};">
+                                <div class="social-head">
+                                    <span class="social-icon" style="background:${meta.color}22; color:${meta.color}; border:1px solid ${meta.color}55;">${escapeHtml(meta.glyph)}</span>
+                                    <div style="min-width:0;">
+                                        <div style="font-size:8px; color:var(--text-muted); font-weight:800; text-transform:uppercase; letter-spacing:.5px;">${pPlat}</div>
+                                        <div style="font-size:10px; color:var(--text-white); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${pHandle}</div>
+                                    </div>
+                                </div>
+                                ${showStat ? `<div class="social-stat"><div class="social-card-val">${pStat}</div><div style="font-size:7px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px;">Followers</div></div>` : ''}
+                            </div>`;
                         }).join('');
                         p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="social-grid">${sHtml}</div>`;
                     }
@@ -2073,13 +2934,18 @@
                         p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="wawasan-box" style="border-radius: ${br};"><div style="font-size:10px; font-weight:800; color:var(--accent-gold); letter-spacing:1px;">${parsedTitle}</div><div style="font-size:11px; line-height:1.4;">${parsedContent}</div></div>`;
                     }
                     else if (elem.type === 'image') {
-                        p = elem.imgData ? `<div class="image-preview-wrapper ${elem.shapeStyle === 'circle' ? 'is-circle' : (elem.shapeStyle === 'pill' ? 'is-pill' : '')}" style="border-radius:${br};"><img src="${elem.imgData}" class="img-preview-box" style="border-radius:${br}; width:100%; height:100%;"></div>` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px; border-radius:${br}">Belum ada gambar/logo diupload</div>`;
+                        const resolvedSrc = elem.imgVarRef && globalVars[elem.imgVarRef] && globalVars[elem.imgVarRef].type === 'image' ? globalVars[elem.imgVarRef].value : elem.imgData;
+                        const isBg = elem.imgPosition === 'background';
+                        const isAbs = elem.imgPosition === 'absolute';
+                        const fitStyle = isBg ? 'height:100%; width:100%; object-fit:cover;' : 'width:100%; height:100%;';
+                        const wrapStyle = isBg ? `border-radius:${br}; height:100%; width:100%; border:1px solid rgba(196,154,87,.35);` : `border-radius:${br};`;
+                        p = resolvedSrc ? `<div class="image-preview-wrapper ${elem.shapeStyle === 'circle' ? 'is-circle' : (elem.shapeStyle === 'pill' ? 'is-pill' : '')}" style="${wrapStyle}"><img src="${resolvedSrc}" class="img-preview-box" style="border-radius:${br}; ${fitStyle}"></div>` : `<div style="border:1px dashed var(--border-obsidian); padding:20px; text-align:center; color:var(--text-muted); font-size:10px; border-radius:${br}">Belum ada gambar/logo diupload</div>`;
                     }
                     else if (elem.type === 'link') {
                         const linkLabel = renderVarsInText(elem.label || 'TAUTAN', globalVars, sIdx, eIdx, 'label');
                         const linkText = renderVarsInText(elem.text || elem.url || 'Buka Tautan', globalVars, sIdx, eIdx, 'text');
                         const safeUrl = String(elem.url || '#').replace(/"/g,'&quot;');
-                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="link-card" style="border-radius:${br};"><div><div style="font-size:8px;letter-spacing:1px;color:#E0CC75;font-weight:800;">${linkLabel}</div><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a></div><span style="font-size:18px;">↗</span></div>`;
+                        p = `${pill ? `<div style="margin-bottom:6px;">${pill}</div>` : ''}<div class="link-card" style="border-radius:${br};"><div><div style="font-size:8px;letter-spacing:1px;color:var(--accent-gold);font-weight:800; margin-bottom:2px;">${linkLabel}</div><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a></div><span class="link-arrow">↗</span></div>`;
                     }
                     else if (elem.type === 'comparison') {
                         const parsedLabel = renderVarsInText(elem.label || 'PERBANDINGAN', globalVars, sIdx, eIdx, 'label');
@@ -2129,6 +2995,15 @@
                         });
                     }
 
+                    if (elem.type === 'image' && (elem.imgPosition === 'absolute' || elem.imgPosition === 'background')) {
+                        elemWrapper.classList.add('elem-img-floating');
+                        if (elem.imgPosition === 'background') {
+                            elemWrapper.style.cssText = `position:absolute; inset:16px 20px 14px 20px; z-index:0; opacity:${(elem.imgOpacity != null ? elem.imgOpacity : 100) / 100}; pointer-events:none;`;
+                        } else {
+                            const wPct = elem.imgW != null ? elem.imgW : 30;
+                            elemWrapper.style.cssText = `position:absolute; left:${elem.imgX != null ? elem.imgX : 10}%; top:${elem.imgY != null ? elem.imgY : 10}%; width:${wPct}%; z-index:5; opacity:${(elem.imgOpacity != null ? elem.imgOpacity : 100) / 100};`;
+                        }
+                    }
                     elemWrapper.innerHTML = dragBar + p;
                     slideBody.appendChild(elemWrapper);
                 });
@@ -2277,10 +3152,10 @@
                     saveToLocalStorage();
                     renderForms();
                     renderPreview();
-                    alert("Metadata JSON Berhasil Diimport!\nSemua variabel dan komponen slide telah dipulihkan dan dapat diedit langsung.");
+                    showMalevinToast('success', 'Import Berhasil', 'Semua variabel dan komponen slide telah dipulihkan dan dapat diedit langsung.');
                 } catch (err) {
                     console.error("JSON Import Error:", err);
-                    alert("Gagal Import JSON!\nFile ini bukan file metadata MALEVIN yang valid.");
+                    showMalevinToast('error', 'Import Gagal', 'File ini bukan file metadata MALEVIN yang valid.');
                 }
             };
             reader.readAsText(file);
@@ -2437,7 +3312,7 @@
   // Social platform icon fallback and compact card styling are rendered through a post-process.
   function socialIcon(platform){const p=String(platform||'').toLowerCase(); if(p.includes('instagram'))return '◎';if(p.includes('tiktok'))return '♪';if(p.includes('youtube'))return '▶';if(p.includes('facebook'))return 'f';if(p.includes('x')||p.includes('twitter'))return '𝕏';if(p.includes('linkedin'))return 'in';return String(platform||'?').slice(0,2).toUpperCase();}
   const oldRenderPreview=renderPreview;
-  window.renderPreview=function(){oldRenderPreview();setTimeout(()=>{document.querySelectorAll('.social-card').forEach(card=>{const label=card.querySelector('div');if(!label||card.querySelector('.social-head'))return;const plat=label.textContent.trim();const stat=card.querySelector('.social-card-val');const handle=stat?.nextElementSibling;label.remove();const head=document.createElement('div');head.className='social-head';head.innerHTML=`<span class="social-icon">${escapeHtml(socialIcon(plat))}</span><div style="font-size:8px;color:var(--text-muted);font-weight:800;text-transform:uppercase;">${escapeHtml(plat||'Social')}</div>`;card.prepend(head);if(stat)stat.style.fontSize='16px';});},0);};
+  window.renderPreview=function(){oldRenderPreview();setTimeout(()=>{document.querySelectorAll('.social-card').forEach(card=>{const label=card.querySelector('div');if(!label||card.querySelector('.social-head'))return;const plat=label.textContent.trim();const stat=card.querySelector('.social-card-val');const handle=stat?.nextElementSibling;label.remove();const head=document.createElement('div');head.className='social-head';head.innerHTML=`<span class="social-icon">${escapeHtml(socialIcon(plat))}</span><div style="font-size:8px;color:var(--text-muted);font-weight:800;text-transform:uppercase;">${escapeHtml(plat||'Social')}</div>`;card.prepend(head);if(stat)stat.style.fontSize='16px';});equalizeKpiGrid();equalizeSlideGrid();renderBentoHoles();},0);};
 
   // Filename modal + repeatable export.
   window.openFilenameModal=function(type){pendingExportType=type;document.getElementById('filenameModalTitle').textContent=type==='pdf'?'Nama File PDF':'Nama File JSON';document.getElementById('filenameInput').value=type==='pdf'?'MALEVIN_Deck':'MALEVIN_Deck_Project';document.getElementById('filenameModalOverlay').classList.add('show');setTimeout(()=>{const i=document.getElementById('filenameInput');i.focus();i.select();},30);};
@@ -2600,6 +3475,189 @@
   // Initialize new model fields for existing tables and images.
   slidesData.forEach(s=>s.elements.forEach(el=>{if(el.type==='table')syncTableLegacy(el);if(el.type==='chart'&&el.showBadge===undefined)el.showBadge=false;}));
 })();
+
+  // ===== DRAG & DROP ELEMEN DI HP (sentuh) =====
+  // Tahan elemen ±0,35 detik -> mulai seret. Geser jari ke elemen / slot kosong lalu lepas.
+  // Ketuk singkat -> tampilkan tombol 100% / 50% / 33%.
+  (function(){
+    const HOLD_MS = 350, MOVE_TOL = 9;
+    let t = null; // state sentuhan
+    let ghost = null, scrollRAF = null;
+    window.__selElem = null;
+
+    function panel(){ return document.getElementById('previewPanel'); }
+    function markSelected(){
+      document.querySelectorAll('.draggable-element.is-selected').forEach(n => n.classList.remove('is-selected'));
+      const sel = window.__selElem; if (!sel) return;
+      const body = document.querySelector('.slide-body[data-slide-index="'+sel.s+'"]');
+      const el = body && body.querySelector(':scope > .draggable-element[data-elem-index="'+sel.e+'"]');
+      if (el) el.classList.add('is-selected');
+    }
+    const prevRP = window.renderPreview;
+    window.renderPreview = function(){ prevRP(); setTimeout(markSelected, 5); };
+
+    function cleanup(){
+      if (!t) return;
+      clearTimeout(t.timer);
+      if (t.el) { t.el.classList.remove('touch-armed', 'touch-lifting'); t.el.style.opacity = ''; if (t.wasDraggable) t.el.setAttribute('draggable', 'true'); }
+      if (ghost) { ghost.remove(); ghost = null; }
+      cancelAnimationFrame(scrollRAF);
+      document.body.classList.remove('touch-dragging');
+      document.querySelectorAll('.bento-drop-slot.drag-over').forEach(n => n.classList.remove('drag-over'));
+      t = null;
+    }
+    function resetHover(){
+      document.querySelectorAll('.draggable-element').forEach(el => el.classList.remove('drag-over-top','drag-over-bottom','drag-over-left','drag-over-right','drag-over-swap'));
+      document.querySelectorAll('.slide-body').forEach(el => el.classList.remove('drag-over-empty'));
+      document.querySelectorAll('.bento-drop-slot.drag-over').forEach(n => n.classList.remove('drag-over'));
+    }
+    function fire(type, target, x, y){
+      target.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+    }
+    function targetAt(x, y){
+      if (ghost) ghost.style.display = 'none';
+      const node = document.elementFromPoint(x, y);
+      if (ghost) ghost.style.display = '';
+      return node;
+    }
+    function hover(x, y){
+      resetHover();
+      const node = targetAt(x, y); if (!node) return null;
+      const slot = node.closest('.bento-drop-slot');
+      const el = node.closest('.draggable-element');
+      const body = node.closest('.slide-body');
+      let target = slot || el || body;
+      if (!slot && !el) { // area kosong: bila di bawah konten slide asal atau di luar body slide asal -> slot baris baru
+        const srcBody = (window._dragSourceBodyAt && window._dragSourceBodyAt(node)) || null;
+        if (srcBody) {
+          const els = [...srcBody.querySelectorAll(':scope > .draggable-element')];
+          const lowest = els.reduce((m, n) => Math.max(m, n.getBoundingClientRect().bottom), -Infinity);
+          if (!body || y >= lowest - 2) { const nr = srcBody.querySelector(':scope > .bento-newrow'); if (nr) target = nr; }
+        }
+      }
+      if (!target) return null;
+      fire('dragover', target, x, y);
+      return target;
+    }
+    function autoScroll(){
+      if (!t || !t.dragging) return;
+      const p = panel();
+      if (p && p.scrollHeight > p.clientHeight + 1) { // panel preview yang bisa di-scroll (layar lebar)
+        const r = p.getBoundingClientRect(), y = t.y, zone = 70;
+        if (y < r.top + zone) p.scrollTop -= Math.ceil((r.top + zone - y) / 5);
+        else if (y > r.bottom - zone) p.scrollTop += Math.ceil((y - (r.bottom - zone)) / 5);
+      } else { // HP: yang ter-scroll adalah halaman (window), bukan panel -> geser window
+        const y = t.y, zone = 90, bottom = window.innerHeight - 56; // 56 = tinggi bar navigasi bawah
+        if (y < zone) window.scrollBy(0, -Math.ceil((zone - y) / 4));
+        else if (y > bottom - zone) window.scrollBy(0, Math.ceil((y - (bottom - zone)) / 4));
+      }
+      scrollRAF = requestAnimationFrame(autoScroll);
+    }
+    function startDrag(){
+      if (!t) return;
+      const el = t.el;
+      const body = el.closest('.slide-body'); if (!body) return cleanup();
+      t.dragging = true;
+      draggedElemInfo = { kind: 'element', sIdx: Number(body.dataset.slideIndex), eIdx: Number(el.dataset.elemIndex) };
+      dragHoverInfo = null;
+      document.body.classList.add('is-dragging-elem', 'touch-dragging');
+      markDragSource(draggedElemInfo.sIdx);
+      el.classList.remove('touch-armed'); el.classList.add('touch-lifting');
+      ghost = document.createElement('div'); ghost.className = 'touch-drag-ghost'; ghost.textContent = '⋮⋮ LEPASKAN DI TEMPAT BARU';
+      ghost.style.left = t.x + 'px'; ghost.style.top = t.y + 'px';
+      document.body.appendChild(ghost);
+      if (navigator.vibrate) { try { navigator.vibrate(15); } catch(_){} }
+      autoScroll();
+    }
+
+    document.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'touch' || t) return;
+      const el = e.target.closest && e.target.closest('.draggable-element');
+      if (!el || !el.closest('#previewPanel')) return;
+      if (e.target.closest('.elem-drag-bar')) return; // tombol ukuran tetap bisa diketuk
+      t = { el, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, dragging: false, pid: e.pointerId, wasDraggable: el.getAttribute('draggable') === 'true' };
+      el.setAttribute('draggable', 'false'); // matikan drag bawaan browser agar tidak bentrok
+      t.timer = setTimeout(() => { el.classList.add('touch-armed'); startDrag(); }, HOLD_MS);
+    }, { passive: true });
+
+    document.addEventListener('pointermove', e => {
+      if (!t || e.pointerId !== t.pid) return;
+      t.x = e.clientX; t.y = e.clientY;
+      if (!t.dragging) {
+        if (Math.hypot(t.x - t.sx, t.y - t.sy) > MOVE_TOL) { // jari bergeser sebelum "tahan" -> ini scroll biasa
+          clearTimeout(t.timer);
+          const el = t.el; if (el && t.wasDraggable) el.setAttribute('draggable', 'true');
+          t = null;
+        }
+        return;
+      }
+      if (ghost) { ghost.style.left = t.x + 'px'; ghost.style.top = t.y + 'px'; }
+      hover(t.x, t.y);
+    }, { passive: true });
+
+    // cegah halaman ikut ter-scroll saat sedang menyeret
+    document.addEventListener('touchmove', e => { if (t && t.dragging) e.preventDefault(); }, { passive: false });
+    document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.draggable-element') && t) e.preventDefault(); });
+
+    document.addEventListener('pointerup', e => {
+      if (!t || e.pointerId !== t.pid) return;
+      const state = t;
+      if (state.dragging) {
+        const x = e.clientX, y = e.clientY;
+        const target = hover(x, y);
+        if (target) fire('drop', target, x, y);
+        // bila tidak ada drop yang valid, bersihkan status seret
+        resetHover(); clearDragIndicators(); draggedElemInfo = null; dragHoverInfo = null;
+        cleanup();
+        return;
+      }
+      // ketukan singkat: pilih elemen supaya tombol ukuran muncul
+      clearTimeout(state.timer);
+      const body = state.el.closest('.slide-body');
+      if (body && !e.target.closest('.elem-drag-bar')) {
+        const s = Number(body.dataset.slideIndex), ei = Number(state.el.dataset.elemIndex);
+        const same = window.__selElem && window.__selElem.s === s && window.__selElem.e === ei;
+        window.__selElem = same ? null : { s, e: ei };
+        markSelected();
+      }
+      cleanup();
+    });
+    document.addEventListener('pointercancel', e => {
+      if (!t) return;
+      if (t.dragging) { resetHover(); clearDragIndicators(); draggedElemInfo = null; dragHoverInfo = null; }
+      cleanup();
+    });
+    // ketuk di luar elemen -> sembunyikan tombol
+    document.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'touch') return;
+      if (e.target.closest && (e.target.closest('.draggable-element'))) return;
+      if (window.__selElem) { window.__selElem = null; markSelected(); }
+    }, { passive: true });
+  })();
+
+  // ===== RELAYOUT: perbaiki posisi berantakan setelah kembali dari mode edit =====
+  // Saat mode edit, panel preview disembunyikan (ukuran = 0). Render yang terjadi saat itu tidak bisa
+  // menghitung tinggi elemen, jadi tata letak dihitung ulang begitu preview tampil lagi.
+  (function(){
+    let rlTimer = null;
+    function relayoutNow(){
+      const pv = document.getElementById('previewPanel');
+      if (!pv || pv.offsetWidth === 0) return;
+      try { autoScaleDeckContainer(); equalizeKpiGrid(); equalizeSlideGrid(); renderBentoHoles(); autoScaleDeckContainer(); } catch(e) { console.warn(e); }
+    }
+    window.relayoutPreview = function(){
+      cancelAnimationFrame(rlTimer);
+      rlTimer = requestAnimationFrame(relayoutNow);
+      [120, 400].forEach(ms => setTimeout(relayoutNow, ms)); // gambar/font/grafik yang baru selesai dimuat
+    };
+    const prevSetMode = window.setMode;
+    window.setMode = function(mode){ const r = prevSetMode.apply(this, arguments); if (mode !== 'edit') window.relayoutPreview(); return r; };
+    document.addEventListener('load', e => { if (e.target && e.target.tagName === 'IMG' && e.target.closest('#deck-container')) window.relayoutPreview(); }, true);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.relayoutPreview());
+    // preview yang dirender ulang saat tersembunyi -> tandai supaya dihitung ulang ketika terlihat
+    window.addEventListener('orientationchange', () => setTimeout(window.relayoutPreview, 200));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) window.relayoutPreview(); });
+  })();
 </script>
 </body>
 </html>
